@@ -7,7 +7,7 @@ return [
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |
-    | This option defines the default authentication "guard" and password
+    | This option defines the default auth "guard" and password
     | reset "broker" for your application. You may change these values
     | as required, but they're a perfect start for most applications.
     |
@@ -23,11 +23,11 @@ return [
     | Authentication Guards
     |--------------------------------------------------------------------------
     |
-    | Next, you may define every authentication guard for your application.
+    | Next, you may define every auth guard for your application.
     | Of course, a great default configuration has been defined for you
     | which utilizes session storage plus the Eloquent user provider.
     |
-    | All authentication guards have a user provider, which defines how the
+    | All auth guards have a user provider, which defines how the
     | users are actually retrieved out of your database or other storage
     | system used by the application. Typically, Eloquent is utilized.
     |
@@ -47,13 +47,13 @@ return [
     | User Providers
     |--------------------------------------------------------------------------
     |
-    | All authentication guards have a user provider, which defines how the
+    | All auth guards have a user provider, which defines how the
     | users are actually retrieved out of your database or other storage
     | system used by the application. Typically, Eloquent is utilized.
     |
     | If you have multiple user tables or models you may configure multiple
     | providers to represent the model / table. These providers may then
-    | be assigned to any extra authentication guards you have defined.
+    | be assigned to any extra auth guards you have defined.
     |
     | Supported: "database", "eloquent"
     |
