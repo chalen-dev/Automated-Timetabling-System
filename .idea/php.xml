@@ -130,6 +130,7 @@
       <path value="$PROJECT_DIR$/algo_driven_web/vendor/symfony/var-dumper" />
       <path value="$PROJECT_DIR$/algo_driven_web/vendor/symfony/yaml" />
       <path value="$PROJECT_DIR$/algo_driven_web/vendor/theseer/tokenizer" />
+      <path value="$PROJECT_DIR$/algo_driven_web/vendor/_laravel_idea" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />

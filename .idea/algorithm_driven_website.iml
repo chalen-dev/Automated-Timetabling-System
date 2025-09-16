@@ -121,6 +121,7 @@
       <excludeFolder url="file://$MODULE_DIR$/algo_driven_web/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/algo_driven_web/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/algo_driven_web/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/algo_driven_web/vendor/_laravel_idea" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
