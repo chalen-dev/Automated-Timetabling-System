@@ -1,1 +1,216 @@
-djkfykls blksdl kfsdgjlfk
+<?php
+?>
+    <!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Faculty portal — Timetable</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="page">
+
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button class="hamburger" aria-label="menu">
+                <!-- simple hamburger -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M3 12h18M3 18h18" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="brand">Faculty portal</div>
+        </div>
+
+        <div class="top-actions">
+            <div class="user"><div class="avatar">A</div><div>ADMIN NAME</div></div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="col-left">
+            <div class="controls">
+                <h2>TIMETABLE</h2>
+                <div class="search-row">
+                    <div class="search" role="search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.7"><path d="M21 21l-4.35-4.35" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <input id="search" type="search" placeholder="Search">
+                    </div>
+                    <button id="viewArchive" class="btn">View Archive</button>
+                </div>
+            </div>
+
+            <div class="cards" id="cards">
+                <!-- create card -->
+                <div class="card create" id="createBtn" tabindex="0" role="button" aria-pressed="false">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="#6b5a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    CREATE NEW TIMETABLE
+                </div>
+
+                <!-- example dept card -->
+                <div class="card" data-title="Computer Science">
+                    <div class="card-actions">
+                        <button class="small-btn" title="Edit">✎</button>
+                        <button class="small-btn" title="Archive">📦</button>
+                    </div>
+
+                    <div>
+                        <div class="dept-visual">
+                            <div class="col">
+                                <div class="block"></div>
+                                <div class="block sm"></div>
+                            </div>
+                            <div class="col">
+                                <div class="block"></div>
+                                <div class="block sm"></div>
+                            </div>
+                        </div>
+                        <h3>COMPUTER SCIENCE</h3>
+                        <p>1st sem (2024-2025)</p>
+                    </div>
+                </div>
+
+                <!-- another example -->
+                <div class="card" data-title="Information Technology">
+                    <div class="card-actions">
+                        <button class="small-btn" title="Edit">✎</button>
+                        <button class="small-btn" title="Delete">🗑️</button>
+                    </div>
+                    <div>
+                        <div class="dept-visual">
+                            <div class="col"><div class="block sm"></div></div>
+                            <div class="col"><div class="block"></div></div>
+                        </div>
+                        <h3>INFORMATION TECHNOLOGY</h3>
+                        <p>1st sem (2024-2025)</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <aside class="sidebar">
+            <div class="toolbar" aria-hidden="false">
+                <button class="tool" title="A - Z"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h7" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><small>A-Z</small></button>
+                <button class="tool" title="Department"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4z" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Dept</small></button>
+                <button class="tool" title="Select"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Select</small></button>
+                <button class="tool" title="Select All"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#6b5a5a" stroke-width="1.6"/></svg><small>All</small></button>
+                <button class="tool" title="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Delete</small></button>
+                <button class="tool" title="Archive"><svg viewBox="0 0 24 24" fill="none"><path d="M21 10V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 10l-9 6-9-6" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Archive</small></button>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- modal for creating new timetable -->
+    <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal" role="document">
+            <h3>Create Timetable</h3>
+            <p style="margin-top:6px;font-size:13px;color:var(--muted)">Enter details for new timetable</p>
+            <form id="createForm">
+                <div class="form-row">
+                    <input name="title" placeholder="Department / Title" required />
+                    <select name="semester">
+                        <option value="1st sem (2024-2025)">1st sem (2024-2025)</option>
+                        <option value="2nd sem (2024-2025)">2nd sem (2024-2025)</option>
+                    </select>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+                    <button type="button" id="cancelBtn" class="btn">Cancel</button>
+                    <button type="submit" class="btn">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Simple interactivity: search filter + create modal + dynamic card creation
+    const searchInput = document.getElementById('search');
+    const cardsEl = document.getElementById('cards');
+    const createBtn = document.getElementById('createBtn');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const createForm = document.getElementById('createForm');
+
+    // Filter cards by title or content
+    searchInput.addEventListener('input', (e)=>{
+        const q = e.target.value.trim().toLowerCase();
+        document.querySelectorAll('.card').forEach(card=>{
+            // keep create card visible always
+            if(card.id === 'createBtn') return card.style.display = '';
+            const title = (card.dataset.title || card.querySelector('h3')?.textContent || '').toLowerCase();
+            const text = (card.textContent || '').toLowerCase();
+            if(title.includes(q) || text.includes(q)) card.style.display=''; else card.style.display='none';
+        })
+    });
+
+    // modal helpers
+    function openModal(){ modalBackdrop.classList.add('show'); modalBackdrop.setAttribute('aria-hidden','false'); }
+    function closeModal(){ modalBackdrop.classList.remove('show'); modalBackdrop.setAttribute('aria-hidden','true'); }
+
+    createBtn.addEventListener('click', openModal);
+    createBtn.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }});
+    cancelBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeModal(); });
+
+    // create card on submit
+    createForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const form = new FormData(createForm);
+        const title = form.get('title').trim();
+        const semester = form.get('semester');
+        if(!title) return;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.title = title;
+        card.innerHTML = `
+        <div class="card-actions">
+          <button class="small-btn" title="Edit">✎</button>
+          <button class="small-btn" title="Delete">🗑️</button>
+        </div>
+        <div>
+          <div class="dept-visual">
+            <div class="col"><div class="block"></div></div>
+            <div class="col"><div class="block sm"></div></div>
+          </div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(semester)}</p>
+        </div>
+      `;
+
+        // insert after create card
+        cardsEl.appendChild(card);
+        createForm.reset();
+        closeModal();
+    });
+
+    // basic delegation for delete / edit
+    cardsEl.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.small-btn');
+        if(!btn) return;
+        const card = btn.closest('.card');
+        if(btn.title === 'Delete'){
+            card.remove();
+        } else if(btn.title === 'Edit'){
+            // simple edit: fill modal with current values
+            const title = card.dataset.title || card.querySelector('h3')?.textContent || '';
+            const sem = card.querySelector('p')?.textContent || '';
+            createForm.elements['title'].value = title;
+            createForm.elements['semester'].value = sem;
+            // on submit we'll create a new one; to replace we could implement more logic — keeping it simple
+            openModal();
+        }
+    });
+
+    // small helper to prevent XSS from inserted text
+    function escapeHtml(str){
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+</script>
+</body>
+</html>

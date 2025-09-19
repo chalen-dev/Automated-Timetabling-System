@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Faculty Portal — Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg: #efe7e6;
+            --panel: #fff;
+            --muted: #bdafb0;
+            --accent: #dac7c7;
+            --header: #ffffff;
+            --shadow: 0 6px 14px rgba(24,20,20,0.06);
+            --radius: 12px;
+            --max-width: 1600px;
+        }
+
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            background:var(--bg);
+            color:#222;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            padding:20px;
+            display:flex;
+            justify-content:center;
+        }
+
+        .page{
+            width:100%;
+            max-width:var(--max-width);
+            background:transparent;
+        }
+
+        /* Topbar */
+        header.topbar{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:16px 20px;
+            background:var(--header);
+            border-radius:10px;
+            box-shadow: var(--shadow);
+            margin-bottom:18px;
+            position:relative;
+            z-index:1001;
+        }
+        .brand{font-weight:600}
+        .top-actions{display:flex;align-items:center;gap:12px}
+        .hamburger{border:0;background:transparent;padding:8px;border-radius:8px;cursor:pointer}
+        .user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+        .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#c6b3b3,#e7d4d4);display:inline-flex;align-items:center;justify-content:center}
+
+        /* Sidebar */
+        .left-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 240px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 80px 20px 20px;
+            transform: translateX(-100%);
+            transition: transform .3s ease;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .left-sidebar.show{transform:translateX(0)}
+        .left-sidebar a{
+            display:block;
+            padding:10px 14px;
+            border-radius:8px;
+            text-decoration:none;
+            font-size:14px;
+            color:#333;
+            transition:background .2s;
+        }
+        .left-sidebar a:hover,
+        .left-sidebar a.active{
+            background:var(--accent);
+            color:#fff;
+        }
+
+        /* Overlay */
+        .overlay{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.4);
+            display:none;
+            z-index:999;
+        }
+        .overlay.show{display:block}
+
+        /* Main Layout */
+        main.container{
+            display:grid;
+            grid-template-columns: 1fr 88px;
+            gap:20px;
+            align-items:start;
+        }
+        .col-left{padding:8px}
+
+        /* Right Toolbar */
+        aside.sidebar{position:sticky;top:80px;display:flex;align-items:center;justify-content:center}
+        .toolbar{display:flex;flex-direction:column;gap:14px;align-items:center;padding:8px}
+        .tool{background:transparent;border:0;padding:8px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+        .tool svg{width:22px;height:22px}
+        .tool small{font-size:10px;color:var(--muted)}
+
+        /* Responsive */
+        @media (max-width:900px){
+            main.container{grid-template-columns:1fr 64px}
+        }
+        @media (max-width:700px){
+            body{padding:12px}
+            main.container{grid-template-columns:1fr}
+            aside.sidebar{order:2;margin-top:16px;position:static}
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <!-- Sidebar -->
+    <div id="leftSidebar" class="left-sidebar">
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Professors</a>
+        <a href="#">Courses</a>
+        <a href="#">Classrooms</a>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button id="menuBtn" class="hamburger" aria-label="menu">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path d="M3 6h18M3 12h18M3 18h18" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <div class="brand">Faculty portal</div>
+        </div>
+        <div class="top-actions">
+            <div class="user"><div class="avatar">A</div><div>ADMIN NAME</div></div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container">
+        <section class="col-left">
+
+            <h2>Page Title</h2>
+            <p>mga contents</p>
+        </section>
+
+        <!--
+        <aside class="sidebar">
+          <div class="toolbar">
+            <button class="tool" title="A - Z">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h7" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <small>A-Z</small>
+            </button>
+            <button class="tool" title="Department">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4z" stroke="#6b5a5a" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <small>Dept</small>
+            </button>
+          </div>
+        </aside>-->
+    </main>
+</div>
+
+<script>
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("leftSidebar");
+    const overlay = document.getElementById("overlay");
+
+    menuBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("show");
+        overlay.classList.toggle("show");
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("show");
+        overlay.classList.remove("show");
+    });
+</script>
+</body>
+</html>
+
