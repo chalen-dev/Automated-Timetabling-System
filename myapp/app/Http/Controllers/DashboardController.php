@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
@@ -19,6 +20,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         //Display dashboard, while passing in the details of the authenticated user to the blade template/component
-        return view('pages.dashboard', compact('user'));
+        return view('dashboard.index', compact('user'));
     }
+
 }

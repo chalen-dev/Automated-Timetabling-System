@@ -22,7 +22,7 @@
     <div class="row">
         <div></div>
         <div>
-            @yield('content')
+            @yield('body')
         </div>
     </div>
     @include('partials.footer')
