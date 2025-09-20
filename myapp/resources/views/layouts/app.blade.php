@@ -10,17 +10,22 @@
 
 </head>
 <body>
-    <header>
-        @include('partials.header')
-    </header>
-    <div class="container">
-        <div class="row">
-            <div></div>
-            <div>
-                @yield('content')
-            </div>
+<header>
+    @guest
+        @include('partials.guest-header')
+    @endguest
+    @auth
+        @include('partials.auth-header')
+    @endauth
+</header>
+<div class="container">
+    <div class="row">
+        <div></div>
+        <div>
+            @yield('content')
         </div>
-        @include('partials.footer')
     </div>
+    @include('partials.footer')
+</div>
 </body>
 </html>

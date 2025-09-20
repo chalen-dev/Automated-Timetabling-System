@@ -3,6 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <h1>Dashboard</h1>
+    <h1>Welcome User!</h1>
+
 @endsection
 
