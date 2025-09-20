@@ -15,12 +15,14 @@ class AuthController extends Controller
     }
     public function register(Request $request){
 
+        //Input validation
         $request->validate([
-            'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'],
+            'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'], //regex is to disallow the use of certain special characters
             'email' => ['required', 'string', 'email', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        //Create user, query to db
         try {
             User::create([
                 'name' => $request->name,
@@ -32,6 +34,7 @@ class AuthController extends Controller
             dd($e->getMessage());
         }
 
+        //Redirect to login if successful
         return redirect()->route('login.form');
     }
 
@@ -40,14 +43,15 @@ class AuthController extends Controller
     }
 
     public function login(Request $request){
+
+        //Input validation
         $request->validate([
-            'login' => ['required', 'string', 'login'],
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        /*
-        //Determine if email or username
-        $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        //Determines if inputted username or email
+        $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
         //Attempt to login
         if (Auth::attempt([$fieldType => $request->login, 'password' => $request->password])) {
@@ -59,7 +63,6 @@ class AuthController extends Controller
             'login' => 'Credentials provided do not match our records.',
         ]);
 
-        */
     }
 
 
