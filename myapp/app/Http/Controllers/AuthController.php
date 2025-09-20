@@ -14,15 +14,17 @@ class AuthController extends Controller
     }
     public function register(Request $request){
         $request->validate([
-            'username' => 'required|unique:users,username|regex:/^[A-Za-z0-9_]+$/',
-            'email' => 'required|email',
+            'username' => 'required|max:20|regex:/^[A-Za-z0-9_]+$/',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
         ]);
+
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
         return redirect()->route('login.form');
     }
 

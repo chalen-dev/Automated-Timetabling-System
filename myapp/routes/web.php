@@ -7,6 +7,10 @@ Route::get('/', function () {
     return view('home');
 });
 
+Route::get('/dashboard', function () {
+    return view('pages.dashboard');
+});//->middleware('auth');
+
 // Register
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form');
 Route::post('/register', [AuthController::class, 'register'])->name('register');

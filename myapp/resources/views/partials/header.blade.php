@@ -1,7 +1,7 @@
 <nav>
 
 </nav>
-<ul>
+<ul class="flex gap-4">
     <li>
         <a href="{{ url('/') }}">Home</a>
     </li>
