@@ -8,8 +8,8 @@
     <form action="{{ url('register') }}" method="post">
         @csrf
 
-        <input type="text" name="username" placeholder="Username" class="border border-gray-300 rounded">
-        @error('username')
+        <input type="text" name="name" placeholder="Username" class="border border-gray-300 rounded">
+        @error('name')
             <span class="text-red-500">{{$message}}</span>
         @enderror
         <br>

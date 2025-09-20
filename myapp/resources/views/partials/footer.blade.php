@@ -1,3 +1,3 @@
 <footer>
-    <p>&copy; {{ date('Y') }} My Laravel App</p>
+    <p>&copy; {{ date('Y') }} Facultime</p>
 </footer>
