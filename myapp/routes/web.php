@@ -1,15 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->middleware('guest');
 
-Route::get('/dashboard', function () {
-    return view('pages.dashboard');
-})->middleware('auth');
+//Homepage or Dashboard, depending on authentication status
+Route::get('/', [HomeController::class, 'index']);
 
 // Register
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->middleware('guest')->name('register.form');
@@ -20,4 +17,4 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->middleware('gues
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest')->name('login');
 
 // Logout
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('guest')->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');

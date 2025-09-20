@@ -53,7 +53,7 @@ class AuthController extends Controller
         //Determines if inputted username or email
         $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
-        //Attempt to login
+        //Attempt to login. This code automatically gives the user Auth when successful
         if (Auth::attempt([$fieldType => $request->login, 'password' => $request->password])) {
             //if login successful, redirect here
             return redirect()->intended('/dashboard');
@@ -62,8 +62,20 @@ class AuthController extends Controller
         return redirect()->back()->withErrors([
             'login' => 'Credentials provided do not match our records.',
         ]);
-
     }
 
+    public function logout(Request $request){
+
+        //Log out user
+        Auth::logout();
+
+        // invalidate the session
+        $request->session()->invalidate();
+
+        // prevent CSRF attacks
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
 
 }
