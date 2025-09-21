@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('pages.app')
 
 @section('title', 'Login')
 
-@section('body')
+@section('content')
     <h1>Login</h1>
 
     <form action="{{ url('login') }}" method="post">

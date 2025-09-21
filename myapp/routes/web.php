@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
@@ -13,18 +13,18 @@ Route::get('/', [WelcomeController::class, 'index'])
 // Guest Routes (Unauthenticated)
 Route::middleware('guest')->group(function () {
     // Register
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form');
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register.form');
+    Route::post('/register', [UserController::class, 'register'])->name('register');
 
     // Login
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [UserController::class, 'login'])->name('login');
 });
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     //Logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
     //Dashboard
     Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard.index');

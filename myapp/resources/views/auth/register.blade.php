@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('pages.app')
 
 @section('title', 'Register')
 
-@section('body')
+@section('content')
     <h1>Register</h1>
 
     <form action="{{ url('register') }}" method="post">

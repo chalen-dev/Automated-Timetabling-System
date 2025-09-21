@@ -20,9 +20,13 @@
 </header>
 <div class="container">
     <div class="row">
-        <div></div>
         <div>
-            @yield('body')
+            @auth
+                @include('dashboard.dashboard-menu')
+            @endauth
+        </div>
+        <div>
+            @yield('content')
         </div>
     </div>
     @include('partials.footer')
