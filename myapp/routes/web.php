@@ -31,20 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
-    //Dashboard
-    Route::get('/main-timetable-list', [DashboardController::class, 'showDashboard'])
-        ->name('dashboard.main-timetable-list');
-    Route::get('/course-list', [DashboardController::class, 'showCourseList'])
-        ->name('dashboard.course-list');
-    Route::get('/room-list', [DashboardController::class, 'showRoomList'])
-        ->name('dashboard.room-list');
-    Route::get('/professor-list', [DashboardController::class, 'showProfessorList'])
-        ->name('dashboard.professor-list');
-});
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
-// Auth routes (login, register, password reset, email verify, etc.)
-//Email verification will be implemented later.
-//Auth::routes(['verify' => true]);
+});
 
 
 

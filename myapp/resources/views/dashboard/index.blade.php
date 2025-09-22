@@ -1,7 +1,7 @@
 @extends('pages.app')
 
-@section('title', 'Rooms')
+@section('title', 'Dashboard')
 
 @section('content')
-    <h1>Rooms List</h1>
+    <h1>Dashboard</h1>
 @endsection
