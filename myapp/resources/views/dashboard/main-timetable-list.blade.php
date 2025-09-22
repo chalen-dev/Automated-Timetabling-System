@@ -1,6 +1,6 @@
 @extends('pages.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Timetables')
 
 @section('content')
     <h1>Timetable List</h1>

@@ -13,23 +13,38 @@ Route::get('/', [WelcomeController::class, 'index'])
 // Guest Routes (Unauthenticated)
 Route::middleware('guest')->group(function () {
     // Register
-    Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register.form');
-    Route::post('/register', [UserController::class, 'register'])->name('register');
+    Route::get('/register', [UserController::class, 'showRegisterForm'])
+        ->name('register.form');
+    Route::post('/register', [UserController::class, 'register'])
+        ->name('register');
 
     // Login
-    Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
-    Route::post('/login', [UserController::class, 'login'])->name('login');
+    Route::get('/login', [UserController::class, 'showLoginForm'])
+        ->name('login.form');
+    Route::post('/login', [UserController::class, 'login'])
+        ->name('login');
 });
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     //Logout
-    Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+    Route::post('/logout', [UserController::class, 'logout'])
+        ->name('logout');
 
     //Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard.index');
-
+    Route::get('/main-timetable-list', [DashboardController::class, 'showDashboard'])
+        ->name('dashboard.main-timetable-list');
+    Route::get('/course-list', [DashboardController::class, 'showCourseList'])
+        ->name('dashboard.course-list');
+    Route::get('/room-list', [DashboardController::class, 'showRoomList'])
+        ->name('dashboard.room-list');
+    Route::get('/professor-list', [DashboardController::class, 'showProfessorList'])
+        ->name('dashboard.professor-list');
 });
+
+// Auth routes (login, register, password reset, email verify, etc.)
+//Email verification will be implemented later.
+//Auth::routes(['verify' => true]);
 
 
 

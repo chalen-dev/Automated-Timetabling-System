@@ -13,7 +13,7 @@ class WelcomeController extends Controller
 
         //Else, redirect to dashboard and pass in user details.
         $user = auth()->user();
-        return view('dashboard.index', compact('user'));
+        return view('dashboard.main-timetable-list', compact('user'));
 
 
     }
