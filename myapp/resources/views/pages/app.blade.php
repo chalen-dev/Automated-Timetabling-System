@@ -21,9 +21,6 @@
 <div class="container">
     <div class="row">
         <div>
-            @auth
-                @include('dashboard.dashboard-menu')
-            @endauth
         </div>
         <div>
             @yield('content')
