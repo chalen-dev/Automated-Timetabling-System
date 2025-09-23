@@ -1,0 +1,54 @@
+program,year_level,course_title,course_name,academic_term,course_type,class_hours,total_class_days,lecture_days,laboratory_days
+bscs,1st,cce 101/l,introduction to computing,1st,major,2 hrs ,4,2,2
+bscs,1st,ge 15,environmental science,1st,minor,1 hr ,3,3,0
+bscs,1st,ge 3,the contemporary world,1st,minor,1 hr,3,3,0
+bscs,1st,pahf 1,movement competency training,1st,minor, 4 hrs,1,1,0
+bscs,1st,cce 109/l,fundamentals of programming,2nd,major,2 hrs,4,2,2
+bscs,1st,cs 8,social issues and professional practice,2nd,major,1 hr,3,3,0
+bscs,1st,ge 2,purposive communication w/ interactive learni,semestral,minor,1 hr,3,3,0
+bscs,1st,nstp 1,national service training program 1,semestral,minor,4 hrs,1,1,0
+bscs,2nd,cce 104/l,information management,1st,major,2 hrs,4,2,2
+bscs,2nd,cs 26/l,software development fundamentals,1st,major,2 hrs,4,2,2
+bscs,2nd,pahf 3,dance and sports 1,1st,minor,4 hrs,1,1,0
+bscs,2nd,cs 3/l,discrete structures 2,2nd,major,2 hrs,4,2,2
+bscs,2nd,hci 101,human computer interaction,2nd,major,1 hr,3,3,0
+bscs,2nd,mth 103/l,probabilities and statistics,2nd,major,2 hrs,4,2,2
+bscs,2nd,mth 105,integral calculus,2nd,major,1 hr,3,3,0
+bscs,3rd,bsm 325,numerical analysis,1st,major,1 hr,3,3,0
+bscs,3rd,cs 12/l,software engineering 1,1st,major,2 hrs,4,2,2
+bscs,3rd,cst 9/l,cs professional track 3,1st,major,2 hrs,4,2,2
+bscs,3rd,ge 5,"science, technology, and society",1st,minor,1 hr,3,3,0
+bscs,3rd,cs 11/l,architecture and organization,2nd,major,2 hrs,4,2,2
+bscs,3rd,cs 15/l,programming languages,2nd,major,2 hrs,4,2,2
+bscs,3rd,ge 7,art appreciation,2nd,minor,1 hr,3,3,0
+bscs,3rd,phys 101/l,college physics 1,2nd,major,2 hrs,4,2,2
+bscs,4th,cce 106/l,application development and emerging technologies,1st,major,2 hrs,4,2,2
+bscs,4th,cs 18/l,cs thesis writing 1,1st,major,2 hrs,4,2,2
+bscs,4th,cs 19/l,operating systems,1st,major,2 hrs,4,2,2
+bscs,4th,cs 21/l,networks and communications,2nd,major,2 hrs,4,2,2
+bscs,4th,cs 24/l,cs professional track 6,2nd,major,2 hrs,4,2,2
+bsit,1st,cce 101/l,introduction to computing,1st,major,2 hrs,4,2,2
+bsit,1st,ge 3,the contemporary world,1st,minor,1 hr,3,3,0
+bsit,1st,ge 4,mathematics in the modern world,1st,minor,1 hr,3,3,0
+bsit,1st,pahf 1,movement competency training,1st,minor,4 hrs,1,1,0
+bsit,1st,cce 102/l,computer programming 1,2nd,major,2 hrs,4,2,2
+bsit,1st,ge 15,environmental science,2nd,minor,1 hr,3,3,0
+bsit,1st,ge 2,purposive communication w/ interactive learni,semestral,minor,1 hr,3,3,0
+bsit,1st,nstp 1,national service training program 1,semestral,minor,4 hrs,1,1,0
+bsit,2nd,cce 104/l,information management,1st,major,2 hrs,4,2,2
+bsit,2nd,cce 105/l,data structures and algorithms,1st,major,2 hrs,4,2,2
+bsit,2nd,ge 7,art appreciation,1st,minor,1 hr,3,3,0
+bsit,2nd,it 4,calculus 1,1st,major,1 hr,3,3,0
+bsit,2nd,pahf 3,dance and sports 1,1st,minor,4 hrs,1,1,0
+bsit,2nd,it 3/l,networking 1,2nd,major,2 hrs,4,2,2
+bsit,2nd,it 5/l,it elective 2,2nd,major,2 hrs,4,2,2
+bsit,2nd,mth 103/l,probabilities and statistics,2nd,major,2 hrs,4,2,2
+bsit,3rd,cce 106/l,application development and emerging technologies,1st,major,2 hrs,4,2,2
+bsit,3rd,it 11/l,networking 2,1st,major,2 hrs,4,2,2
+bsit,3rd,it 14/l,professional track for it 5,1st,major,2 hrs,4,2,2
+bsit,3rd,ge 11,the entrepreneurial mind,2nd,major,1 hr,3,3,0
+bsit,3rd,it 10/l,it elective 3,2nd,major,2 hrs,4,2,2
+bsit,3rd,it 12/l,systems integration & architecture,2nd,major,2 hrs,4,2,2
+bsit,3rd,it 13/l,professional track for it 4,2nd,major,2 hrs,4,2,2
+bsit,4th,it 23/l,systems administration and maintenance,1st,major,2 hrs,4,2,2
+bsit,4th,it 24/l,capstone project 2,2nd,major,2 hrs,4,2,2

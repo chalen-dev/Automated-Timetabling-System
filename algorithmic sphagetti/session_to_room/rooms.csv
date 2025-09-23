@@ -1,0 +1,24 @@
+room_name,type,constraints
+clv1,computer laboratory,none
+clv2,computer laboratory,none
+clv3,computer laboratory,none
+avr,lecture,none
+rm301,lecture,none
+rm302,lecture,none
+gym1,lecture,pahf only
+gym2,lecture,pahf only
+gym3,lecture,pahf only
+gym4,lecture,pahf only
+gym5,lecture,pahf only
+gym6,lecture,pahf only
+nstp1,lecture,nstp only
+nstp2,lecture,nstp only
+nstp3,lecture,nstp only
+nstp4,lecture,nstp only
+nstp5,lecture,nstp only
+nstp6,lecture,nstp only
+nstp7,lecture,nstp only
+nstp8,lecture,nstp only
+nstp9,lecture,nstp only
+nstp10,lecture,nstp only
+nstp11,lecture,nstp only
