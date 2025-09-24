@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
@@ -27,12 +28,18 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
+
     //Logout
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
+    //Dashboard Routes
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+        ->name('dashboard.index');
+
+    //Courses Routes
+    Route::get('/courses', [CourseController::class, 'index'])
+        ->name('/courses.index');
 
 });
 

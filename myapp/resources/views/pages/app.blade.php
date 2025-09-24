@@ -12,10 +12,10 @@
 <body>
 <header>
     @guest
-        @include('partials.guest-header')
+        @include('components.guest-header')
     @endguest
     @auth
-        @include('partials.auth-header')
+        @include('components.auth-header')
     @endauth
 </header>
 <div class="container">
@@ -26,7 +26,7 @@
             @yield('content')
         </div>
     </div>
-    @include('partials.footer')
+    @include('components.footer')
 </div>
 </body>
 </html>
