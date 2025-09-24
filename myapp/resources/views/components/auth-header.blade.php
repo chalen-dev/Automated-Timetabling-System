@@ -5,7 +5,7 @@
             <span>{{auth()->user()->name}}</span>
         </li>
         <li>
-            <form action="{{url('logout')}}" method="post">
+            <form action="{{route('logout')}}" method="post">
                 @csrf
                 <button type="submit">Logout</button>
             </form>
@@ -14,19 +14,19 @@
     <!-- Sub header -->
     <ul class = 'flex gap-4'>
         <li>
-            <a href="{{url('/dashboard')}}">Dashboard</a>
+            <a href="{{route('dashboard.index')}}">Dashboard</a>
         </li>
         <li>
-            <a href="{{url('/courses')}}">Courses</a>
+            <a href="{{route('courses.index')}}">Courses</a>
         </li>
         <li>
-            <a href=""></a>
+            <a href="{{route('sessions.index')}}">Sessions</a>
         </li>
         <li>
-            <a href=""></a>
+            <a href="">Professors</a>
         </li>
         <li>
-            <a href=""></a>
+            <a href="">Rooms</a>
         </li>
     </ul>
 </nav>

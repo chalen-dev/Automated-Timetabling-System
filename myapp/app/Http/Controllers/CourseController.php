@@ -19,6 +19,16 @@ class CourseController extends Controller
     }
 
     public function show($id){
-        return view('courses.show', ['id' => $id]);
+        //Test Code Start
+        $courses = [
+            ['course_title' => 'IT 12', 'id' => 1],
+            ['course_title' => 'IT 14', 'id' => 2],
+        ];
+
+        //Collect specific course details depending on the id
+        $course = collect($courses)->firstWhere('id', $id);
+        //Test code end
+
+        return view('courses.show', compact('course'));
     }
 }

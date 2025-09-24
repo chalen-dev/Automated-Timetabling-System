@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 // Default Page, either Homepage or Dashboard, depending on authentication status
 Route::get('/', [WelcomeController::class, 'index'])
-    ->name('welcome');
+    ->name('default');
 
 // Guest Routes (Unauthenticated)
 Route::middleware('guest')->group(function () {
@@ -24,6 +25,8 @@ Route::middleware('guest')->group(function () {
         ->name('login.form');
     Route::post('/login', [UserController::class, 'login'])
         ->name('login');
+
+
 });
 
 // Authenticated Routes
@@ -39,8 +42,15 @@ Route::middleware('auth')->group(function () {
 
     //Courses Routes
     Route::get('/courses', [CourseController::class, 'index'])
-        ->name('/courses.index');
+        ->name('courses.index');
+    Route::get('/courses/{id}', [CourseController::class, 'show'])
+        ->name('courses.show');
 
+    //Sessions Routes
+    Route::get('/sessions', [SessionController::class, 'index'])
+        ->name('sessions.index');
+    Route::get('sessions/{id}', [SessionController::class, 'show'])
+        ->name('sessions.show');
 });
 
 
