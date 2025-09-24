@@ -74,7 +74,7 @@ class UserController extends Controller
         // prevent CSRF attacks
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('default');
     }
 
 }

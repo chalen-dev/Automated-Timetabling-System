@@ -5,6 +5,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 
@@ -30,7 +31,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
+Route::middleware([Authenticate::class])->group(function () {
 
     //Logout
     Route::post('/logout', [UserController::class, 'logout'])
