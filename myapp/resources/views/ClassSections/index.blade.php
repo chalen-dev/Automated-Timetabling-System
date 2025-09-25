@@ -8,7 +8,7 @@
         @foreach($sessions as $session)
             <li>
                 <p>{{$session['session_name']}}</p>
-                <a href='{{route('sessions.show', $session['id'])}}'>View details</a>
+                <a href='{{route('ClassSections.show', $session['id'])}}'>View details</a>
             </li>
         @endforeach
     </ul>

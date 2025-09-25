@@ -13,7 +13,7 @@ class SessionController extends Controller
             ['session_name' => 'BSCS 1st Year B', 'id' => 2],
         ];
         //Test code end
-        return view('sessions.index', compact('sessions'));
+        return view('ClassSections.index', compact('sessions'));
     }
 
     public function show($id){
@@ -28,6 +28,6 @@ class SessionController extends Controller
         //Collect specific course details depending on the id
         $session = collect($sessions)->firstWhere('id', $id);
 
-        return view('sessions.show', compact('session'));
+        return view('ClassSections.show', compact('session'));
     }
 }

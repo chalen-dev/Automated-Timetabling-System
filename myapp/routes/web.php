@@ -48,10 +48,10 @@ Route::middleware([Authenticate::class])->group(function () {
         ->name('courses.show');
 
     //Sessions Routes
-    Route::get('/sessions', [SessionController::class, 'index'])
-        ->name('sessions.index');
-    Route::get('sessions/{id}', [SessionController::class, 'show'])
-        ->name('sessions.show');
+    Route::get('/ClassSections', [SessionController::class, 'index'])
+        ->name('ClassSections.index');
+    Route::get('ClassSections/{id}', [SessionController::class, 'show'])
+        ->name('ClassSections.show');
 });
 
 
