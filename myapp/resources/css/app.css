@@ -17,3 +17,8 @@ body{
 * {
     color: white;
 }
+
+a {
+    color: #7aa9f6;
+    text-decoration: underline;
+}
