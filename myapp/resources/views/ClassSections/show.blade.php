@@ -1,10 +1,8 @@
 @extends('pages.app')
 
-@section('title', 'Session Details')
+@section('title', 'Class Section Details')
 
 @section('content')
-    <h1>Session details</h1>
-    <p>Session name: {{$session['session_name']}}</p>
-    <p>ID: {{$session['id']}}</p>
+    <h1>Class Section details</h1>
     <a href="{{route('ClassSections.index')}}">Back</a>
 @endsection

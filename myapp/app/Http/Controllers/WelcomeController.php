@@ -11,9 +11,9 @@ class WelcomeController extends Controller
         if (!auth()->check())
             return view('welcome');
 
-        //Else, redirect to dashboard and pass in user details.
+        //Else, redirect to Dashboard and pass in user details.
         $user = auth()->user();
-        return view('dashboard.index', compact('user'));
+        return view('Dashboard.index', compact('user'));
 
 
     }

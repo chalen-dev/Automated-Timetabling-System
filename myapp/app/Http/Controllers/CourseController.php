@@ -56,7 +56,7 @@ class CourseController extends Controller
         ];
         //Test code end
 
-        return view('courses.index', compact('courses'));
+        return view('Courses.index', compact('courses'));
     }
 
     public function show($id){
@@ -70,6 +70,6 @@ class CourseController extends Controller
         $course = collect($courses)->firstWhere('id', $id);
         //Test code end
 
-        return view('courses.show', compact('course'));
+        return view('Courses.show', compact('course'));
     }
 }

@@ -1,7 +1,8 @@
 <?php
 
+
+use App\Http\Controllers\ClassSectionController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
@@ -38,19 +39,19 @@ Route::middleware([Authenticate::class])->group(function () {
         ->name('logout');
 
     //Dashboard Routes
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard.index');
+    Route::get('/Dashboard', [DashboardController::class, 'index'])
+        ->name('Dashboard.index');
 
     //Courses Routes
-    Route::get('/courses', [CourseController::class, 'index'])
-        ->name('courses.index');
-    Route::get('/courses/{id}', [CourseController::class, 'show'])
-        ->name('courses.show');
+    Route::get('/Courses', [CourseController::class, 'index'])
+        ->name('Courses.index');
+    Route::get('/Courses/{id}', [CourseController::class, 'show'])
+        ->name('Courses.show');
 
     //Sessions Routes
-    Route::get('/ClassSections', [SessionController::class, 'index'])
+    Route::get('/ClassSections', [ClassSectionController::class, 'index'])
         ->name('ClassSections.index');
-    Route::get('ClassSections/{id}', [SessionController::class, 'show'])
+    Route::get('ClassSections/{id}', [ClassSectionController::class, 'show'])
         ->name('ClassSections.show');
 });
 
