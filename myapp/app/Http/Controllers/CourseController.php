@@ -26,8 +26,15 @@ class CourseController extends Controller
     //Store function for create view
     public function store(Request $request){
 
-        if (isset($request['course_type']) && is_array($request['course_type'])) {
-            $request['course_type'] = reset($request['course_type']); // take the first value
+        //This code block checks whether if the total of lecture and laboratory days exceeds 6
+        //Since you can only have six classes per week at max.
+        //Its placed above validation to still have it be prompted despite other fields being null
+        $lecture_days = $request->total_lecture_class_days;
+        $lab_days = $request->total_laboratory_class_days;
+        if (($lecture_days + $lab_days) > 6) {
+            return back()->withErrors([
+                'total_days' => 'The total of lecture and laboratory days cannot exceed 6.'
+            ])->withInput();
         }
 
         $validatedData = $request -> validate([
@@ -41,7 +48,9 @@ class CourseController extends Controller
                 'duration_type' => 'required|string',
         ]);
 
-        Course::create($validatedData);
+
+
+        //Course::create($validatedData);
         return redirect()->route('courses.index')
             ->with('success', 'Course created successfully.');
     }
