@@ -20,6 +20,14 @@
             ]"
             default="minor"
         />
+        <x-number-input
+            label="Class Hours"
+            name="class_hours"
+            :default="1"
+            :min="1"
+            :max="9"
+            :step="1"
+        />
 
 
 

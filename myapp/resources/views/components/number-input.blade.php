@@ -1,20 +1,19 @@
-@php
-    $inputValue = old($name, $value ?? '');
-    if (is_array($inputValue)) $inputValue = '';
-@endphp
-
 <div class="mb-3">
-    <label>{{ $label }}:</label>
+    @if($label ?? false)
+        <label for="{{ $name }}" class="form-label">{{ $label }}</label>
+    @endif
     <input
         type="number"
         name="{{ $name }}"
-        value="{{ $inputValue }}"
-        min="{{ $min ?? '' }}"
-        max="{{ $max ?? '' }}"
-        step="{{ $step ?? '' }}"
-        {{ $attributes }}
+        id="{{ $name }}"
+        class="form-control"
+        value="{{ old($name, $default ?? '') }}"
+        @if(isset($min)) min="{{ $min }}" @endif
+        @if(isset($max)) max="{{ $max }}" @endif
+        @if(isset($step)) step="{{ $step }}" @endif
     >
+
     @error($name)
-    <span class="text-red-500">{{ $message }}</span>
+    <div class="text-danger mt-1">{{ $message }}</div>
     @enderror
 </div>
