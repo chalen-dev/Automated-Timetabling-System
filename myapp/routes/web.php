@@ -1,7 +1,6 @@
 <?php
 
 
-use App\Http\Controllers\ClassSectionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
@@ -28,7 +27,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [UserController::class, 'login'])
         ->name('login');
 
-
 });
 
 // Authenticated Routes
@@ -45,11 +43,7 @@ Route::middleware([Authenticate::class])->group(function () {
     //Courses Routes
     Route::resource('/courses', CourseController::class);
 
-    //Sessions Routes
-    Route::get('/classSections', [ClassSectionController::class, 'index'])
-        ->name('classSections.index');
-    Route::get('classSections/{id}', [ClassSectionController::class, 'show'])
-        ->name('classSections.show');
+
 });
 
 

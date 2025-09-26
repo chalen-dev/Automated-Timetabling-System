@@ -20,7 +20,7 @@
             <a href="{{route('courses.index')}}">Courses</a>
         </li>
         <li>
-            <a href="{{route('classSections.index')}}">Class Sections</a>
+            <a href="">Class Sections</a>
         </li>
         <li>
             <a href="">Professors</a>

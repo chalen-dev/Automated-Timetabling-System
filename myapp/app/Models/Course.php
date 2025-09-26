@@ -16,4 +16,5 @@ class Course extends Model
         'unit_load',
         'duration_type'
     ];
+
 }

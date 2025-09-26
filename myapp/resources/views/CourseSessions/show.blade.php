@@ -1,6 +1,6 @@
 @extends('pages.app')
 
-@section('title', 'Class Section Details')
+@section('title', 'Sessions')
 
 @section('content')
     <h1>Class Section details</h1>
