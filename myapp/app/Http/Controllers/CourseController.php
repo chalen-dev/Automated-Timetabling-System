@@ -43,14 +43,14 @@ class CourseController extends Controller
 
 
         $validatedData = $request -> validate([
-                'course_title' => 'required|string',
-                'course_name' => 'required|string',
-                'course_type' => 'required|string',
-                'class_hours' => 'required|numeric',
-                'total_lecture_class_days' => 'required|numeric',
-                'total_laboratory_class_days' => 'required|numeric',
-                'unit_load' => 'required|numeric',
-                'duration_type' => 'required|string',
+            'course_title' => 'required|string',
+            'course_name' => 'required|string',
+            'course_type' => 'required|string',
+            'class_hours' => 'required|numeric|min:1|max:9',
+            'total_lecture_class_days' => 'required|numeric|min:1|max:6',
+            'total_laboratory_class_days' => 'required|numeric|min:1|max:6',
+            'unit_load' => 'required|numeric|min:0.0|max:10.0',
+            'duration_type' => 'required|string',
         ]);
 
 
@@ -78,10 +78,10 @@ class CourseController extends Controller
             'course_title' => 'required|string',
             'course_name' => 'required|string',
             'course_type' => 'required|string',
-            'class_hours' => 'required|numeric',
-            'total_lecture_class_days' => 'required|numeric',
-            'total_laboratory_class_days' => 'required|numeric',
-            'unit_load' => 'required|numeric',
+            'class_hours' => 'required|numeric|min:1|max:9',
+            'total_lecture_class_days' => 'required|numeric|min:1|max:6',
+            'total_laboratory_class_days' => 'required|numeric|min:1|max:6',
+            'unit_load' => 'required|numeric|min:0.0|max:10.0',
             'duration_type' => 'required|string',
         ]);
 

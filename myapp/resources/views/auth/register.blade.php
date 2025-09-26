@@ -13,6 +13,7 @@
             type="text"
             name="name"
             placeholder="Username"
+            :value="old('name')"
         />
 
         <x-input.auth-text
@@ -20,6 +21,7 @@
             type="email"
             name="email"
             placeholder="Email"
+            :value="old('email')"
         />
 
         <x-input.auth-text
@@ -27,6 +29,7 @@
             type="password"
             name="password"
             placeholder="Password"
+            :value="old('password')"
         />
 
         <x-input.auth-text

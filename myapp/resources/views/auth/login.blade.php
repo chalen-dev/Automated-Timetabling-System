@@ -14,6 +14,7 @@
             name="login"
             placeholder="Username or Email"
             class="border border-gray-300 rounded"
+            :value="old('login')"
         />
 
         <x-input.auth-text
@@ -22,6 +23,7 @@
             name="password"
             placeholder="Password"
             class="border border-gray-300 rounded"
+            :value="old('password')"
         />
 
         @if($errors->has('login_error'))
