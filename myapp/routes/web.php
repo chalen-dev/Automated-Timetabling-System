@@ -39,20 +39,17 @@ Route::middleware([Authenticate::class])->group(function () {
         ->name('logout');
 
     //Dashboard Routes
-    Route::get('/Dashboard', [DashboardController::class, 'index'])
-        ->name('Dashboard.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard.index');
 
     //Courses Routes
-    Route::get('/Courses', [CourseController::class, 'index'])
-        ->name('Courses.index');
-    Route::get('/Courses/{id}', [CourseController::class, 'show'])
-        ->name('Courses.show');
+    Route::resource('/courses', CourseController::class);
 
     //Sessions Routes
-    Route::get('/ClassSections', [ClassSectionController::class, 'index'])
-        ->name('ClassSections.index');
-    Route::get('ClassSections/{id}', [ClassSectionController::class, 'show'])
-        ->name('ClassSections.show');
+    Route::get('/classSections', [ClassSectionController::class, 'index'])
+        ->name('classSections.index');
+    Route::get('classSections/{id}', [ClassSectionController::class, 'show'])
+        ->name('classSections.show');
 });
 
 

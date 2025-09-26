@@ -13,7 +13,7 @@ class WelcomeController extends Controller
 
         //Else, redirect to Dashboard and pass in user details.
         $user = auth()->user();
-        return view('Dashboard.index', compact('user'));
+        return view('dashboard.index', compact('user'));
 
 
     }

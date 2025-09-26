@@ -13,7 +13,7 @@ class ClassSectionController extends Controller
             ['section_name' => 'BSCS 1st Year B', 'id' => 2],
         ];
         //Test code end
-        return view('ClassSections.index', compact('classSections'));
+        return view('classSections.index', compact('classSections'));
     }
 
     public function show($id){
@@ -28,6 +28,6 @@ class ClassSectionController extends Controller
         //Collect specific course details depending on the id
         $classSection = collect($classSections)->firstWhere('id', $id);
 
-        return view('ClassSections.show', compact('classSection'));
+        return view('classSections.show', compact('classSection'));
     }
 }

@@ -7,19 +7,69 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    //Display all
     public function index(){
-
         $courses = Course::all();
-
-        return view('Courses.index', compact('courses'));
+        return view('courses.index', compact('courses'));
     }
 
-    public function show($id){
-        $courses = Course::all();
-
-        //Collect specific course details depending on the id
-        $course = collect($courses)->firstWhere('id', $id);
-
-        return view('Courses.show', compact('course'));
+    //Display specific course
+    public function show(Course $course){
+        return view('courses.show', compact('course'));
     }
+
+    //Display create view
+    public function create(){
+        return view('courses.create');
+    }
+
+    //Store function for create view
+    public function store(Request $request){
+        $request -> validate([
+                'course_title' => 'required',
+                'course_name' => 'required',
+                'course_type' => 'required',
+                'class_hours' => 'required',
+                'total_lecture_class_days' => 'required',
+                'total_laboratory_class_days' => 'required',
+                'unit_load' => 'required',
+        ]);
+        Course::create($request->all());
+        return redirect()->route('courses.index')
+            ->with('success', 'Course created successfully.');
+    }
+
+    //Display edit view
+    public function edit(Course $course){
+        return view('Courses.edit', compact('course'));
+    }
+
+    //Update course
+    public function update(Request $request, Course $course){
+        $request -> validate([
+            'course_title' => 'required',
+            'course_name' => 'required',
+            'course_type' => 'required',
+            'class_hours' => 'required',
+            'total_lecture_class_days' => 'required',
+            'total_laboratory_class_days' => 'required',
+            'unit_load' => 'required',
+        ]);
+
+        $course->update($request->all());
+
+        return redirect()->route('courses.index')
+            ->with('success', 'Course updated successfully');
+    }
+
+    public function destroy(Course $course){
+        $course->delete();
+        return redirect()->route('courses.index')
+            ->with('success', 'Course deleted successfully');
+    }
+
+
+
 }
+
+

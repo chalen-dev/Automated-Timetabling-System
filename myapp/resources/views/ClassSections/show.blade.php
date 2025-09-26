@@ -4,5 +4,5 @@
 
 @section('content')
     <h1>Class Section details</h1>
-    <a href="{{route('ClassSections.index')}}">Back</a>
+    <a href="{{route('classSections.index')}}">Back</a>
 @endsection
