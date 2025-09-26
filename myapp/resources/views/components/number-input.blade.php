@@ -18,6 +18,6 @@
 
 
     @error($name)
-        <div class="text-danger mt-1">{{ $message }}</div>
+        <div class="!text-red-500">{{ $message }}</div>
     @enderror
 </div>

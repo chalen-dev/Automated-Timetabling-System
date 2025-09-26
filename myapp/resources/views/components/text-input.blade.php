@@ -3,6 +3,6 @@
     <label>{{ $label }}:</label>
     <input type="text" name="{{ $name }}" value="{{ old($name) }}" {{ $attributes }}>
     @error($name)
-    <span class="text-red-500">{{ $message }}</span>
+    <span class="!text-red-500">{{ $message }}</span>
     @enderror
 </div>

@@ -5,22 +5,31 @@
 @section('content')
     <h1>Login</h1>
 
-    <form action="{{ url('login') }}" method="post">
+    <form action="{{ url('login') }}" method="post" class="flex flex-col gap-4">
         @csrf
 
-        <input type="text" name="login" placeholder="Username or Email" class="border border-gray-300 rounded">
-        @error('login')
-        <span class="text-red-500">{{$message}}</span>
-        @enderror
-        <br>
+        <x-auth-text-input
+            label=""
+            type="text"
+            name="login"
+            placeholder="Username or Email"
+            class="border border-gray-300 rounded"
+        />
 
-        <input type="password" name="password" placeholder="Password" class="border border-gray-300 rounded">
-        @error('password')
-        <span class="text-red-500">{{$message}}</span>
-        @enderror
-        <br>
+        <x-auth-text-input
+            label=""
+            type="password"
+            name="password"
+            placeholder="Password"
+            class="border border-gray-300 rounded"
+        />
+
+        @if($errors->has('login_error'))
+            <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
+        @endif
 
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
+
 
 
     </form>

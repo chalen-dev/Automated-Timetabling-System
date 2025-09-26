@@ -60,7 +60,7 @@ class UserController extends Controller
         }
         //if login failed, redirect back with error message
         return redirect()->back()->withErrors([
-            'login' => 'Credentials provided do not match our records.',
+            'login_error' => 'Credentials provided do not match our records.',
         ]);
     }
 
