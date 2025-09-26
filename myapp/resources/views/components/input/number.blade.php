@@ -8,7 +8,6 @@
             type="number"
             name="{{ $name }}"
             id="{{ $name }}"
-            class="form-control"
             value="{{ old($name, $default ?? '') }}"
             @if(isset($min)) min="{{ $min }}" @endif
             @if(isset($max)) max="{{ $max }}" @endif

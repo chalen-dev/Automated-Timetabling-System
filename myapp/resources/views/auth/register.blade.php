@@ -8,28 +8,28 @@
     <form action="{{ url('register') }}" method="post">
         @csrf
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="text"
             name="name"
             placeholder="Username"
         />
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="email"
             name="email"
             placeholder="Email"
         />
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="password"
             name="password"
             placeholder="Password"
         />
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="password"
             name="password_confirmation"

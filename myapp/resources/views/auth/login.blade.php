@@ -5,10 +5,10 @@
 @section('content')
     <h1>Login</h1>
 
-    <form action="{{ url('login') }}" method="post" class="flex flex-col gap-4">
+    <form action="{{ url('login') }}" method="post" class="flex flex-col">
         @csrf
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="text"
             name="login"
@@ -16,7 +16,7 @@
             class="border border-gray-300 rounded"
         />
 
-        <x-auth-text-input
+        <x-input.auth-text
             label=""
             type="password"
             name="password"
