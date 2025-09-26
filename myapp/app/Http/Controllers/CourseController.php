@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    //Instance Functions
+    private function total_days_exceed_6($data){
+        $lecture_days = $data->total_lecture_class_days;
+        $lab_days = $data->total_laboratory_class_days;
+        if (($lecture_days + $lab_days) > 6) {
+            return true;
+        }
+        return false;
+    }
     //Display all
     public function index(){
         $courses = Course::all();
@@ -26,16 +35,12 @@ class CourseController extends Controller
     //Store function for create view
     public function store(Request $request){
 
-        //This code block checks whether if the total of lecture and laboratory days exceeds 6
-        //Since you can only have six classes per week at max.
-        //Its placed above validation to still have it be prompted despite other fields being null
-        $lecture_days = $request->total_lecture_class_days;
-        $lab_days = $request->total_laboratory_class_days;
-        if (($lecture_days + $lab_days) > 6) {
+        if ($this->total_days_exceed_6($request)){
             return back()->withErrors([
                 'total_days' => 'The total of lecture and laboratory days cannot exceed 6.'
             ])->withInput();
         }
+
 
         $validatedData = $request -> validate([
                 'course_title' => 'required|string',
@@ -57,23 +62,30 @@ class CourseController extends Controller
 
     //Display edit view
     public function edit(Course $course){
-        return view('Courses.edit', compact('course'));
+        return view('courses.edit', compact('course'));
     }
 
     //Update course
     public function update(Request $request, Course $course){
-        $request -> validate([
-            'course_title' => 'required',
-            'course_name' => 'required',
-            'course_type' => 'required',
-            'class_hours' => 'required',
-            'total_lecture_class_days' => 'required',
-            'total_laboratory_class_days' => 'required',
-            'unit_load' => 'required',
-            'duration_type' => 'required',
+
+        if ($this->total_days_exceed_6($request)){
+            return back()->withErrors([
+                'total_days' => 'The total of lecture and laboratory days cannot exceed 6.'
+            ])->withInput();
+        }
+
+        $validatedData = $request -> validate([
+            'course_title' => 'required|string',
+            'course_name' => 'required|string',
+            'course_type' => 'required|string',
+            'class_hours' => 'required|numeric',
+            'total_lecture_class_days' => 'required|numeric',
+            'total_laboratory_class_days' => 'required|numeric',
+            'unit_load' => 'required|numeric',
+            'duration_type' => 'required|string',
         ]);
 
-        $course->update($request->all());
+        $course->update($validatedData);
 
         return redirect()->route('courses.index')
             ->with('success', 'Course updated successfully');
@@ -84,6 +96,7 @@ class CourseController extends Controller
         return redirect()->route('courses.index')
             ->with('success', 'Course deleted successfully');
     }
+
 
 
 

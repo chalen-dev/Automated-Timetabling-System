@@ -9,9 +9,9 @@
     <ul>
         @foreach($courses as $course)
             <li class="flex gap-10">
-                <p>{{$course['course_title']}}</p>
+                <p>{{$course->course_title}}</p>
                 <a href="{{route('courses.show', $course)}}">View</a>
-                <a href="">Edit</a>
+                <a href="{{route('courses.edit', $course)}}">Edit</a>
             </li>
         @endforeach
     </ul>

@@ -1,3 +1,4 @@
+@props(['label' => '', 'name', 'value' => ''])
 
 <div class="mb-3 flex flex-col gap-4">
     <div class="flex flex-row gap-4">
@@ -8,7 +9,7 @@
             type="number"
             name="{{ $name }}"
             id="{{ $name }}"
-            value="{{ old($name, $default ?? '') }}"
+            value="{{ old($name, $default ?? $value) }}"
             @if(isset($min)) min="{{ $min }}" @endif
             @if(isset($max)) max="{{ $max }}" @endif
             @if(isset($step)) step="{{ $step }}" @endif
