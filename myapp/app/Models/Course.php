@@ -13,6 +13,7 @@ class Course extends Model
         'class_hours',
         'total_lecture_class_days',
         'total_laboratory_class_days',
-        'unit_load'
+        'unit_load',
+        'duration_type'
     ];
 }

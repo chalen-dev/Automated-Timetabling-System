@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('course_title');
             $table->string('course_name');
-            $table->string('course_type');
+            $table->enum('course_type', ['major', 'minor', 'pe', 'nstp', 'other']);
             $table->integer('class_hours');
             $table->integer('total_lecture_class_days');
             $table->integer('total_laboratory_class_days');
             $table->decimal('unit_load', 10, 1);
+            $table->enum('duration_type', ['semestral', 'term'])->default('term');
             $table->timestamps();
         });
     }

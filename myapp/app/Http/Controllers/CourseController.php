@@ -25,16 +25,23 @@ class CourseController extends Controller
 
     //Store function for create view
     public function store(Request $request){
-        $request -> validate([
-                'course_title' => 'required',
-                'course_name' => 'required',
-                'course_type' => 'required',
-                'class_hours' => 'required',
-                'total_lecture_class_days' => 'required',
-                'total_laboratory_class_days' => 'required',
-                'unit_load' => 'required',
+
+        if (isset($request['course_type']) && is_array($request['course_type'])) {
+            $request['course_type'] = reset($request['course_type']); // take the first value
+        }
+
+        $validatedData = $request -> validate([
+                'course_title' => 'required|string',
+                'course_name' => 'required|string',
+                'course_type' => 'required|string',
+                'class_hours' => 'required|numeric',
+                'total_lecture_class_days' => 'required|numeric',
+                'total_laboratory_class_days' => 'required|numeric',
+                'unit_load' => 'required|numeric',
+                'duration_type' => 'required|string',
         ]);
-        Course::create($request->all());
+
+        Course::create($validatedData);
         return redirect()->route('courses.index')
             ->with('success', 'Course created successfully.');
     }
@@ -54,6 +61,7 @@ class CourseController extends Controller
             'total_lecture_class_days' => 'required',
             'total_laboratory_class_days' => 'required',
             'unit_load' => 'required',
+            'duration_type' => 'required',
         ]);
 
         $course->update($request->all());

@@ -22,3 +22,20 @@ a {
     color: #7aa9f6;
     text-decoration: underline;
 }
+
+input, select{
+    border: 1px solid #7aa9f6;
+    border-radius: 5px;
+    width: 400px;
+}
+
+option {
+    color: black;
+}
+
+button{
+    background-color: #7aa9f6;
+    color: white;
+    border-radius: 5px;
+    width: 200px;
+}
