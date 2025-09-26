@@ -7,9 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'My Laravel App')</title>
     @vite('resources/css/app.css')
+    <script src="//unpkg.com/alpinejs" defer></script>
 
 </head>
 <body>
+@include('includes.notif.flash-message')
 <header>
     @guest
         @include('components.headers.guest-header')

@@ -8,9 +8,10 @@
     <!--Test Code Start-->
     <ul>
         @foreach($courses as $course)
-            <li>
+            <li class="flex gap-10">
                 <p>{{$course['course_title']}}</p>
                 <a href="{{route('courses.show', $course)}}">View</a>
+
             </li>
         @endforeach
     </ul>

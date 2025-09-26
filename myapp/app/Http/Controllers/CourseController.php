@@ -50,7 +50,7 @@ class CourseController extends Controller
 
 
 
-        //Course::create($validatedData);
+        Course::create($validatedData);
         return redirect()->route('courses.index')
             ->with('success', 'Course created successfully.');
     }

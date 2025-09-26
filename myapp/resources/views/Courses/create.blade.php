@@ -2,6 +2,7 @@
 
 @section('title', 'Create Course')
 
+
 @section('content')
     <form action="{{route('courses.store')}}" method="POST" class="flex flex-col gap-4 justify-start">
         @csrf
