@@ -11,7 +11,7 @@
             <li class="flex gap-10">
                 <p>{{$course['course_title']}}</p>
                 <a href="{{route('courses.show', $course)}}">View</a>
-
+                <a href="">Edit</a>
             </li>
         @endforeach
     </ul>
