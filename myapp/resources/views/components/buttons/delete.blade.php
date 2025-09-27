@@ -1,6 +1,6 @@
-@props(['action ','professor', 'item_type'])
+@props(['action','model', 'item_type'])
 
-<form action="{{route($action, $professor)}}" method="POST">
+<form action="{{route($action, $model)}}" method="POST">
     @csrf
     @method('DELETE')
     <button
