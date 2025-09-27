@@ -28,5 +28,8 @@
         <li>
             <a href="">Rooms</a>
         </li>
+        <li>
+            <a href="{{route('academic-programs.index')}}">Academic Programs</a>
+        </li>
     </ul>
 </nav>

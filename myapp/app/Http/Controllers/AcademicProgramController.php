@@ -12,8 +12,8 @@ class AcademicProgramController extends Controller
      */
     public function index()
     {
-        $academic_programs = AcademicProgram::all();
-        return view('academic-programs.index', compact('academic_programs'));
+        $academicPrograms = AcademicProgram::all();
+        return view('academic-programs.index', compact('academicPrograms'));
     }
 
     /**
@@ -43,9 +43,9 @@ class AcademicProgramController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AcademicProgram $academic_program)
+    public function show(AcademicProgram $academicProgram)
     {
-        return view('academic-program.show', compact('academic_program'));
+        return view('academic-program.show', compact('academicProgram'));
     }
 
     /**
@@ -53,7 +53,7 @@ class AcademicProgramController extends Controller
      */
     public function edit(AcademicProgram $academicProgram)
     {
-        //
+        return view('academic-programs.edit', compact('academicProgram'));
     }
 
     /**
@@ -61,7 +61,15 @@ class AcademicProgramController extends Controller
      */
     public function update(Request $request, AcademicProgram $academicProgram)
     {
-        //
+        $validatedData = $request -> validate([
+            'program_name' => 'required|string',
+            'program_abbreviation' => 'required|string',
+            'program_description' => 'nullable|string',
+        ]);
+
+        $academicProgram->update($validatedData);
+        return redirect()->route('academic-programs.index')
+            ->with('success', 'Academic Program updated successfully');
     }
 
     /**
@@ -69,6 +77,8 @@ class AcademicProgramController extends Controller
      */
     public function destroy(AcademicProgram $academicProgram)
     {
-        //
+        $academicProgram->delete();
+        return redirect()->route('academic-programs.index')
+            ->with('success', 'Academic Program deleted successfully');
     }
 }
