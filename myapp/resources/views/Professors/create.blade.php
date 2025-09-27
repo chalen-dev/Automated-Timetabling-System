@@ -18,7 +18,14 @@
         />
 
         <x-input.select
-            label="Professor Type (Regular/Non Regular"
+            label="Academic Program"
+            name="academic_program_id"
+            :options="$academic_program_options"
+            default=""
+        />
+
+        <x-input.select
+            label="Professor Type (Regular/Non Regular)"
             name="professor_type"
             :options="[
                 'regular' => 'Regular',

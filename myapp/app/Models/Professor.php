@@ -12,6 +12,12 @@ class Professor extends Model
         'professor_type',
         'max_unit_load',
         'professor_age',
-        'position'
+        'position',
+        'academic_program_id' //foreign key
     ];
+
+    //A professor can belong to a single academic program (many to one)
+    public function academicProgram(){
+        return $this->belongsTo(AcademicProgram::class);
+    }
 }

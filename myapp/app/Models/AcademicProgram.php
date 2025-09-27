@@ -11,4 +11,9 @@ class AcademicProgram extends Model
         'program_abbreviation',
         'program_description',
     ];
+
+    //An academic program has many professors (one to many)
+    public function professors(){
+        return $this->hasMany(Professor::class);
+    }
 }

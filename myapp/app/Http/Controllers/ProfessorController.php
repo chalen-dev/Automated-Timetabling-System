@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicProgram;
 use App\Models\Professor;
 use Illuminate\Http\Request;
 
@@ -21,7 +22,8 @@ class ProfessorController extends Controller
      */
     public function create()
     {
-        return view('professors.create');
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        return view('professors.create', compact('academic_program_options'));
     }
 
     /**
@@ -36,6 +38,7 @@ class ProfessorController extends Controller
             'max_unit_load' => 'required|numeric|min:1.0',
             'professor_age' => 'nullable|numeric',
             'position' => 'nullable|string',
+            'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
 
         Professor::create($validatedData);
@@ -48,7 +51,8 @@ class ProfessorController extends Controller
      */
     public function show(Professor $professor)
     {
-        return view('professors.show', compact('professor'));
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        return view('professors.show', compact('professor', 'academic_program_options'));
     }
 
     /**
@@ -56,7 +60,8 @@ class ProfessorController extends Controller
      */
     public function edit(Professor $professor)
     {
-        return view('professors.edit', compact('professor'));
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        return view('professors.edit', compact('professor', 'academic_program_options'));
     }
 
     /**
@@ -71,8 +76,8 @@ class ProfessorController extends Controller
             'max_unit_load' => 'required|numeric|min:1.0',
             'professor_age' => 'nullable|numeric',
             'position' => 'nullable|string',
+            'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
-
         $professor->update($validatedData);
         return redirect()->route('professors.index')
             ->with('success', 'Professor updated successfully.');
