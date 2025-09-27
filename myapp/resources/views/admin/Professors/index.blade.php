@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Professors</h1>
-    <a href="{{route('professors.create')}}">Create</a>
+    <a href="{{route('admin.professors.create')}}">Create</a>
     <ul>
         @foreach($professors as $professor)
             <li class="flex gap-10">
@@ -12,9 +12,9 @@
                 <p>{{$professor->last_name}}</p>
                 <p>{{$professor->professor_type}}</p>
                 <p>{{$professor->max_unit_load}}</p>
-                <a href='{{route('professors.show', $professor)}}'>View</a>
-                <a href='{{route('professors.edit', $professor)}}'>Edit</a>
-                <x-buttons.delete action="professors.destroy" :model="$professor" item_name="professor" />
+                <a href='{{route('admin.professors.show', $professor)}}'>View</a>
+                <a href='{{route('admin.professors.edit', $professor)}}'>Edit</a>
+                <x-buttons.delete action="admin.professors.destroy" :model="$professor" item_name="professor" />
             </li>
         @endforeach
     </ul>

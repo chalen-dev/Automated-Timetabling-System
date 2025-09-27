@@ -38,18 +38,21 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
-    //Dashboard Routes
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard.index');
+    // Admin Routes Group
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Dashboard Routes
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard.index');
 
-    //Courses Routes
-    Route::resource('/courses', CourseController::class);
+        // Courses Routes
+        Route::resource('courses', CourseController::class);
 
-    //Professor Routes
-    Route::resource('/professors', ProfessorController::class);
+        // Professor Routes
+        Route::resource('professors', ProfessorController::class);
 
-    //Academic Program Routes
-    Route::resource('/academic-programs', AcademicProgramController::class);
+        // Academic Program Routes
+        Route::resource('academic-programs', AcademicProgramController::class);
+    });
 });
 
 

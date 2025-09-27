@@ -14,7 +14,7 @@ class ProfessorController extends Controller
     public function index()
     {
         $professors = Professor::all();
-        return view('professors.index', compact('professors'));
+        return view('admin.professors.index', compact('professors'));
     }
 
     /**
@@ -23,7 +23,7 @@ class ProfessorController extends Controller
     public function create()
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
-        return view('professors.create', compact('academic_program_options'));
+        return view('admin.professors.create', compact('academic_program_options'));
     }
 
     /**
@@ -52,7 +52,7 @@ class ProfessorController extends Controller
     public function show(Professor $professor)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
-        return view('professors.show', compact('professor', 'academic_program_options'));
+        return view('admin.professors.show', compact('professor', 'academic_program_options'));
     }
 
     /**
@@ -61,7 +61,7 @@ class ProfessorController extends Controller
     public function edit(Professor $professor)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
-        return view('professors.edit', compact('professor', 'academic_program_options'));
+        return view('admin.professors.edit', compact('professor', 'academic_program_options'));
     }
 
     /**

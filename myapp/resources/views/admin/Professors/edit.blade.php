@@ -1,20 +1,22 @@
 @extends('pages.app')
 
-@section('title', 'Create Professor')
+@section('title', 'Edit Professor')
 
 @section('content')
-    <h1>Create Professor</h1>
-    <form action="{{route('professors.store')}}" method="post">
+    <form action="{{route('admin.professors.update', $professor)}}" method='POST' class="flex flex-col gap-4 justify-start">
         @csrf
+        @method('PUT')
 
         <x-input.text
             label="First Name"
             name="first_name"
+            :value="old('first_name', $professor->first_name)"
         />
 
         <x-input.text
             label="Last Name"
             name="last_name"
+            :value="old('last_name', $professor->last_name)"
         />
 
         <x-input.select
@@ -22,6 +24,7 @@
             name="academic_program_id"
             :options="$academic_program_options"
             default=""
+            :value="old('academic_program_id', $professor->academic_program_id)"
         />
 
         <x-input.select
@@ -32,32 +35,33 @@
                 'non_regular' => 'Non-Regular',
                 'none' => 'None'
             ]"
+            :value="old('professor_type', $professor->professor_type)"
         />
 
         <x-input.number
             label="Max Unit Load"
             name="max_unit_load"
-            :default="0"
             :min="1.0"
             :step="0.1"
+            :value="old('max_unit_load', $professor->max_unit_load)"
         />
 
         <x-input.number
             label="Professor Age"
             name="professor_age"
-            :default="0"
             :min="0"
             :max="120"
             :step="1"
+            :value="old('professor_age', $professor->professor_age)"
         />
 
         <x-input.text
             label="Position"
             name="position"
+            :value="old('position', $professor->position)"
         />
 
-        <button type="submit">Create</button>
+        <button type="submit">Confirm Changes</button>
+        <a href="{{route('admin.professors.index')}}">Back</a>
     </form>
-
-    <a href="{{route('professors.index')}}">Back</a>
 @endsection

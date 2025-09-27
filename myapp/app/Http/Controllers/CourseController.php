@@ -19,17 +19,17 @@ class CourseController extends Controller
     //Display all
     public function index(){
         $courses = Course::all();
-        return view('courses.index', compact('courses'));
+        return view('admin.courses.index', compact('courses'));
     }
 
     //Display specific course
     public function show(Course $course){
-        return view('courses.show', compact('course'));
+        return view('admin.courses.show', compact('course'));
     }
 
     //Display create view
     public function create(){
-        return view('courses.create');
+        return view('admin.courses.create');
     }
 
     //Store function for create view
@@ -62,7 +62,7 @@ class CourseController extends Controller
 
     //Display edit view
     public function edit(Course $course){
-        return view('courses.edit', compact('course'));
+        return view('admin.courses.edit', compact('course'));
     }
 
     //Update course

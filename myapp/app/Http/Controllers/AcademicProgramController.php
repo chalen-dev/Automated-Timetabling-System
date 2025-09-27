@@ -13,7 +13,7 @@ class AcademicProgramController extends Controller
     public function index()
     {
         $academicPrograms = AcademicProgram::all();
-        return view('academic-programs.index', compact('academicPrograms'));
+        return view('admin.academic-programs.index', compact('academicPrograms'));
     }
 
     /**
@@ -21,7 +21,7 @@ class AcademicProgramController extends Controller
      */
     public function create()
     {
-        return view('academic-programs.create');
+        return view('admin.academic-programs.create');
     }
 
     /**
@@ -45,7 +45,7 @@ class AcademicProgramController extends Controller
      */
     public function show(AcademicProgram $academicProgram)
     {
-        return view('academic-program.show', compact('academicProgram'));
+        return view('admin.academic-programs.show', compact('academicProgram'));
     }
 
     /**
@@ -53,7 +53,7 @@ class AcademicProgramController extends Controller
      */
     public function edit(AcademicProgram $academicProgram)
     {
-        return view('academic-programs.edit', compact('academicProgram'));
+        return view('admin.academic-programs.edit', compact('academicProgram'));
     }
 
     /**

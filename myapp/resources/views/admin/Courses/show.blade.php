@@ -12,5 +12,5 @@
     <p>Total Laboratory Class Days: {{$course->total_laboratory_class_days}}</p>
     <p>Unit Load: {{$course->unit_load}}</p>
     <p>Duration Type: {{$course->duration_type}}</p>
-    <a href="{{route('courses.index')}}">Back</a>
+    <a href="{{route('admin.courses.index')}}">Back</a>
 @endsection

@@ -14,22 +14,22 @@
     <!-- Sub header -->
     <ul class = 'flex gap-4'>
         <li>
-            <a href="{{route('dashboard.index')}}">Dashboard</a>
+            <a href="{{route('admin.dashboard.index')}}">Dashboard</a>
         </li>
         <li>
-            <a href="{{route('courses.index')}}">Courses</a>
+            <a href="{{route('admin.courses.index')}}">Courses</a>
         </li>
         <li>
             <a href="">Class Sections</a>
         </li>
         <li>
-            <a href="{{route('professors.index')}}">Professors</a>
+            <a href="{{route('admin.professors.index')}}">Professors</a>
         </li>
         <li>
             <a href="">Rooms</a>
         </li>
         <li>
-            <a href="{{route('academic-programs.index')}}">Academic Programs</a>
+            <a href="{{route('admin.academic-programs.index')}}">Academic Programs</a>
         </li>
     </ul>
 </nav>
