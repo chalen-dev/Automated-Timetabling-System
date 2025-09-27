@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\AcademicProgramController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\UserController;
@@ -46,6 +47,9 @@ Route::middleware([Authenticate::class])->group(function () {
 
     //Professor Routes
     Route::resource('/professors', ProfessorController::class);
+
+    //Academic Program Routes
+    Route::resource('/academic-programs', AcademicProgramController::class);
 });
 
 

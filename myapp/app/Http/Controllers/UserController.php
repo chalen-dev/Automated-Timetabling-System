@@ -35,7 +35,7 @@ class UserController extends Controller
         }
 
         //Redirect to login if successful
-        return redirect()->route('login.form');
+        return redirect()->route('login.form')->with('success', 'User registered successfully.');
     }
 
     public function showLoginForm(){
@@ -74,7 +74,7 @@ class UserController extends Controller
         // prevent CSRF attacks
         $request->session()->regenerateToken();
 
-        return redirect()->route('default');
+        return redirect()->route('default')->with('info', 'User has logged out.');
     }
 
 }

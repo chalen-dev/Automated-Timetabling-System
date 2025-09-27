@@ -19,7 +19,9 @@ return new class extends Migration
             $table->decimal('max_unit_load', 10, 1);
             $table->integer('professor_age')->nullable();
             $table->string('position')->nullable();
+            $table->foreignId('academic_program_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+
         });
     }
 
