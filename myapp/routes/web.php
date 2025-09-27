@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
@@ -43,7 +44,8 @@ Route::middleware([Authenticate::class])->group(function () {
     //Courses Routes
     Route::resource('/courses', CourseController::class);
 
-
+    //Professor Routes
+    Route::resource('/professors', ProfessorController::class);
 });
 
 

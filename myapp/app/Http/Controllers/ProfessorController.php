@@ -12,7 +12,8 @@ class ProfessorController extends Controller
      */
     public function index()
     {
-        //
+        $professors = Professor::all();
+        return view('professors.index', compact('professors'));
     }
 
     /**
@@ -20,7 +21,7 @@ class ProfessorController extends Controller
      */
     public function create()
     {
-        //
+        return view('professors.create');
     }
 
     /**
@@ -28,7 +29,18 @@ class ProfessorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request -> validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'professor_type' => 'required|string',
+            'max_unit_load' => 'required|numeric|min:1.0',
+            'professor_age' => 'nullable|numeric',
+            'position' => 'nullable|string',
+        ]);
+
+        Professor::create($validatedData);
+        return redirect()->route('professors.index')
+            ->with('success', 'Professor created successfully.');
     }
 
     /**
@@ -36,7 +48,7 @@ class ProfessorController extends Controller
      */
     public function show(Professor $professor)
     {
-        //
+        return view('professors.show', compact('professor'));
     }
 
     /**
@@ -44,7 +56,7 @@ class ProfessorController extends Controller
      */
     public function edit(Professor $professor)
     {
-        //
+        return view('professors.edit', compact('professor'));
     }
 
     /**
@@ -52,7 +64,18 @@ class ProfessorController extends Controller
      */
     public function update(Request $request, Professor $professor)
     {
-        //
+        $validatedData = $request -> validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'professor_type' => 'required|string',
+            'max_unit_load' => 'required|numeric|min:1.0',
+            'professor_age' => 'nullable|numeric',
+            'position' => 'nullable|string',
+        ]);
+
+        $professor->update($validatedData);
+        return redirect()->route('professors.index')
+            ->with('success', 'Professor updated successfully.');
     }
 
     /**
@@ -60,6 +83,8 @@ class ProfessorController extends Controller
      */
     public function destroy(Professor $professor)
     {
-        //
+        $professor->delete();
+        return redirect()->route('professors.index')
+            ->with('success', 'Professor deleted successfully.');
     }
 }

@@ -1,0 +1,21 @@
+@extends('pages.app')
+
+@section('title', 'Professors')
+
+@section('content')
+    <h1>Professors</h1>
+    <a href="{{route('professors.create')}}">Create</a>
+    <ul>
+        @foreach($professors as $professor)
+            <li class="flex gap-10">
+                <p>{{$professor->first_name}}</p>
+                <p>{{$professor->last_name}}</p>
+                <p>{{$professor->professor_type}}</p>
+                <p>{{$professor->max_unit_load}}</p>
+                <a href='{{route('professors.show', $professor)}}'>View</a>
+                <a href='{{route('professors.edit', $professor)}}'>Edit</a>
+                @include('Professors.delete')
+            </li>
+        @endforeach
+    </ul>
+@endsection

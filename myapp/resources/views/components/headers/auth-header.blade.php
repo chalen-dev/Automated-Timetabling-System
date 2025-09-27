@@ -23,7 +23,7 @@
             <a href="">Class Sections</a>
         </li>
         <li>
-            <a href="">Professors</a>
+            <a href="{{route('professors.index')}}">Professors</a>
         </li>
         <li>
             <a href="">Rooms</a>

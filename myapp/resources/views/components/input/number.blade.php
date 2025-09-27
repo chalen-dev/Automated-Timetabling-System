@@ -1,4 +1,4 @@
-@props(['label' => '', 'name', 'value' => ''])
+@props(['label' => '', 'name', 'value' => '', 'default', 'min', 'max', 'step'])
 
 <div class="mb-3 flex flex-col gap-4">
     <div class="flex flex-row gap-4">

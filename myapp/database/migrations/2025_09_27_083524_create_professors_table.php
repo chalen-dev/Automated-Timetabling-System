@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->enum('professor_type', ['regular', 'non-regular', 'none'])->default('regular');
-            $table->integer('max_unit_load');
+            $table->decimal('max_unit_load', 10, 1);
             $table->integer('professor_age')->nullable();
             $table->string('position')->nullable();
             $table->timestamps();
