@@ -14,7 +14,7 @@
                 <p>{{$course->duration_type}}</p>
                 <a href="{{route('courses.show', $course)}}">View</a>
                 <a href="{{route('courses.edit', $course)}}">Edit</a>
-                @include('Professors.delete')
+                <x-buttons.delete action="courses.destroy" professor="$course" item_type="course" />
             </li>
         @endforeach
     </ul>

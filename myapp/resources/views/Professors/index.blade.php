@@ -14,7 +14,7 @@
                 <p>{{$professor->max_unit_load}}</p>
                 <a href='{{route('professors.show', $professor)}}'>View</a>
                 <a href='{{route('professors.edit', $professor)}}'>Edit</a>
-                @include('Professors.delete')
+                <x-buttons.delete action="professors.destroy" professor="$professor" item_type="professor" />
             </li>
         @endforeach
     </ul>
