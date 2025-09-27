@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('program_name');
             $table->string('program_abbreviation');
-            $table->text('program_description');
+            $table->text('program_description')->nullable();
             $table->timestamps();
         });
     }
