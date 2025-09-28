@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 // Default Page, either Homepage or Timetables, depending on authentication status
 Route::get('/', [WelcomeController::class, 'index'])
-    ->name('default');
+    ->name('home');
 
 // Guest Routes (Unauthenticated)
 Route::middleware('guest')->group(function () {

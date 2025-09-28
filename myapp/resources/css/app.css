@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -10,47 +11,8 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-body{
-    background-color: #323232;
-}
-
-
 *{
-    color: white;
-}
-
-a {
-    color: #7aa9f6;
-    text-decoration: underline;
-}
-
-input, select{
-    border: 1px solid #7aa9f6;
-    border-radius: 5px;
-}
-
-input{
-    width: 400px;
-}
-
-input[type="number"]{
-    width: 100px;
-}
-
-select{
-    width: 200px;
-}
-
-
-
-option {
-    color: black;
-}
-
-button{
-    background-color: #7aa9f6;
-    color: white;
-    border-radius: 5px;
-    width: 200px;
+    border: 1px solid black;
+    box-sizing: border-box;
 }
 

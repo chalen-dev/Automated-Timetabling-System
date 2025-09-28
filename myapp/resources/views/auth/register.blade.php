@@ -3,62 +3,68 @@
 @section('title', 'Register')
 
 @section('content')
-    <h1>Register</h1>
 
-    <form action="{{ url('register') }}" method="post">
-        @csrf
+    <div class="flex flex-col items-center justify-center w-screen h-[calc(100vh)]">
+        <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1">
+            @csrf
 
-        <x-input.auth-text
-            label="Username"
-            type="text"
-            name="name"
-            placeholder=""
-            :value="old('name')"
-        />
+            <h1>Sign Up to Facultime</h1>
 
-        <x-input.auth-text
-            label="First Name"
-            type="text"
-            name="first_name"
-            placeholder=""
-            :value="old('first_name')"
-        />
+            <x-input.auth-text
+                label="USERNAME"
+                type="text"
+                name="name"
+                placeholder=""
+                :value="old('name')"
+            />
 
-        <x-input.auth-text
-            label="Last Name"
-            type="text"
-            name="last_name"
-            placeholder=""
-            :value="old('last_name')"
-        />
+            <!--YET TO BE ADDED IN DATABASE-->
+            <x-input.auth-text
+                label="FIRST NAME"
+                type="text"
+                name="first_name"
+                placeholder=""
+                :value="old('first_name')"
+            />
 
-        <x-input.auth-text
-            label="Email"
-            type="email"
-            name="email"
-            placeholder=""
-            :value="old('email')"
-        />
+            <!--YET TO BE ADDED IN DATABASE-->
+            <x-input.auth-text
+                label="LAST NAME"
+                type="text"
+                name="last_name"
+                placeholder=""
+                :value="old('last_name')"
+            />
 
-        <x-input.password-text
-            label="Password"
-            elementId="password"
-            type="password"
-            name="password"
-            placeholder=""
-            :value="old('password')"
-        />
+            <x-input.auth-text
+                label="EMAIL"
+                type="email"
+                name="email"
+                placeholder=""
+                :value="old('email')"
+            />
 
-        <x-input.password-text
-            label="Confirm Password"
-            elementId="password_confirmation"
-            toggleId="togglePasswordConfirmation"
-            type="password"
-            name="password_confirmation"
-            placeholder=""
-        />
+            <x-input.password-text
+                label="PASSWORD"
+                elementId="password"
+                type="password"
+                name="password"
+                placeholder=""
+                :value="old('password')"
+            />
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Register</button>
-        <p>Already a member? <a href="{{ url('login') }}">Login here</a></p>
-    </form>
+            <x-input.password-text
+                label="CONFIRM PASSWORD"
+                elementId="password_confirmation"
+                toggleId="togglePasswordConfirmation"
+                type="password"
+                name="password_confirmation"
+                placeholder=""
+            />
+
+            <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full">Register</button>
+            <p>Already a member? <a href="{{ url('login') }}">Login here</a></p>
+        </form>
+    </div>
+
 @endsection

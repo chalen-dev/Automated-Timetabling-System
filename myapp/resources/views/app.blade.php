@@ -13,6 +13,9 @@
 <body>
     @include('includes.notif.flash-message')
     <header>
+        @guest
+            @include('components.headers.guest-header')
+        @endguest
         @auth
             @include('components.headers.auth-header')
         @endauth

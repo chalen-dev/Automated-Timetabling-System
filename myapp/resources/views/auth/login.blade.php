@@ -5,38 +5,42 @@
 @section('content')
     <h1>Login</h1>
 
-    <form action="{{ url('login') }}" method="post" class="flex flex-col">
-        @csrf
-        <h1>Login to FaculTime</h1>
-        <x-input.auth-text
-            label="Username or Email"
-            type="text"
-            name="login"
-            placeholder=""
-            class="border border-gray-300 rounded"
-            :value="old('login')"
-        />
+    <div class="flex flex-col items-center justify-center w-screen h-[calc(100vh)]">
+        <form action="{{ url('login') }}" method="post" class="flex flex-col">
+            @csrf
+            <h1>Login to FaculTime</h1>
+            <x-input.auth-text
+                label="Username or Email"
+                type="text"
+                name="login"
+                placeholder=""
+                class="border border-gray-300 rounded"
+                :value="old('login')"
+            />
 
-        <x-input.password-text
-            label="Password"
-            elementId="password"
-            type="password"
-            name="password"
-            placeholder=""
-            class="border border-gray-300 rounded"
-            :value="old('password')"
-        />
+            <x-input.password-text
+                label="Password"
+                elementId="password"
+                type="password"
+                name="password"
+                placeholder=""
+                class="border border-gray-300 rounded"
+                :value="old('password')"
+            />
 
 
-        @if($errors->has('login_error'))
-            <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
-        @endif
+            @if($errors->has('login_error'))
+                <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
+            @endif
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
 
-        <p>Don't have an account? <a href="{{ url('register') }}">Register here</a></p>
+            <p>Don't have an account? <a href="{{ url('register') }}">Register here</a></p>
 
-    </form>
+        </form>
+    </div>
+
+
 @endsection
 
 

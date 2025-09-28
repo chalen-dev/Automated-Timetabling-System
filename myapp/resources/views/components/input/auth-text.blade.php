@@ -1,5 +1,5 @@
 @props(['label', 'type', 'placeholder', 'name', 'value' => ''])
-<div>
+<div class="mb-3 flex flex-col gap-1 w-full">
     <label>{{$label}}</label>
     <input type="{{$type}}" name="{{$name}}" placeholder="{{$placeholder}}" value="{{old($name, $value)}}">
     @error($name)

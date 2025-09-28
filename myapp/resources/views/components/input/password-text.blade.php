@@ -1,9 +1,11 @@
 @props(['label', 'type', 'elementId', 'placeholder', 'name', 'value' => '' , 'toggleId' => 'toggleBtn'])
-<div>
+<div class="w-full">
     <label>{{$label}}</label>
     <div class="flex items-center">
-        <input id = "{{$elementId}}" type="{{$type}}" name="{{$name}}" placeholder="{{$placeholder}}" value="{{old($name, $value)}}">
-        <button type="button" id="{{$toggleId}}" class="bg-grey-500 text-white px-4 py-2 rounded">Show</button>
+        <input class = 'flex-4' id = "{{$elementId}}" type="{{$type}}" name="{{$name}}" placeholder="{{$placeholder}}" value="{{old($name, $value)}}">
+        <button class = 'flex-0.1 ml-2 bg-white text-gray-700 px-4 py-1 rounded' type="button" id="{{ $toggleId }}">
+            <i class="bi bi-eye"></i>
+        </button>
     </div>
 
     @error($name)
@@ -23,12 +25,12 @@
 
                         if (passwordInput.type === 'password') {
                             passwordInput.type = 'text';
-                            toggleBtn.textContent = 'Hide';
+                            toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
                         }
 
                         else {
                             passwordInput.type = 'password';
-                            toggleBtn.textContent = 'Show';
+                            toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
                         }
 
                     })
