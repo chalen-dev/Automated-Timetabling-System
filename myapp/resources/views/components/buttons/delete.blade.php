@@ -1,13 +1,17 @@
-@props(['action','model', 'item_name'])
+@props(['action','model','item_name','btnType' => 'normal'])
 
-<form action="{{route($action, $model)}}" method="POST">
+<form action="{{ route($action, $model) }}" method="POST" class="inline">
     @csrf
     @method('DELETE')
     <button
         type="submit"
         onclick="return confirm('Are you sure you want to delete this {{$item_name}}?')"
-        class="!text-red-500 !w-20 !bg-transparent !border-red-500 !border-1"
+        class="text-red-500 bg-transparent border-none p-1 flex items-center justify-center rounded"
     >
-        Delete
+        @if($btnType === 'normal')
+            <p>Delete</p>
+        @elseif($btnType === 'icon')
+            <i class="bi bi-trash"></i>
+        @endif
     </button>
 </form>

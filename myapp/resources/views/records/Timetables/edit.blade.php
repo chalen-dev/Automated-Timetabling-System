@@ -11,6 +11,7 @@
         <x-input.text
             label="Name of Timetable"
             name="timetable_name"
+            :value="old('timetable_name', $timetable->timetable_name)"
         />
 
         <x-input.radio-group
@@ -18,11 +19,13 @@
             name="semester"
             :options="$semesterOptions"
             default=""
+            :value="old('semester', $timetable->semester)"
         />
 
         <x-input.text
             label="Academic Year"
             name="academic_year"
+            :value="old('academic_year', $timetable->academic_year)"
         />
 
         <x-input.text-area
