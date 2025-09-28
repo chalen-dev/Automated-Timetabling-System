@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('timetables', function (Blueprint $table) {
             $table->id();
+            $table->string('timetable_name');
+            $table->enum('semester', ['1st', '2nd']);
+            $table->string('academic_year');
+            $table->text('timetable_description')->nullable();
             $table->timestamps();
         });
     }

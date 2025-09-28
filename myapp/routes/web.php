@@ -5,8 +5,8 @@ use App\Http\Controllers\AcademicProgramController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
@@ -41,9 +41,9 @@ Route::middleware([Authenticate::class])->group(function () {
 
     // Admin Routes Group
     Route::prefix('records')->name('records.')->group(function () {
-        // Dashboard Routes
-        Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard.index');
+
+        // Timetable Routes (timetable list, the DASHBOARD)
+        Route::resource('timetable', TimetableController::class);
 
         // Courses Routes
         Route::resource('courses', CourseController::class);
