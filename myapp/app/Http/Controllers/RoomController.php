@@ -47,7 +47,7 @@ class RoomController extends Controller
             'room_name' => 'required|string',
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
-            'room_capacity' => 'nullable|integer',
+            'room_capacity' => 'nullable|integer|min:0|max:50',
         ]);
 
         Room::create($validatedData);
@@ -82,7 +82,7 @@ class RoomController extends Controller
             'room_name' => 'required|string',
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
-            'room_capacity' => 'nullable|integer',
+            'room_capacity' => 'nullable|integer|min:0|max:50',
         ]);
 
         $room->update($validatedData);

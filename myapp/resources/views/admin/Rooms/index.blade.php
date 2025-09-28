@@ -8,9 +8,9 @@
     <ul>
         @foreach($rooms as $room)
             <li class="flex gap-10">
-                <p>{{$room->room_number}}</p>
+                <p>{{$room->room_name}}</p>
                 <p>{{$room->room_type}}</p>
-                <p>{{$room->capacity}}</p>
+                <p>{{$room->room_capacity}}</p>
                 <a href="{{route('admin.rooms.show', $room)}}">View</a>
                 <a href="{{route('admin.rooms.edit', $room)}}">Edit</a>
                 <x-buttons.delete action="admin.rooms.destroy" :model="$room" item_name="room" />

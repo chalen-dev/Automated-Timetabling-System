@@ -4,9 +4,9 @@
 
 @section('content')
     <h1>Room Details</h1>
-    <p>Room Number: {{$room->room_number}}</p>
+    <p>Room Name: {{$room->room_name}}</p>
     <p>Room Type: {{$room->room_type}}</p>
-    <p>Capacity: {{$room->capacity}}</p>
-    <p>Specific Days: {{$room->specific_days}}</p>
+    <p>Capacity: {{$room->room_capacity}}</p>
+    <p>Course Type Exclusive To: {{$room->course_type_exclusive_to}}</p>
     <a href="{{route('admin.rooms.index')}}">Back</a>
 @endsection

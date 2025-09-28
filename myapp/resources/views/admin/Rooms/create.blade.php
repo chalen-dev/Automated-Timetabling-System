@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Create Room</h1>
-    <form action="{{route('admin.rooms.store')}}">
+    <form action="{{route('admin.rooms.store')}}" method="POST">
         @csrf
 
         <x-input.text
@@ -23,7 +23,7 @@
             label="Course Type Exclusive To"
             name="course_type_exclusive_to"
             :options="$courseTypeExclusiveToOptions"
-            default=""
+            default="none"
         />
 
         <x-input.number
@@ -35,5 +35,7 @@
             :step="1"
         />
 
+        <button type="submit">Create</button>
     </form>
+    <a href="{{route('admin.rooms.index')}}">Back</a>
 @endsection
