@@ -4,6 +4,10 @@
 
 
 @section('content')
+    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
+
+    </div>
+    <h1>Create Course</h1>
     <form action="{{route('records.courses.store')}}" method="POST" class="flex flex-col gap-4 justify-start">
         @csrf
 
@@ -33,27 +37,24 @@
             :step="1"
         />
 
-        <div class="flex flex-row gap-4">
+        <x-input.number
+            label="Total Lecture Class Days per Week"
+            name="total_lecture_class_days"
+            :default="0"
+            :min="0"
+            :max="6"
+            :step="1"
+        />
 
-            <x-input.number
-                label="Total Lecture Class Days per Week"
-                name="total_lecture_class_days"
-                :default="0"
-                :min="0"
-                :max="6"
-                :step="1"
-            />
+        <x-input.number
+            label="Total Laboratory Class Days per Week"
+            name="total_laboratory_class_days"
+            :default="0"
+            :min="0"
+            :max="6"
+            :step="1"
+        />
 
-            <x-input.number
-                label="Total Laboratory Class Days per Week"
-                name="total_laboratory_class_days"
-                :default="0"
-                :min="0"
-                :max="6"
-                :step="1"
-            />
-
-        </div>
 
         @if($errors->has('total_days'))
             <div class="!text-red-500">{{$errors->first('total_days')}}</div>
@@ -75,9 +76,7 @@
             default=""
         />
 
-
         <button type="submit">Create</button>
-
 
     </form>
     <a href="{{route('records.courses.index')}}">Back</a>
