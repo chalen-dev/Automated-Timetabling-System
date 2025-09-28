@@ -19,6 +19,7 @@
 
         <x-input.password-text
             label="Password"
+            elementId="password"
             type="password"
             name="password"
             placeholder=""

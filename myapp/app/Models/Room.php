@@ -9,7 +9,7 @@ class Room extends Model
     protected $fillable =[
         'room_name',
         'room_type',
-        'specific_days', //e.g. Monday, Wednesday, Friday
+        'course_type_exclusive_to',
         'room_capacity'
     ];
 }

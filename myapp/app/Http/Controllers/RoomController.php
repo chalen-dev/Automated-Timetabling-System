@@ -10,6 +10,18 @@ class RoomController extends Controller
     /**
      * Display a listing of the resource.
      */
+    private $roomTypeOptions = [
+        'lecture' => 'Lecture',
+        'comlab' => 'Computer Lab',
+        'gym' => 'Gym',
+        'main' => 'Main',
+    ];
+    private $courseTypeExclusiveToOptions = [
+        'none' => 'None',
+        'pe' => 'PE',
+        'nstp' => 'NSTP',
+        'others' => 'Others',
+    ];
     public function index()
     {
         $rooms = Room::all();
@@ -21,7 +33,9 @@ class RoomController extends Controller
      */
     public function create()
     {
-        return view('admin.rooms.create');
+        $roomTypeOptions = $this->roomTypeOptions;
+        $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
+        return view('admin.rooms.create', compact('roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
 
     /**
@@ -32,7 +46,7 @@ class RoomController extends Controller
         $validatedData = $request->validate([
             'room_name' => 'required|string',
             'room_type' => 'required|string',
-            'specific_days' => 'nullable|string',
+            'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer',
         ]);
 
@@ -54,7 +68,9 @@ class RoomController extends Controller
      */
     public function edit(Room $room)
     {
-        return view('admin.rooms.edit', compact('room'));
+        $roomTypeOptions = $this->roomTypeOptions;
+        $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
+        return view('admin.rooms.edit', compact('room', 'roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
 
     /**
@@ -65,7 +81,7 @@ class RoomController extends Controller
         $validatedData = $request->validate([
             'room_name' => 'required|string',
             'room_type' => 'required|string',
-            'specific_days' => 'nullable|string',
+            'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer',
         ]);
 

@@ -1,3 +1,4 @@
+
 <nav class = 'flex flex-col gap-4 '>
     <ul class = 'flex gap-4'>
         <li class = 'flex gap-4'>
@@ -11,22 +12,5 @@
             </form>
         </li>
     </ul>
-    <!-- Sub header -->
-    <ul class = 'flex gap-4'>
-        <li>
-            <a href="{{route('admin.dashboard.index')}}">Dashboard</a>
-        </li>
-        <li>
-            <a href="{{route('admin.courses.index')}}">Courses</a>
-        </li>
-        <li>
-            <a href="{{route('admin.professors.index')}}">Professors</a>
-        </li>
-        <li>
-            <a href="">Rooms</a>
-        </li>
-        <li>
-            <a href="{{route('admin.academic-programs.index')}}">Academic Programs</a>
-        </li>
-    </ul>
+
 </nav>

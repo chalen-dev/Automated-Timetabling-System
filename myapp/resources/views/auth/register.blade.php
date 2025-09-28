@@ -40,16 +40,19 @@
             :value="old('email')"
         />
 
-        <x-input.auth-text
+        <x-input.password-text
             label="Password"
+            elementId="password"
             type="password"
             name="password"
             placeholder=""
             :value="old('password')"
         />
 
-        <x-input.auth-text
+        <x-input.password-text
             label="Confirm Password"
+            elementId="password_confirmation"
+            toggleId="togglePasswordConfirmation"
             type="password"
             name="password_confirmation"
             placeholder=""

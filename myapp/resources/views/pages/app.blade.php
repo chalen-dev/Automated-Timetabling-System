@@ -13,17 +13,15 @@
 <body>
     @include('includes.notif.flash-message')
     <header>
-        @guest
-            @include('components.headers.guest-header')
-        @endguest
         @auth
             @include('components.headers.auth-header')
         @endauth
     </header>
     <div class="container">
-        <div class="row">
-            <div>
-            </div>
+        <div class="flex gap-4 flex-row">
+            @auth
+                <x-sidebar.sidebar/>
+            @endauth
             <div>
                 @yield('content')
             </div>

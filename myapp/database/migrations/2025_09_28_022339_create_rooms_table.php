@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('room_name');
             $table->enum('room_type', ['lecture', 'comlab', 'gym', 'main']);
-            $table->string('specific_days')->nullable();
             $table->integer('room_capacity')->nullable();
             $table->timestamps();
         });
