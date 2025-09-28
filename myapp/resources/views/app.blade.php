@@ -1,36 +1,46 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" x-data>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'My Laravel App')</title>
     @vite('resources/css/app.css')
     <script src="//unpkg.com/alpinejs" defer></script>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebar', { open: false }) // start hidden
+        })
+    </script>
 </head>
-<body class="overflow-x-hidden w-screen m-0 p-0 top-0 bottom-0 left-0 right-0">
-    @include('includes.notif.flash-message')
-    <header>
+<body class="overflow-x-hidden">
+
+@include('includes.notif.flash-message')
+
+<!-- HEADER -->
+<header>
+    @guest
+        @include('components.headers.guest-header')
+    @endguest
+    @auth
+        @include('components.headers.auth-header')
+    @endauth
+</header>
+
+<div class="flex h-screen pt-16">
+    <!-- SIDEBAR -->
+    @auth
+        <x-sidebar.sidebar />
+    @endauth
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 transition-all p-6">
+        @yield('content')
         @guest
-            @include('components.headers.guest-header')
+            @include('components.footers.footer')
         @endguest
-        @auth
-            @include('components.headers.auth-header')
-        @endauth
-    </header>
-    <div class="container">
-        <div class="flex gap-4 flex-row">
-            @auth
-                <x-sidebar.sidebar/>
-            @endauth
-            <div>
-                @yield('content')
-            </div>
-        </div>
-        @include('components.footers.footer')
-    </div>
-    @stack('scripts')
+    </main>
+</div>
+
 </body>
 </html>

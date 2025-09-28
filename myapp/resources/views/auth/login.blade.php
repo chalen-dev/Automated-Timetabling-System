@@ -33,7 +33,7 @@
                 <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
             @endif
 
-            <button type="submit" class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold">Login ➝</button>
+            <button type="submit" class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold w-full">Login ➝</button>
 
             <p>Don't have an account? <a href="{{ url('register') }}">Sign Up</a></p>
 

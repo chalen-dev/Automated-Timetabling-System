@@ -74,7 +74,7 @@ class UserController extends Controller
         // prevent CSRF attacks
         $request->session()->regenerateToken();
 
-        return redirect()->route('default')->with('info', 'User has logged out.');
+        return redirect()->route('home')->with('info', 'User has logged out.');
     }
 
 }

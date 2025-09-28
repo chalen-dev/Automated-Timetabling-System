@@ -1,5 +1,5 @@
-<nav>
-    <ul class="flex gap-4 justify-between pl-10 pr-10 fixed top-0 z-50 w-screen">
+<nav class="pl-10 pr-10 fixed top-0 z-50 w-screen">
+    <ul class="flex gap-4 justify-between pl-10 pr-10 z-50 w-full">
         <li>
             <img src="{{asset('umtc_logo.png')}}" class="w-15 h-15" alt="UMTC Logo" >
         </li>
