@@ -14,7 +14,7 @@
                 label="USERNAME"
                 type="text"
                 name="name"
-                placeholder=""
+                placeholder="Choose a username"
                 :value="old('name')"
             />
 
@@ -40,7 +40,7 @@
                 label="EMAIL"
                 type="email"
                 name="email"
-                placeholder=""
+                placeholder="example.@umindanao.edu.ph"
                 :value="old('email')"
             />
 
@@ -49,7 +49,7 @@
                 elementId="password"
                 type="password"
                 name="password"
-                placeholder=""
+                placeholder="At least 8 characters"
                 :value="old('password')"
             />
 
@@ -62,7 +62,7 @@
                 placeholder=""
             />
 
-            <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full">Register</button>
+            <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full">Register ➝</button>
             <p>Already a member? <a href="{{ url('login') }}">Login here</a></p>
         </form>
     </div>

@@ -10,7 +10,7 @@
     <script src="//unpkg.com/alpinejs" defer></script>
 
 </head>
-<body>
+<body class="overflow-x-hidden w-screen m-0 p-0 top-0 bottom-0 left-0 right-0">
     @include('includes.notif.flash-message')
     <header>
         @guest

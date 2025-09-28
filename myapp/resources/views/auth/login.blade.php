@@ -3,14 +3,14 @@
 @section('title', 'Login')
 
 @section('content')
-    <h1>Login</h1>
 
-    <div class="flex flex-col items-center justify-center w-screen h-[calc(100vh)]">
-        <form action="{{ url('login') }}" method="post" class="flex flex-col">
+    <div class="flex flex-col items-center justify-center w-screen h-[calc(100vh-55px)]">
+        <form action="{{ url('login') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-3">
             @csrf
             <h1>Login to FaculTime</h1>
+            <br>
             <x-input.auth-text
-                label="Username or Email"
+                label="USERNAME or EMAIL"
                 type="text"
                 name="login"
                 placeholder=""
@@ -19,11 +19,11 @@
             />
 
             <x-input.password-text
-                label="Password"
+                label="PASSWORD"
                 elementId="password"
                 type="password"
                 name="password"
-                placeholder=""
+                placeholder="Enter your password"
                 class="border border-gray-300 rounded"
                 :value="old('password')"
             />
@@ -33,9 +33,9 @@
                 <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
             @endif
 
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
+            <button type="submit" class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold">Login ➝</button>
 
-            <p>Don't have an account? <a href="{{ url('register') }}">Register here</a></p>
+            <p>Don't have an account? <a href="{{ url('register') }}">Sign Up</a></p>
 
         </form>
     </div>
