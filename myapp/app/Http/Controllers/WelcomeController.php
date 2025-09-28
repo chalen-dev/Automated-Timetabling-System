@@ -11,9 +11,9 @@ class WelcomeController extends Controller
         if (!auth()->check())
             return view('auth.login');
 
-        //Else, redirect to Dashboard and pass in user details.
+        //Else, redirect to Timetables and pass in user details.
         $user = auth()->user();
-        return view('records.dashboard.index', compact('user'));
+        return view('records.timetables.index', compact('user'));
 
 
     }

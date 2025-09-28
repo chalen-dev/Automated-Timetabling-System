@@ -12,7 +12,8 @@ class TimetableController extends Controller
      */
     public function index()
     {
-        //
+        $timetables = Timetable::all();
+        return view('records.timetables.index', compact('timetables'));
     }
 
     /**
@@ -20,7 +21,7 @@ class TimetableController extends Controller
      */
     public function create()
     {
-        //
+        return view('records.timetables.create');
     }
 
     /**
@@ -28,7 +29,17 @@ class TimetableController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'timetable_name' => 'required|string|max:30',
+            'semester' => 'required|string|in:1st,2nd',
+            'academic_year' => 'required|string',
+            'timetable_description' => 'nullable|string',
+        ]);
+
+        Timetable::create($validatedData);
+
+        return redirect()->route('records.timetables.index')
+            ->with('success', 'Timetable created successfully.');
     }
 
     /**
@@ -36,7 +47,7 @@ class TimetableController extends Controller
      */
     public function show(Timetable $timetable)
     {
-        //
+        return view('records.timetables.show', compact('timetable'));
     }
 
     /**
@@ -44,7 +55,7 @@ class TimetableController extends Controller
      */
     public function edit(Timetable $timetable)
     {
-        //
+        return view('records.timetables.edit', compact('timetable'));
     }
 
     /**
@@ -52,7 +63,17 @@ class TimetableController extends Controller
      */
     public function update(Request $request, Timetable $timetable)
     {
-        //
+        $validatedData = $request->validate([
+            'timetable_name' => 'required|string|max:30',
+            'semester' => 'required|string|in:1st,2nd',
+            'academic_year' => 'required|string',
+            'timetable_description' => 'nullable|string',
+        ]);
+
+        $timetable->update($validatedData);
+
+        return redirect()->route('records.timetables.index')
+            ->with('success', 'Timetable updated successfully.');
     }
 
     /**
@@ -60,6 +81,8 @@ class TimetableController extends Controller
      */
     public function destroy(Timetable $timetable)
     {
-        //
+        $timetable->delete();
+        return redirect()->route('records.timetables.index')
+            ->with('success', 'Timetable deleted successfully.');
     }
 }

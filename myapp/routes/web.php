@@ -12,7 +12,7 @@ use App\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
 
-// Default Page, either Homepage or Dashboard, depending on authentication status
+// Default Page, either Homepage or Timetables, depending on authentication status
 Route::get('/', [WelcomeController::class, 'index'])
     ->name('default');
 
@@ -39,11 +39,11 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
-    // Admin Routes Group
+    // Records Routes Group
     Route::prefix('records')->name('records.')->group(function () {
 
         // Timetable Routes (timetable list, the DASHBOARD)
-        Route::resource('timetable', TimetableController::class);
+        Route::resource('timetables', TimetableController::class);
 
         // Courses Routes
         Route::resource('courses', CourseController::class);

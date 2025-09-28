@@ -1,6 +1,6 @@
 <ul class = 'flex gap-4 flex-col'>
     <li>
-        <a href="{{route('records.dashboard.index')}}">Dashboard</a>
+        <a href="{{route('records.timetables.index')}}">Dashboard</a>
     </li>
     <li>
         <a href="{{route('records.courses.index')}}">Courses</a>
