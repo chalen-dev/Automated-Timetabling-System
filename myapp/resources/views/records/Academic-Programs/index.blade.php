@@ -12,7 +12,7 @@
                 <p>{{$academicProgram->program_abbreviation}}</p>
                 <a href="{{route('records.academic-programs.show', $academicProgram)}}">View</a>
                 <a href="{{route('records.academic-programs.edit', $academicProgram)}}">Edit</a>
-                <x-buttons.delete action="admin.academic-programs.destroy" :model="$academicProgram"
+                <x-buttons.delete action="records.academic-programs.destroy" :model="$academicProgram"
                                   item_name="Academic Program"/>
             </li>
         @endforeach

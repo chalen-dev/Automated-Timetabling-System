@@ -9,7 +9,7 @@
 
     <ul class="flex flex-col gap-6 px-4 p-10">
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.timetables.index') }}">Dashboard</a>
+            <a href="{{ route('records.timetables.index') }}">Timetables</a>
         </li>
         <li class="flex flex-row justify-start items-center h-10 pl-10">
             <a href="{{ route('records.courses.index') }}">Courses</a>
