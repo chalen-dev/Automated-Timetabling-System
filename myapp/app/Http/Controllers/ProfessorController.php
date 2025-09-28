@@ -11,6 +11,18 @@ class ProfessorController extends Controller
     /**
      * Display a listing of the resource.
      */
+    private $genderOptions = [
+        'male' => 'Male',
+        'female' => 'Female',
+        'none' => 'Not Specified'
+    ];
+
+    private $professorTypeOptions = [
+        'regular' => 'Regular',
+        'non-regular' => 'Non-Regular',
+        'none' => 'None'
+    ];
+
     public function index()
     {
         $professors = Professor::all();
@@ -22,8 +34,10 @@ class ProfessorController extends Controller
      */
     public function create()
     {
+        $genderOptions = $this->genderOptions;
+        $professorTypeOptions = $this->professorTypeOptions;
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
-        return view('records.professors.create', compact('academic_program_options'));
+        return view('records.professors.create', compact('academic_program_options', 'genderOptions', 'professorTypeOptions'));
     }
 
     /**
@@ -36,6 +50,7 @@ class ProfessorController extends Controller
             'last_name' => 'required|string',
             'professor_type' => 'required|string',
             'max_unit_load' => 'required|numeric|min:1.0',
+            'gender' => 'required|string',
             'professor_age' => 'nullable|numeric',
             'position' => 'nullable|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
@@ -61,7 +76,9 @@ class ProfessorController extends Controller
     public function edit(Professor $professor)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
-        return view('records.professors.edit', compact('professor', 'academic_program_options'));
+        $genderOptions = $this->genderOptions;
+        $professorTypeOptions = $this->professorTypeOptions;
+        return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions'));
     }
 
     /**
@@ -74,6 +91,7 @@ class ProfessorController extends Controller
             'last_name' => 'required|string',
             'professor_type' => 'required|string',
             'max_unit_load' => 'required|numeric|min:1.0',
+            'gender' => 'required|string',
             'professor_age' => 'nullable|numeric',
             'position' => 'nullable|string',
             'academic_program_id' => 'required|exists:academic_programs,id',

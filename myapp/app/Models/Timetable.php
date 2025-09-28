@@ -12,7 +12,6 @@ class Timetable extends Model
         'semester',
         'academic_year',
         'timetable_description',
-
     ];
     public function user(){
         return $this->belongsTo(User::class);

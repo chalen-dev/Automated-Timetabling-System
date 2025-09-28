@@ -10,6 +10,11 @@ class TimetableController extends Controller
     /**
      * Display a listing of the resource.
      */
+    private $semesterOptions = [
+        '1st' => '1st',
+        '2nd' => '2nd'
+    ];
+
     public function index()
     {
         $timetables = Timetable::all();
@@ -21,7 +26,8 @@ class TimetableController extends Controller
      */
     public function create()
     {
-        return view('records.timetables.create');
+        $semesterOptions = $this->semesterOptions;
+        return view('records.timetables.create', compact('semesterOptions'));
     }
 
     /**
@@ -55,7 +61,8 @@ class TimetableController extends Controller
      */
     public function edit(Timetable $timetable)
     {
-        return view('records.timetables.edit', compact('timetable'));
+        $semesterOptions = $this->semesterOptions;
+        return view('records.timetables.edit', compact('timetable', 'semesterOptions'));
     }
 
     /**

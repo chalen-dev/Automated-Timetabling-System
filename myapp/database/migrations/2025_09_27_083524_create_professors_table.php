@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->enum('professor_type', ['regular', 'non-regular', 'none'])->default('regular');
             $table->decimal('max_unit_load', 10, 1);
+            $table->enum('gender', ['male', 'female', 'none']);
             $table->integer('professor_age')->nullable();
             $table->string('position')->nullable();
             $table->foreignId('academic_program_id')->constrained()->cascadeOnDelete();

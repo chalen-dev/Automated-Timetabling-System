@@ -24,14 +24,16 @@
                 default=""
         />
 
-        <x-input.select
+        <x-input.radio-group
                 label="Professor Type (Regular/Non Regular)"
                 name="professor_type"
-                :options="[
-                'regular' => 'Regular',
-                'non_regular' => 'Non-Regular',
-                'none' => 'None'
-            ]"
+                :options="$professorTypeOptions"
+        />
+
+        <x-input.radio-group
+                label="Gender"
+                name="gender"
+                :options="$genderOptions"
         />
 
         <x-input.number
