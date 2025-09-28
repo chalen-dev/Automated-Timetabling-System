@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Academic Program Details')
 

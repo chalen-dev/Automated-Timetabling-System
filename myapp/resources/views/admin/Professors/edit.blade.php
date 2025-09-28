@@ -1,64 +1,65 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Edit Professor')
 
 @section('content')
-    <form action="{{route('admin.professors.update', $professor)}}" method='POST' class="flex flex-col gap-4 justify-start">
+    <form action="{{route('admin.professors.update', $professor)}}" method='POST'
+          class="flex flex-col gap-4 justify-start">
         @csrf
         @method('PUT')
 
         <x-input.text
-            label="First Name"
-            name="first_name"
-            :value="old('first_name', $professor->first_name)"
+                label="First Name"
+                name="first_name"
+                :value="old('first_name', $professor->first_name)"
         />
 
         <x-input.text
-            label="Last Name"
-            name="last_name"
-            :value="old('last_name', $professor->last_name)"
+                label="Last Name"
+                name="last_name"
+                :value="old('last_name', $professor->last_name)"
         />
 
         <x-input.select
-            label="Academic Program"
-            name="academic_program_id"
-            :options="$academic_program_options"
-            default=""
-            :value="old('academic_program_id', $professor->academic_program_id)"
+                label="Academic Program"
+                name="academic_program_id"
+                :options="$academic_program_options"
+                default=""
+                :value="old('academic_program_id', $professor->academic_program_id)"
         />
 
         <x-input.select
-            label="Professor Type (Regular/Non Regular)"
-            name="professor_type"
-            :options="[
+                label="Professor Type (Regular/Non Regular)"
+                name="professor_type"
+                :options="[
                 'regular' => 'Regular',
                 'non_regular' => 'Non-Regular',
                 'none' => 'None'
             ]"
-            :value="old('professor_type', $professor->professor_type)"
+                :value="old('professor_type', $professor->professor_type)"
         />
 
         <x-input.number
-            label="Max Unit Load"
-            name="max_unit_load"
-            :min="1.0"
-            :step="0.1"
-            :value="old('max_unit_load', $professor->max_unit_load)"
+                label="Max Unit Load"
+                name="max_unit_load"
+                :min="1.0"
+                :step="0.1"
+                :value="old('max_unit_load', $professor->max_unit_load)"
         />
 
         <x-input.number
-            label="Professor Age"
-            name="professor_age"
-            :min="0"
-            :max="120"
-            :step="1"
-            :value="old('professor_age', $professor->professor_age)"
+                label="Professor Age"
+                name="professor_age"
+                :min="0"
+                :max="120"
+                :step="1"
+                :value="old('professor_age', $professor->professor_age)"
         />
 
         <x-input.text
-            label="Position"
-            name="position"
-            :value="old('position', $professor->position)"
+                label="Position"
+                name="position"
+                :value="old('position', $professor->position)"
         />
 
         <button type="submit">Confirm Changes</button>

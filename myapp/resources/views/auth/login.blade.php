@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Login')
 
@@ -26,7 +26,6 @@
             class="border border-gray-300 rounded"
             :value="old('password')"
         />
-
 
 
         @if($errors->has('login_error'))

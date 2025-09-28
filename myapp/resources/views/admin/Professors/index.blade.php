@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Professors')
 
@@ -14,7 +14,7 @@
                 <p>{{$professor->max_unit_load}}</p>
                 <a href='{{route('admin.professors.show', $professor)}}'>View</a>
                 <a href='{{route('admin.professors.edit', $professor)}}'>Edit</a>
-                <x-buttons.delete action="admin.professors.destroy" :model="$professor" item_name="professor" />
+                <x-buttons.delete action="admin.professors.destroy" :model="$professor" item_name="professor"/>
             </li>
         @endforeach
     </ul>

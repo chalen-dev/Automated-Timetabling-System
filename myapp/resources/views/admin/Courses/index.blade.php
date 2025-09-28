@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Courses')
 
@@ -14,7 +14,7 @@
                 <p>{{$course->duration_type}}</p>
                 <a href="{{route('admin.courses.show', $course)}}">View</a>
                 <a href="{{route('admin.courses.edit', $course)}}">Edit</a>
-                <x-buttons.delete action="admin.courses.destroy" :model='$course' item_name='course' />
+                <x-buttons.delete action="admin.courses.destroy" :model='$course' item_name='course'/>
             </li>
         @endforeach
     </ul>

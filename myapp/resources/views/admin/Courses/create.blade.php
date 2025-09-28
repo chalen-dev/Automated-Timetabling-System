@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Create Course')
 
@@ -74,8 +74,6 @@
             :options="$durationTypeOptions"
             default=""
         />
-
-
 
 
         <button type="submit">Create</button>

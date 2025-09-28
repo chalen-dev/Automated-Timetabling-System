@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Rooms')
 
@@ -13,7 +13,7 @@
                 <p>{{$room->room_capacity}}</p>
                 <a href="{{route('admin.rooms.show', $room)}}">View</a>
                 <a href="{{route('admin.rooms.edit', $room)}}">Edit</a>
-                <x-buttons.delete action="admin.rooms.destroy" :model="$room" item_name="room" />
+                <x-buttons.delete action="admin.rooms.destroy" :model="$room" item_name="room"/>
             </li>
         @endforeach
     </ul>

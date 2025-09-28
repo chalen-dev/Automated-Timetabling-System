@@ -1,4 +1,4 @@
-@extends('pages.app')
+@extends('app')
 
 @section('title', 'Edit Course')
 
@@ -82,8 +82,6 @@
             default=""
             :value="old('duration_type', $course->duration_type)"
         />
-
-
 
 
         <button type="submit">Confirm Changes</button>
