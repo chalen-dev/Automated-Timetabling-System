@@ -1,15 +1,17 @@
 @extends('app')
 
-@section('title', 'Create Room')
+@section('title', 'Edit Room')
 
 @section('content')
-    <h1>Create Room</h1>
-    <form action="{{route('admin.rooms.store')}}" method="POST">
+    <h1>Edit Room</h1>
+    <form action="{{route('records.rooms.update', $room)}}" method="POST">
         @csrf
+        @method('PUT')
 
         <x-input.text
             label="Room Name"
             name="room_name"
+            :value="old('room_name', $room->room_name)"
         />
 
         <x-input.select
@@ -17,13 +19,14 @@
             name="room_type"
             :options="$roomTypeOptions"
             default=""
+            :value="old('room_type', $room->room_type)"
         />
 
         <x-input.select
             label="Course Type Exclusive To"
             name="course_type_exclusive_to"
             :options="$courseTypeExclusiveToOptions"
-            default="none"
+            :value="old('course_type_exclusive_to', $room->course_type_exclusive_to)"
         />
 
         <x-input.number
@@ -33,9 +36,11 @@
             :min="0"
             :max="50"
             :step="1"
+            :value="old('room_capacity', $room->room_capacity)"
         />
 
-        <button type="submit">Create</button>
+        <button type="submit">Update</button>
+
     </form>
-    <a href="{{route('admin.rooms.index')}}">Back</a>
+    <a href="{{route('records.rooms.index')}}">Back</a>
 @endsection

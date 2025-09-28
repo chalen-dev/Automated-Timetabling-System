@@ -3,7 +3,7 @@
 @section('title', 'Edit Professor')
 
 @section('content')
-    <form action="{{route('admin.professors.update', $professor)}}" method='POST'
+    <form action="{{route('records.professors.update', $professor)}}" method='POST'
           class="flex flex-col gap-4 justify-start">
         @csrf
         @method('PUT')
@@ -63,6 +63,6 @@
         />
 
         <button type="submit">Confirm Changes</button>
-        <a href="{{route('admin.professors.index')}}">Back</a>
+        <a href="{{route('records.professors.index')}}">Back</a>
     </form>
 @endsection

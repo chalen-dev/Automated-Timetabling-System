@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Create Academic Program</h1>
-    <form action="{{route('admin.academic-programs.store')}}" method="post">
+    <form action="{{route('records.academic-programs.store')}}" method="post">
         @csrf
 
         <x-input.text
@@ -26,5 +26,5 @@
         <button type="submit">Create</button>
     </form>
 
-    <a href="{{route('admin.academic-programs.index')}}">Back</a>
+    <a href="{{route('records.academic-programs.index')}}">Back</a>
 @endsection

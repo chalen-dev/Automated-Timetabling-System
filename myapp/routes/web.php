@@ -40,7 +40,7 @@ Route::middleware([Authenticate::class])->group(function () {
         ->name('logout');
 
     // Admin Routes Group
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('records')->name('records.')->group(function () {
         // Dashboard Routes
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard.index');

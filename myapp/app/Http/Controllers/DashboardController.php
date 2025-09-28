@@ -10,6 +10,6 @@ class DashboardController extends Controller
         $this->middleware('auth');
     }
     public function index(){
-        return view('admin.dashboard.index');
+        return view('records.dashboard.index');
     }
 }

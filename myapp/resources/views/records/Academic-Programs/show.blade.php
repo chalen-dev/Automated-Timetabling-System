@@ -8,5 +8,5 @@
     <p>Abbreviation: {{$academicProgram->program_abbreviation}}</p>
     <p>Description</p>
     <p>{{$academicProgram->program_description}}</p>
-    <a href="{{route('admin.academic-programs.index')}}">Back</a>
+    <a href="{{route('records.academic-programs.index')}}">Back</a>
 @endsection

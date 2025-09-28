@@ -25,7 +25,7 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::all();
-        return view('admin.rooms.index', compact('rooms'));
+        return view('records.rooms.index', compact('rooms'));
     }
 
     /**
@@ -35,7 +35,7 @@ class RoomController extends Controller
     {
         $roomTypeOptions = $this->roomTypeOptions;
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
-        return view('admin.rooms.create', compact('roomTypeOptions', 'courseTypeExclusiveToOptions'));
+        return view('records.rooms.create', compact('roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
 
     /**
@@ -51,7 +51,7 @@ class RoomController extends Controller
         ]);
 
         Room::create($validatedData);
-        return redirect()->route('admin.rooms.index')
+        return redirect()->route('records.rooms.index')
             ->with('success', 'Room created successfully.');
     }
 
@@ -60,7 +60,7 @@ class RoomController extends Controller
      */
     public function show(Room $room)
     {
-        return view('admin.rooms.show', compact('room'));
+        return view('records.rooms.show', compact('room'));
     }
 
     /**
@@ -70,7 +70,7 @@ class RoomController extends Controller
     {
         $roomTypeOptions = $this->roomTypeOptions;
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
-        return view('admin.rooms.edit', compact('room', 'roomTypeOptions', 'courseTypeExclusiveToOptions'));
+        return view('records.rooms.edit', compact('room', 'roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
 
     /**
@@ -86,7 +86,7 @@ class RoomController extends Controller
         ]);
 
         $room->update($validatedData);
-        return redirect()->route('admin.rooms.index')
+        return redirect()->route('records.rooms.index')
             ->with('success', 'Room updated successfully.');
     }
 
@@ -96,7 +96,7 @@ class RoomController extends Controller
     public function destroy(Room $room)
     {
         $room->delete();
-        return redirect()->route('admin.rooms.index')
+        return redirect()->route('records.rooms.index')
             ->with('success', 'Room deleted successfully.');
     }
 }
