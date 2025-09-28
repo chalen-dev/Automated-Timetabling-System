@@ -1,7 +1,7 @@
 @props(['label' => '', 'name', 'value' => '', 'default', 'min', 'max', 'step'])
 
 <div class="mb-3 flex flex-col gap-4">
-    <div class="flex flex-row gap-4">
+    <div class="flex flex-col gap-4">
         @if($label ?? false)
             <label for="{{ $name }}" class="form-label">{{ $label }}</label>
         @endif

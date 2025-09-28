@@ -1,6 +1,6 @@
 @props(['label' => '', 'name', 'value' => null, 'options' => [], 'default' => null])
 
-<div class="mb-3">
+<div class="mb-3 flex flex-col">
     @if($label)
         <label for="{{ $name }}" class="form-label">{{ $label }}</label>
     @endif
