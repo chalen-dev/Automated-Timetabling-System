@@ -7,24 +7,26 @@
 
     <form action="{{ url('login') }}" method="post" class="flex flex-col">
         @csrf
-
+        <h1>Login to FaculTime</h1>
         <x-input.auth-text
-            label=""
+            label="Username or Email"
             type="text"
             name="login"
-            placeholder="Username or Email"
+            placeholder=""
             class="border border-gray-300 rounded"
             :value="old('login')"
         />
 
-        <x-input.auth-text
-            label=""
+        <x-input.password-text
+            label="Password"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder=""
             class="border border-gray-300 rounded"
             :value="old('password')"
         />
+
+
 
         @if($errors->has('login_error'))
             <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
@@ -32,7 +34,11 @@
 
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
 
-
+        <p>Don't have an account? <a href="{{ url('register') }}">Register here</a></p>
 
     </form>
 @endsection
+
+
+
+

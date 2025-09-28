@@ -9,7 +9,7 @@ class WelcomeController extends Controller
     public function index(){
         //If not authenticated, redirect to login
         if (!auth()->check())
-            return view('welcome');
+            return view('auth.login');
 
         //Else, redirect to Dashboard and pass in user details.
         $user = auth()->user();

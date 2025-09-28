@@ -11,24 +11,25 @@
 
 </head>
 <body>
-@include('includes.notif.flash-message')
-<header>
-    @guest
-        @include('components.headers.guest-header')
-    @endguest
-    @auth
-        @include('components.headers.auth-header')
-    @endauth
-</header>
-<div class="container">
-    <div class="row">
-        <div>
+    @include('includes.notif.flash-message')
+    <header>
+        @guest
+            @include('components.headers.guest-header')
+        @endguest
+        @auth
+            @include('components.headers.auth-header')
+        @endauth
+    </header>
+    <div class="container">
+        <div class="row">
+            <div>
+            </div>
+            <div>
+                @yield('content')
+            </div>
         </div>
-        <div>
-            @yield('content')
-        </div>
+        @include('components.footers.footer')
     </div>
-    @include('components.footers.footer')
-</div>
+    @stack('scripts')
 </body>
 </html>
