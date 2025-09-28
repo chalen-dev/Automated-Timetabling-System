@@ -9,7 +9,7 @@
             type="number"
             name="{{ $name }}"
             id="{{ $name }}"
-            value="{{ old($name, $default ?? $value) }}"
+            value="{{ old($name, $value ?? $default) }}"
             @if(isset($min)) min="{{ $min }}" @endif
             @if(isset($max)) max="{{ $max }}" @endif
             @if(isset($step)) step="{{ $step }}" @endif

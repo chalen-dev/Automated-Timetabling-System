@@ -20,14 +20,8 @@
         <x-input.select
             label="Course Type"
             name="course_type"
-            :options="[
-                'major' => 'Major',
-                'minor' => 'Minor',
-                'pe' => 'PE',
-                'nstp' => 'NSTP',
-                'other' => 'Other'
-            ]"
-            default="minor"
+            :options="$courseTypeOptions"
+            default=""
         />
 
         <x-input.number
@@ -77,11 +71,8 @@
         <x-input.select
             label="Course Duration"
             name="duration_type"
-            :options="[
-                'semestral' => 'Semestral',
-                'term' => 'Term'
-            ]"
-            default="term"
+            :options="$durationTypeOptions"
+            default=""
         />
 
 

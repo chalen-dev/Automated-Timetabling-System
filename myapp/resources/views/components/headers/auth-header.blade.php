@@ -20,9 +20,6 @@
             <a href="{{route('admin.courses.index')}}">Courses</a>
         </li>
         <li>
-            <a href="">Class Sections</a>
-        </li>
-        <li>
             <a href="{{route('admin.professors.index')}}">Professors</a>
         </li>
         <li>

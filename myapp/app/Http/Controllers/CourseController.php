@@ -7,6 +7,20 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    //Instance variables
+    private $courseTypeOptions = [
+        'major' => 'Major',
+        'minor' => 'Minor',
+        'pe' => 'PE',
+        'nstp' => 'NSTP',
+        'others' => 'Others',
+    ];
+
+    private $durationTypeOptions = [
+        'semestral' => 'Semestral',
+        'term' => 'Term'
+    ];
+
     //Instance Functions
     private function total_days_exceed_6($data){
         $lecture_days = $data->total_lecture_class_days;
@@ -29,7 +43,9 @@ class CourseController extends Controller
 
     //Display create view
     public function create(){
-        return view('admin.courses.create');
+        $courseTypeOptions = $this->courseTypeOptions;
+        $durationTypeOptions = $this->durationTypeOptions;
+        return view('admin.courses.create', compact('courseTypeOptions', 'durationTypeOptions'));
     }
 
     //Store function for create view
@@ -56,13 +72,15 @@ class CourseController extends Controller
 
 
         Course::create($validatedData);
-        return redirect()->route('courses.index')
+        return redirect()->route('admin.courses.index')
             ->with('success', 'Course created successfully.');
     }
 
     //Display edit view
     public function edit(Course $course){
-        return view('admin.courses.edit', compact('course'));
+        $courseTypeOptions = $this->courseTypeOptions;
+        $durationTypeOptions = $this->durationTypeOptions;
+        return view('admin.courses.edit', compact('course', 'courseTypeOptions', 'durationTypeOptions'));
     }
 
     //Update course
@@ -87,13 +105,13 @@ class CourseController extends Controller
 
         $course->update($validatedData);
 
-        return redirect()->route('courses.index')
+        return redirect()->route('admin.courses.index')
             ->with('success', 'Course updated successfully');
     }
 
     public function destroy(Course $course){
         $course->delete();
-        return redirect()->route('courses.index')
+        return redirect()->route('admin.courses.index')
             ->with('success', 'Course deleted successfully');
     }
 
