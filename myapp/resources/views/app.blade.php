@@ -13,12 +13,12 @@
         })
     </script>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden relative page-background">
 
 @include('includes.notif.flash-message')
 
 <!-- HEADER -->
-<header>
+<header class="topbar">
     @guest
         @include('components.headers.guest-header')
     @endguest
@@ -35,7 +35,10 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 transition-all p-6">
-        @yield('content')
+        <div>
+            @yield('content')
+        </div>
+
         @guest
             @include('components.footers.footer')
         @endguest
