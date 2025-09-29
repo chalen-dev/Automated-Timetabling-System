@@ -9,7 +9,7 @@
             @csrf
             @method('PUT')
             <div class="flex flex-col gap-5">
-                <div class="flex flex-row gap-5">
+                <div class="flex flex-row gap-4">
                     <x-input.text
                         label="Room Name"
                         name="room_name"

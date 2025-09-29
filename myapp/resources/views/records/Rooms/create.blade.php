@@ -8,7 +8,7 @@
         <form action="{{route('records.rooms.store')}}" method="POST">
             @csrf
             <div class="flex flex-col gap-5">
-                <div class="flex flex-row gap-20">
+                <div class="flex flex-row gap-5">
                     <x-input.text
                         label="Room Name"
                         name="room_name"
