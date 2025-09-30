@@ -20,7 +20,7 @@
             <tbody>
                 @foreach($courses as $course)
                 <tr>
-                    <td>{{$course->course_title}}}}</td>
+                    <td>{{$course->course_title}}</td>
                     <td>{{$course->course_name}}</td>
                     <td>
                         <input type="checkbox" name="courses[]" value="{{ $course->id }}">

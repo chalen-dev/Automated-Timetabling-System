@@ -24,7 +24,12 @@ class SpecializationController extends Controller
      */
     public function create(Professor $professor)
     {
-        $courses = Course::all();
+        // get all course IDs already assigned to the professor
+        $assignedCourseIds = $professor->specializations()->pluck('course_id')->toArray();
+
+        // only get unassigned courses
+        $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
+
         return view('records.professors.specializations.create', compact('professor', 'courses'));
     }
 
@@ -47,9 +52,6 @@ class SpecializationController extends Controller
             ]);
         }
 
-        // clear old ones
-        $professor->specializations()->delete();
-
         foreach ($validatedData['courses'] as $courseId) {
             $professor->specializations()->create([
                 'course_id' => $courseId,
@@ -58,48 +60,6 @@ class SpecializationController extends Controller
 
         return redirect()->route('records.professors.specializations.index', $professor);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Professor $professor, Specialization $specialization)
-    {
-        return view('records.professors.specializations.show', compact('professor', 'specialization'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Professor $professor, Specialization $specialization)
-    {
-        $courses = Course::all();
-        return view('records.professors.specializations.edit', compact('professor', 'specialization', 'courses'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Professor $professor, Specialization $specialization)
-    {
-        $validatedData = $request->validate([
-            'course_ids'   => 'required|array',
-            'course_ids.*' => 'exists:courses,id',
-        ]);
-
-        // Clear old ones
-        $professor->specializations()->delete();
-
-        // Insert new ones
-        foreach ($validatedData['course_ids'] as $courseId) {
-            $professor->specializations()->create([
-                'course_id' => $courseId,
-            ]);
-        }
-
-        return redirect()->route('records.professors.specializations.index', $professor)
-            ->with('success', 'Specializations updated successfully.');
-    }
-
     /**
      * Remove the specified resource from storage.
      */
