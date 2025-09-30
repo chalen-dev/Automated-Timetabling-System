@@ -25,16 +25,21 @@
                 <td class="flex-2">{{$professor->last_name}}</td>
                 <td class="flex-2">{{$professor->professor_type}}</td>
                 <td class="flex-2">{{$professor->max_unit_load}}</td>
-                <td class="whitespace-nowrap px-2">
-                    <div class="flex flex-row gap-2 justify-end">
-                        <a>Edit Specializations</a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.show', $professor)}}">
-                            <i class="bi-card-list"></i>
-                        </a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.edit', $professor)}}">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <x-buttons.delete action="records.professors.destroy" :model='$professor' item_name='professor' btnType='icon'/>
+                <td class="whitespace-nowrap w-fit px-2">
+                    <div class="flex flex-row gap-10 justify-end">
+                        <div class="flex flex-row gap-2 justify-center items-center">
+                            <a class="flex items-center justify-center" href="{{route('records.professors.specializations.index', $professor)}}">Specializations</a>
+                        </div>
+                        <div class="flex flex-row gap-2">
+                            <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.show', $professor)}}">
+                                <i class="bi-card-list"></i>
+                            </a>
+                            <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.edit', $professor)}}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <x-buttons.delete action="records.professors.destroy" :model='$professor' item_name='professor' btnType='icon'/>
+                        </div>
+
                     </div>
                 </td>
             </tr>
