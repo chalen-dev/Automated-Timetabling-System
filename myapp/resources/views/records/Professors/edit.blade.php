@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
         <h1>Edit Professor</h1>
-        <form action="{{route('records.professors.update', $professor)}}" method="post">
+        <form action="{{route('records.professors.update', $professor)}}" method="post" class="flex flex-col gap-10">
             @csrf
             @method('PUT')
 
@@ -69,8 +69,11 @@
                         :value="old('position', $professor->position)"
                     />
                 </div>
-            </div>
 
+            </div>
+            <div>
+                <x-specializations.index :professor="$professor"/>
+            </div>
             <div class="flex justify-center items-center gap-100">
                 <a href="{{route('records.professors.index')}}">Back</a>
                 <button type="submit">Update</button>

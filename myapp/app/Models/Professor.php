@@ -14,10 +14,16 @@ class Professor extends Model
         'professor_age',
         'position',
         'academic_program_id' //foreign key
+        //Add suffixes (jr, sr, etc.) soon
     ];
 
     //A professor can belong to a single academic program (many to one)
     public function academicProgram(){
         return $this->belongsTo(AcademicProgram::class);
+    }
+
+    //A professor can have many specializations (one to many)
+    public function specializations(){
+        return $this->hasMany(Specialization::class);
     }
 }

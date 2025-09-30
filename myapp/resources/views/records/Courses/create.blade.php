@@ -75,7 +75,7 @@
                     :step="0.1"
                 />
 
-                <x-input.select
+                <x-input.radio-group
                     label="Course Duration"
                     name="duration_type"
                     :options="$durationTypeOptions"
@@ -90,7 +90,4 @@
 
         </form>
     </div>
-
-
-
 @endsection

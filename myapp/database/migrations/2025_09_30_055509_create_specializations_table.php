@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('timetables', function (Blueprint $table) {
+        Schema::create('specializations', function (Blueprint $table) {
             $table->id();
 
-            //User_id Foreign Key on Users table
-            $table->foreignId('user_id')
-            ->constrained('users')
+            //Professor Foreign Key
+            $table->foreignId('professor_id')
+            ->constrained('professors')
             ->onDelete('cascade');
 
-            $table->string('timetable_name');
-            $table->enum('semester', ['1st', '2nd']);
-            $table->string('academic_year');
-            $table->text('timetable_description')->nullable();
+            //Course Foreign Key
+            $table->foreignId('course_id')
+            ->constrained('courses')
+            ->onDelete('cascade');
+
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('timetables');
+        Schema::dropIfExists('specializations');
     }
 };

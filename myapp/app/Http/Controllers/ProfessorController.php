@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicProgram;
+use App\Models\Course;
 use App\Models\Professor;
 use Illuminate\Http\Request;
 
@@ -56,6 +57,8 @@ class ProfessorController extends Controller
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
 
+
+
         Professor::create($validatedData);
         return redirect()->route('records.professors.index')
             ->with('success', 'Professor created successfully.');
@@ -75,10 +78,11 @@ class ProfessorController extends Controller
      */
     public function edit(Professor $professor)
     {
+        $courses = Course::all();
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $genderOptions = $this->genderOptions;
         $professorTypeOptions = $this->professorTypeOptions;
-        return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions'));
+        return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions', 'courses'));
     }
 
     /**
