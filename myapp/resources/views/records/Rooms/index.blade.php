@@ -22,7 +22,7 @@
             <tr>
                 <td>{{$room->room_name}}</td>
                 <td>{{$room->room_type}}</td>
-                <td>{{$room->room_capacity}}</td>
+                <td>{{$room->room_capacity ?? 'N/A'}}</td>
                 <td class = "flex flex-row gap-4 justify-end">
                     <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.show', $room)}}">
                         <i class="bi-card-list"></i>

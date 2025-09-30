@@ -14,13 +14,13 @@
                     <x-input.text
                         label="First Name"
                         name="first_name"
-                        :value="old('first_name', $professor->first_name)"
+                        :value="$professor->first_name"
                     />
 
                     <x-input.text
                         label="Last Name"
                         name="last_name"
-                        :value="old('last_name', $professor->last_name)"
+                        :value="$professor->last_name"
                     />
 
                     <x-input.select
@@ -28,13 +28,13 @@
                         name="academic_program_id"
                         :options="$academic_program_options"
                         default=""
-                        :value="old('academic_program_id', $professor->academic_program_id)"
+                        :value="$professor->academic_program_id"
                     />
 
                     <x-input.number
                         label="Max Unit Load"
                         name="max_unit_load"
-                        :default="old('max_unit_load', $professor->max_unit_load)"
+                        :value="$professor->max_unit_load"
                         :min="1.0"
                         :step="0.1"
                     />
@@ -42,7 +42,7 @@
                     <x-input.number
                         label="Professor Age"
                         name="professor_age"
-                        :default="old('professor_age', $professor->professor_age)"
+                        :value="$professor->professor_age"
                         :min="0"
                         :max="120"
                         :step="1"
