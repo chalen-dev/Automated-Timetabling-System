@@ -15,6 +15,7 @@ class SpecializationController extends Controller
     public function index(Professor $professor)
     {
         $courses = Course::all();
+        //Get all specializations tied for the professor
         $specializations = $professor->specializations()->with('course')->get();
         return view('records.professors.specializations.index', compact('specializations', 'professor', 'courses'));
     }
