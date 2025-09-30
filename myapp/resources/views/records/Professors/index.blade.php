@@ -21,19 +21,21 @@
         <tbody>
             @foreach($professors as $professor)
             <tr>
-                <td>{{$professor->first_name}}</td>
-                <td>{{$professor->last_name}}</td>
-                <td>{{$professor->professor_type}}</td>
-                <td>{{$professor->max_unit_load}}</td>
-                <td class = "flex flex-row gap-4 justify-end">
-                    <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.show', $professor)}}">
-                        <i class="bi-card-list"></i>
-                    </a>
-                    <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.edit', $professor)}}">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-
-                    <x-buttons.delete action="records.professors.destroy" :model='$professor' item_name='professor' btnType='icon'/>
+                <td class="flex-2">{{$professor->first_name}}</td>
+                <td class="flex-2">{{$professor->last_name}}</td>
+                <td class="flex-2">{{$professor->professor_type}}</td>
+                <td class="flex-2">{{$professor->max_unit_load}}</td>
+                <td class="whitespace-nowrap px-2">
+                    <div class="flex flex-row gap-2 justify-end">
+                        <a>Edit Specializations</a>
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.show', $professor)}}">
+                            <i class="bi-card-list"></i>
+                        </a>
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.professors.edit', $professor)}}">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <x-buttons.delete action="records.professors.destroy" :model='$professor' item_name='professor' btnType='icon'/>
+                    </div>
                 </td>
             </tr>
             @endforeach

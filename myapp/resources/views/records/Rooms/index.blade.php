@@ -23,16 +23,20 @@
                 <td>{{$room->room_name}}</td>
                 <td>{{$room->room_type}}</td>
                 <td>{{$room->room_capacity ?? 'N/A'}}</td>
-                <td class = "flex flex-row gap-4 justify-end">
-                    <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.show', $room)}}">
-                        <i class="bi-card-list"></i>
-                    </a>
-                    <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.edit', $room)}}">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-
-                    <x-buttons.delete action="records.rooms.destroy" :model='$room' item_name='room' btnType='icon'/>
+                <td class="whitespace-nowrap px-2">
+                    <div class="flex flex-row gap-2 justify-end">
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.show', $room)}}">
+                            <i class="bi-card-list"></i>
+                        </a>
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.edit', $room)}}">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <x-buttons.delete action="records.rooms.destroy" :model='$room' item_name='room' btnType='icon'/>
+                    </div>
                 </td>
+
+
+
             </tr>
 
             @endforeach

@@ -5,7 +5,6 @@ use App\Http\Controllers\AcademicProgramController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\RoomController;
-use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
@@ -52,7 +51,6 @@ Route::middleware([Authenticate::class])->group(function () {
         // Professor Routes
         Route::resource('professors', ProfessorController::class);
             // Specialization Routes (scoped to professors)
-            Route::resource('professors.specializations', SpecializationController::class)->only(['index', 'create', 'store', 'destroy']);
 
         // Academic Program Routes
         Route::resource('academic-programs', AcademicProgramController::class);

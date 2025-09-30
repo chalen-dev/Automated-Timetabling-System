@@ -69,10 +69,9 @@
                         :value="old('position', $professor->position)"
                     />
                 </div>
+                <div>
 
-            </div>
-            <div>
-                <x-specializations.index :professor="$professor" :courses="$courses"/>
+                </div>
             </div>
             <div class="flex justify-center items-center gap-100">
                 <a href="{{route('records.professors.index')}}">Back</a>

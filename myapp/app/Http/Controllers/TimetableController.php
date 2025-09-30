@@ -42,6 +42,8 @@ class TimetableController extends Controller
             'timetable_description' => 'nullable|string',
         ]);
 
+        $validatedData['user_id'] = auth()->id();
+
         Timetable::create($validatedData);
 
         return redirect()->route('records.timetables.index')
@@ -76,6 +78,8 @@ class TimetableController extends Controller
             'academic_year' => 'required|string',
             'timetable_description' => 'nullable|string',
         ]);
+
+        $validatedData['user_id'] = auth()->id();
 
         $timetable->update($validatedData);
 

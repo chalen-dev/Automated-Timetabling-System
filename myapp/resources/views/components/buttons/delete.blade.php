@@ -1,6 +1,6 @@
 @props(['action','model','item_name','btnType' => 'normal'])
 
-<form action="{{ route($action, $model) }}" method="POST" class="inline">
+<form action="{{ route($action, $model) }}" method="POST" class="flex items-center justify-center">
     @csrf
     @method('DELETE')
     <button
