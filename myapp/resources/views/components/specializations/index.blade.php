@@ -1,6 +1,6 @@
-@props(['professor'])
+@props(['professor', 'courses'])
 
-<div>
+<div x-data="{ showCreate: {{ session('showCreate') ? 'true' : 'false' }} }">
     <div class="flex flex- items-between gap-10 justify-around">
         <h1>Specializations</h1>
         <button @click="showCreate = true" class="px-3 py-1">Add New</button>

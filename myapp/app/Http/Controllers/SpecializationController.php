@@ -19,6 +19,12 @@ class SpecializationController extends Controller
         return view('specializations.index', compact('professor', 'courses'));
     }
 
+    public function create(Professor $professor)
+    {
+        $courses = Course::all();
+        return view('specializations.create', compact('professor', 'courses'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -30,7 +36,8 @@ class SpecializationController extends Controller
 
         $professor->courses()->syncWithoutDetaching($request->course_id);
 
-        return redirect()->back()->with('success', 'Course added.');
+        return redirect()->route('records.professors.specializations.edit', $professor)
+            ->with('success', 'Course added.');
     }
 
     /**
@@ -39,6 +46,7 @@ class SpecializationController extends Controller
     public function destroy(Professor $professor, Specialization $specialization)
     {
         $specialization->delete();
-        return redirect()->back()->with('success', 'Course removed.');
+        return redirect()->route('records.professors.specializations.edit', $professor)
+            ->with('success', 'Course removed.');
     }
 }

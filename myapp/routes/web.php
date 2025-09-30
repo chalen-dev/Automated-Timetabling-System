@@ -52,7 +52,7 @@ Route::middleware([Authenticate::class])->group(function () {
         // Professor Routes
         Route::resource('professors', ProfessorController::class);
             // Specialization Routes (scoped to professors)
-            Route::resource('professors.specializations', SpecializationController::class)->only(['index', 'store', 'destroy']);
+            Route::resource('professors.specializations', SpecializationController::class)->only(['index', 'create', 'store', 'destroy']);
 
         // Academic Program Routes
         Route::resource('academic-programs', AcademicProgramController::class);
