@@ -25,7 +25,7 @@ class SpecializationController extends Controller
     public function create(Professor $professor)
     {
         $courses = Course::all();
-        return view('records.specializations.create', compact('professor', 'courses'));
+        return view('records.professors.specializations.create', compact('professor', 'courses'));
     }
 
     /**
@@ -34,20 +34,29 @@ class SpecializationController extends Controller
     public function store(Request $request, Professor $professor)
     {
         $validatedData = $request->validate([
-            'course_ids'   => 'required|array',
-            'course_ids.*' => 'exists:courses,id'
+            'courses'   => 'array',
+            'courses.*' => 'exists:courses,id'
         ]);
+
+        // No selection
+        if (empty($validatedData['courses'])) {
+            return view('records.professors.specializations.create', [
+                'professor' => $professor,
+                'courses'   => Course::all(),
+                'message'   => 'No courses were selected for this professor.'
+            ]);
+        }
 
         // clear old ones
         $professor->specializations()->delete();
 
-        foreach ($validatedData['course_ids'] as $courseId) {
+        foreach ($validatedData['courses'] as $courseId) {
             $professor->specializations()->create([
                 'course_id' => $courseId,
             ]);
         }
 
-        return redirect()->route('records.specializations.index', $professor);
+        return redirect()->route('records.professors.specializations.index', $professor);
     }
 
     /**
@@ -55,7 +64,7 @@ class SpecializationController extends Controller
      */
     public function show(Professor $professor, Specialization $specialization)
     {
-        return view('records.specializations.show', compact('professor', 'specialization'));
+        return view('records.professors.specializations.show', compact('professor', 'specialization'));
     }
 
     /**
@@ -64,7 +73,7 @@ class SpecializationController extends Controller
     public function edit(Professor $professor, Specialization $specialization)
     {
         $courses = Course::all();
-        return view('records.specializations.edit', compact('professor', 'specialization', 'courses'));
+        return view('records.professors.specializations.edit', compact('professor', 'specialization', 'courses'));
     }
 
     /**
@@ -87,7 +96,7 @@ class SpecializationController extends Controller
             ]);
         }
 
-        return redirect()->route('records.specializations.index', $professor)
+        return redirect()->route('records.professors.specializations.index', $professor)
             ->with('success', 'Specializations updated successfully.');
     }
 
@@ -98,7 +107,7 @@ class SpecializationController extends Controller
     {
         $specialization->delete();
 
-        return redirect()->route('records.specializations.index', $professor)
+        return redirect()->route('records.professors.specializations.index', $professor)
             ->with('success', 'Specialization deleted successfully.');
     }
 }

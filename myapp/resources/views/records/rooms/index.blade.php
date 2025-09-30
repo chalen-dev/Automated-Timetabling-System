@@ -31,7 +31,7 @@
                         <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.edit', $room)}}">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <x-buttons.delete action="records.rooms.destroy" :model='$room' item_name='room' btnType='icon'/>
+                        <x-buttons.delete action="records.rooms.destroy" :params='$room' item_name='room' btnType='icon'/>
                     </div>
                 </td>
 

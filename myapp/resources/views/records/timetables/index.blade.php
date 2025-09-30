@@ -30,7 +30,7 @@
                             <a class = 'flex items-center justify-center' href="{{route('records.timetables.edit', $timetable)}}">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <x-buttons.delete action="records.timetables.destroy" :model="$timetable" item_name="timetable" btnType="icon"/>
+                            <x-buttons.delete action="records.timetables.destroy" :params="$timetable" item_name="timetable" btnType="icon"/>
                         </div>
                         <div class="bg-red-500">
 
