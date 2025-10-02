@@ -26,7 +26,9 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::all();
-        return view('records.rooms.index', compact('rooms'));
+        $room = Room::first();
+        $exclusiveDays = $room->roomExclusiveDays->pluck('exclusive_day')->toArray();
+        return view('records.rooms.index', compact('rooms', 'exclusiveDays'));
     }
 
     /**

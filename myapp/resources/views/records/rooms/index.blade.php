@@ -14,6 +14,7 @@
                 <td>Room Name</td>
                 <td>Room Type</td>
                 <td>Room Capacity</td>
+                <td>Exclusive Days</td>
                 <td></td>
             </tr>
         </thead>
@@ -22,7 +23,19 @@
             <tr>
                 <td>{{$room->room_name}}</td>
                 <td>{{$room->room_type}}</td>
-                <td>{{$room->room_capacity ?? 'N/A'}}</td>
+                <td>{{$room->room_capacity ?? 'none'}}</td>
+                <td>
+                    {{
+                        $room->roomExclusiveDays->isNotEmpty()
+                        ?
+                        $room->roomExclusiveDays
+                            ->pluck('exclusive_day')
+                            ->map(fn($day) => ucfirst($day)) //Makes each day of the Week have uppercase first letter
+                            ->implode(', ')
+                        :
+                        'N/A'
+                    }}
+                </td>
                 <td class="whitespace-nowrap px-2">
                     <div class="flex flex-row gap-2 justify-end">
                         <a href="{{route('records.rooms.room-exclusive-days.index', $room)}}">
