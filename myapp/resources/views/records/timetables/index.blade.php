@@ -18,10 +18,12 @@
 
             @foreach($timetables as $timetable)
                 <li class="flex h-50 w-75 gap-5 pt-3 pb-7 pl-5 pr-5">
-                    <div class="flex flex-col">
-                        <p>{{$timetable->timetable_name}}</p>
-                        <p>{{$timetable->semester}} semester ({{$timetable->academic_year}})</p>
-                    </div>
+                    <a href="{{route('timetables.timetable-editing-pane.index', $timetable)}}">
+                        <div class="flex flex-col">
+                            <p>{{$timetable->timetable_name}}</p>
+                            <p>{{$timetable->semester}} semester ({{$timetable->academic_year}})</p>
+                        </div>
+                    </a>
                     <div class="flex flex-col gap-10">
                         <div class="flex flex-row">
                             <a class = 'flex items-center justify-center' href="{{route('timetables.show', $timetable)}}">

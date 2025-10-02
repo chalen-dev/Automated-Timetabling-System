@@ -23,14 +23,22 @@
         @include('components.headers.guest-header')
     @endguest
     @auth
-        @include('components.headers.auth-header')
+        @if(request()->routeIs('timetables.timetable-editing-pane.index'))
+            @include('components.headers.timetabling-header')
+        @else
+            @include('components.headers.auth-header')
+        @endif
     @endauth
 </header>
 
 <div class="flex h-screen pt-16">
     <!-- SIDEBAR -->
     @auth
-        <x-sidebar.sidebar />
+        @if(request()->routeIs('timetables.timetable-editing-pane.index'))
+            <x-sidebar.timetabling-sidebar />
+        @else
+            <x-sidebar.sidebar />
+        @endif
     @endauth
 
     <!-- MAIN CONTENT -->

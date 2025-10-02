@@ -43,35 +43,29 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
-    // Timetable and its nested routes NOTE: the TIMETABLE LIST act as DASHBOARD
-    Route::prefix('timetables')->name('timetables.')->group(function() {
-            //Timetable List(act as dashboard)
-            Route::resource('/', TimetableController::class);
-            //Timetabling Editing Pane
-            Route::resource('timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
-    });
+    //Timetable List(act as dashboard)
+    Route::resource('timetables', TimetableController::class);
+    //Timetabling Editing Pane
+        Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
+            ->only('index');
 
     // Courses Routes
     Route::resource('courses', CourseController::class);
 
-    //Professor and nested routes
-    Route::prefix('professors')->name('professors.')->group(function() {
-        //Professor List
-       Route::resource('/', ProfessorController::class);
+    //Professor List
+    Route::resource('professors', ProfessorController::class);
        //Specialization List
-       Route::resource('specializations', SpecializationController::class)->only('create', 'index', 'store', 'destroy');
-    });
+       Route::resource('professors.specializations', SpecializationController::class)
+           ->only('create', 'index', 'store', 'destroy');
 
     // Academic Program Routes
     Route::resource('academic-programs', AcademicProgramController::class);
 
-    // Room and nested routes
-    Route::prefix('rooms')->name('rooms.')->group(function() {
-        //Room List
-        Route::resource('/', RoomController::class);
+    //Room List
+    Route::resource('rooms', RoomController::class);
         //Room Exclusive Day List
-        Route::resource('room-exclusive-days', RoomExclusiveDayController::class)->only('index', 'create', 'store', 'destroy');
-    });
+        Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)
+            ->only('index', 'create', 'store', 'destroy');
 
 });
 
