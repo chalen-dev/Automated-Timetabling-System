@@ -20,4 +20,5 @@ class Specialization extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
 }

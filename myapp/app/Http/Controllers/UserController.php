@@ -56,7 +56,7 @@ class UserController extends Controller
         //Attempt to login. This code automatically gives the user Auth when successful
         if (Auth::attempt([$fieldType => $request->login, 'password' => $request->password])) {
             //if login successful, redirect here
-            return redirect()->route('records.timetables.index');
+            return redirect()->route('timetables.index');
         }
         //if login failed, redirect back with error message
         return redirect()->back()->withErrors([

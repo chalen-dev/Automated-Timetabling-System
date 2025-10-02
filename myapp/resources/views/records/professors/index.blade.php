@@ -15,6 +15,7 @@
                 <td>Last Name</td>
                 <td>Professor Type</td>
                 <td>Max Unit Load</td>
+                <td>Course Specializations</td>
                 <td></td>
             </tr>
         </thead>
@@ -25,6 +26,9 @@
                 <td class="flex-2">{{$professor->last_name}}</td>
                 <td class="flex-2">{{$professor->professor_type}}</td>
                 <td class="flex-2">{{$professor->max_unit_load}}</td>
+                <td class="flex-2">
+                    {{ $professor->courses->pluck('course_title')->implode(', ') ?: 'N/A' }}
+                </td>
                 <td class="whitespace-nowrap w-fit px-2">
                     <div class="flex flex-row gap-10 justify-end">
                         <div class="flex flex-row gap-2 justify-center items-center">

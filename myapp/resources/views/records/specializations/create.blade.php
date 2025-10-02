@@ -3,7 +3,7 @@
 @section('title', 'Create Specialization')
 
 @section('content')
-    <form action="{{route('records.professors.specializations.store', $professor)}}" method="POST">
+    <form action="{{route('professors.specializations.store', $professor)}}" method="POST">
         @csrf
 
         <h3>Assign Courses to {{$professor->last_name}}, {{$professor->first_name}}</h3>
@@ -30,6 +30,6 @@
             </tbody>
         </table>
         <button type="submit">Confirm</button>
-        <a href="{{route('records.professors.specializations.index', $professor)}}">Back</a>
+        <a href="{{route('professors.specializations.index', $professor)}}">Back</a>
     </form>
 @endsection

@@ -59,7 +59,7 @@ class SpecializationController extends Controller
             ]);
         }
 
-        return redirect()->route('records.professors.specializations.index', $professor);
+        return redirect()->route('professors.specializations.index', $professor);
     }
     /**
      * Remove the specified resource from storage.
@@ -68,7 +68,7 @@ class SpecializationController extends Controller
     {
         $specialization->delete();
 
-        return redirect()->route('records.professors.specializations.index', $professor)
+        return redirect()->route('professors.specializations.index', $professor)
             ->with('success', 'Specialization deleted successfully.');
     }
 }
