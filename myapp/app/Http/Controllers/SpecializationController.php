@@ -17,7 +17,7 @@ class SpecializationController extends Controller
         $courses = Course::all();
         //Get all specializations tied for the professor
         $specializations = $professor->specializations()->with('course')->get();
-        return view('records.professors.specializations.index', compact('specializations', 'professor', 'courses'));
+        return view('records.specializations.index', compact('specializations', 'professor', 'courses'));
     }
 
     /**
@@ -31,7 +31,7 @@ class SpecializationController extends Controller
         // only get unassigned courses
         $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
 
-        return view('records.professors.specializations.create', compact('professor', 'courses'));
+        return view('records.specializations.create', compact('professor', 'courses'));
     }
 
     /**
@@ -46,7 +46,7 @@ class SpecializationController extends Controller
 
         // No selection
         if (empty($validatedData['courses'])) {
-            return view('records.professors.specializations.create', [
+            return view('records.specializations.create', [
                 'professor' => $professor,
                 'courses'   => Course::all(),
                 'message'   => 'No courses were selected for this professor.'

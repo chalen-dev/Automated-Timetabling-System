@@ -23,7 +23,7 @@ class RoomExclusiveDayController extends Controller
     public function index(Room $room)
     {
         $assignedExclusiveDays = $room->roomExclusiveDays; // returns collection of RoomExclusiveDay models
-        return view('records.rooms.room-exclusive-days.index', [
+        return view('records.room-exclusive-days.index', [
             'room' => $room,
             'assignedExclusiveDays' => $assignedExclusiveDays,
             'exclusiveDays' => $this->exclusiveDays,
@@ -35,13 +35,13 @@ class RoomExclusiveDayController extends Controller
      */
     public function create(Room $room)
     {
-        //get all days alreadu assigned to the room
+        //get all days already assigned to the room
         $assignedDays = RoomExclusiveDay::where('room_id', $room->id)->pluck('exclusive_day')->toArray();
 
         //get all unassigned days
         $unassignedDays = array_diff_key($this->exclusiveDays, array_flip($assignedDays));
 
-        return view('records.rooms.room-exclusive-days.create', compact('room', 'unassignedDays'));
+        return view('records.room-exclusive-days.create', compact('room', 'unassignedDays'));
     }
 
     /**
@@ -57,7 +57,7 @@ class RoomExclusiveDayController extends Controller
 
 
         if (empty($validatedData['exclusive_days'])) {
-            return view('records.rooms.room-exclusive-days.create', [
+            return view('records.room-exclusive-days.create', [
                 'room' => $room,
                 'unassignedDays' => $this->exclusiveDays,
                 'message' => 'No exclusive days were selected for this room.'
