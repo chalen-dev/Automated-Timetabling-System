@@ -17,13 +17,6 @@ return new class extends Migration
             $table->enum('room_type', ['lecture', 'comlab', 'gym', 'main']);
             $table->enum('course_type_exclusive_to', ['none', 'pe', 'nstp', 'others']);
             $table->integer('room_capacity')->nullable();
-            $table->boolean('monday_exclusive');
-            $table->boolean('tuesday_exclusive');
-            $table->boolean('wednesday_exclusive');
-            $table->boolean('thursday_exclusive');
-            $table->boolean('friday_exclusive');
-            $table->boolean('saturday_exclusive');
-            $table->boolean('sunday_exclusive');
             $table->timestamps();
         });
     }
