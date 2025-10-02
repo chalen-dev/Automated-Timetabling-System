@@ -25,6 +25,9 @@
                 <td>{{$room->room_capacity ?? 'N/A'}}</td>
                 <td class="whitespace-nowrap px-2">
                     <div class="flex flex-row gap-2 justify-end">
+                        <a href="{{route('records.rooms.room-exclusive-days.index', $room)}}">
+                            Set Specific Days
+                        </a>
                         <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.show', $room)}}">
                             <i class="bi-card-list"></i>
                         </a>

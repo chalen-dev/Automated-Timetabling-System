@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\RoomExclusiveDay;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -44,7 +45,7 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'room_name' => 'required|string',
+            'room_name' => 'required|string|unique:rooms,room_name',
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',

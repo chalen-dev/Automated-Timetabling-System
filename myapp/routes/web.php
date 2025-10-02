@@ -5,6 +5,7 @@ use App\Http\Controllers\AcademicProgramController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomExclusiveDayController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
@@ -59,7 +60,8 @@ Route::middleware([Authenticate::class])->group(function () {
 
         // Room Routes
         Route::resource('rooms', RoomController::class);
-
+            // Room Exclusive Day Routes (scoped to rooms)
+            Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)->only('index', 'create', 'store', 'destroy');
 
     });
 });

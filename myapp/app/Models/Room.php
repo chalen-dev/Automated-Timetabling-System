@@ -12,4 +12,8 @@ class Room extends Model
         'course_type_exclusive_to',
         'room_capacity',
     ];
+
+    public function roomExclusiveDays(){
+        return $this->hasMany(RoomExclusiveDay::class);
+    }
 }
