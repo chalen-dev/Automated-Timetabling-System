@@ -4,8 +4,8 @@
 
 @section('content')
 
-    <div class="flex flex-col items-center justify-center w-screen h-[calc(90vh)]">
-        <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1">
+    <div class="flex flex-col items-center justify-center w-screen ">
+        <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1 bg-white rounded-xl">
             @csrf
 
             <h1>Sign Up to Facultime</h1>

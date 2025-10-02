@@ -13,37 +13,37 @@
         })
     </script>
 </head>
-<body class="overflow-x-hidden relative page-background">
 
-@include('includes.notif.flash-message')
+<body class="bg-page flex flex-col align-center ">
 
-<!-- HEADER -->
-<header class="topbar">
-    @guest
-        @include('components.headers.guest-header')
-    @endguest
-    @auth
-        @include('components.headers.auth-header')
-    @endauth
-</header>
+    @include('includes.notif.flash-message')
 
-<div class="flex h-screen pt-16">
-    <!-- SIDEBAR -->
+<!-- SIDEBAR -->
     @auth
         <x-sidebar.sidebar />
     @endauth
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 transition-all p-6">
-        <div>
-            @yield('content')
-        </div>
+<!-- HEADER -->
+        <header class="topbar">
+            @guest
+                @include('components.headers.guest-header')
+            @endguest
+            @auth
+                @include('components.headers.auth-header')
+            @endauth
+        </header>
+<!-- MAIN CONTENT -->
+        <main>
+            <div>
+                @yield('content')
+            </div>
+            <div>
+                @guest
+                    @include('components.footers.footer')
+                @endguest
+            </div>
+        </main>
 
-        @guest
-            @include('components.footers.footer')
-        @endguest
-    </main>
-</div>
 
 </body>
 </html>
