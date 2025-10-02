@@ -46,7 +46,7 @@ class TimetableController extends Controller
 
         Timetable::create($validatedData);
 
-        return redirect()->route('records.timetables.index')
+        return redirect()->route('timetables.index')
             ->with('success', 'Timetable created successfully.');
     }
 
@@ -55,7 +55,7 @@ class TimetableController extends Controller
      */
     public function show(Timetable $timetable)
     {
-        return view('records.timetables.show', compact('timetable'));
+        return view('timetables.show', compact('timetable'));
     }
 
     /**
@@ -83,7 +83,7 @@ class TimetableController extends Controller
 
         $timetable->update($validatedData);
 
-        return redirect()->route('records.timetables.index')
+        return redirect()->route('timetables.index')
             ->with('success', 'Timetable updated successfully.');
     }
 
@@ -93,7 +93,7 @@ class TimetableController extends Controller
     public function destroy(Timetable $timetable)
     {
         $timetable->delete();
-        return redirect()->route('records.timetables.index')
+        return redirect()->route('timetables.index')
             ->with('success', 'Timetable deleted successfully.');
     }
 }

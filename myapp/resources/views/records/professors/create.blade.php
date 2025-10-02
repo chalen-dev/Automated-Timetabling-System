@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
         <h1>Create Professor</h1>
-        <form action="{{route('records.professors.store')}}" method="post">
+        <form action="{{route('professors.store')}}" method="post">
             @csrf
 
             <div class="flex gap-10">
@@ -70,7 +70,7 @@
 
 
             <div class="flex justify-center items-center gap-100">
-                <a href="{{route('records.professors.index')}}">Back</a>
+                <a href="{{route('professors.index')}}">Back</a>
                 <button type="submit">Create</button>
             </div>
 

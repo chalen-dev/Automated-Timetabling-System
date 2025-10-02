@@ -3,7 +3,7 @@
 @section('title', 'Create Room Exclusive Day')
 
 @section('content')
-    <form action="{{route('records.rooms.room-exclusive-days.store', $room)}}" method="POST">
+    <form action="{{route('rooms.room-exclusive-days.store', $room)}}" method="POST">
         @csrf
 
         <h3>Assign Exclusive Days to {{$room->room_name}}</h3>
@@ -29,6 +29,6 @@
             </tbody>
         </table>
         <button type="submit">Confirm</button>
-        <a href="{{route('records.rooms.room-exclusive-days.index', $room)}}">Back</a>
+        <a href="{{route('rooms.room-exclusive-days.index', $room)}}">Back</a>
     </form>
 @endsection

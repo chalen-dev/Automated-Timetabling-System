@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Exclusive Days for {{$room->room_name}}</h1>
-    <a href="{{route('records.rooms.room-exclusive-days.create', $room)}}">Add</a>
+    <a href="{{route('rooms.room-exclusive-days.create', $room)}}">Add</a>
     <table class="w-full">
         <thead>
             <tr>
@@ -18,7 +18,7 @@
                 <td>{{ $exclusiveDays[$day->exclusive_day] }}</td>
                 <td>
                     <x-buttons.delete
-                        action="records.rooms.room-exclusive-days.destroy"
+                        action="rooms.room-exclusive-days.destroy"
                         :params="[$room, $day]" {{-- this passes the model, so route gets /room-exclusive-days/{id} --}}
                         item_name="room exclusive day"
                         btnType="icon"
@@ -28,5 +28,5 @@
         @endforeach
         </tbody>
     </table>
-    <a href="{{route('records.rooms.index')}}">Back</a>
+    <a href="{{route('rooms.index')}}">Back</a>
 @endsection

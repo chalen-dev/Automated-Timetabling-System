@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
         <h1>Edit Timetable</h1>
-        <form class = "flex flex-row gap-7 w-full" action="{{route('records.timetables.update', $timetable)}}" method="POST">
+        <form class = "flex flex-row gap-7 w-full" action="{{route('timetables.update', $timetable)}}" method="POST">
             @csrf
             @method('PUT')
 
@@ -39,7 +39,7 @@
                     />
                 </div>
                 <div class="flex flex-row w-full justify-between items-center">
-                    <a href="{{route('records.timetables.index')}}">Back</a>
+                    <a href="{{route('timetables.index')}}">Back</a>
                     <button type="submit">Confirm Changes</button>
                 </div>
             </div>

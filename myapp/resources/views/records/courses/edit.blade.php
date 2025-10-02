@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
         <h1>Edit Course</h1>
-        <form action="{{route('records.courses.update', $course)}}" method="POST" class="flex flex-col gap-4 justify-start">
+        <form action="{{route('courses.update', $course)}}" method="POST" class="flex flex-col gap-4 justify-start">
             @csrf
             @method('PUT')
 
@@ -93,7 +93,7 @@
             </div>
 
             <div class="flex justify-center items-center gap-100">
-                <a href="{{route('records.courses.index')}}">Back</a>
+                <a href="{{route('courses.index')}}">Back</a>
                 <button type="submit">Confirm Changes</button>
             </div>
 

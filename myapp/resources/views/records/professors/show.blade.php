@@ -10,6 +10,6 @@
     <p>Max Unit Load: {{$professor->max_unit_load}}</p>
     <p>Professor Age: {{$professor->professor_age ?? 'N/A'}}</p>
     <p>Position: {{$professor->position ?? 'N/A'}}</p>
-    <a href="{{route('records.professors.index')}}">Back</a>
+    <a href="{{route('professors.index')}}">Back</a>
 @endsection
 

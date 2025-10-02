@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex justify-between">
         <h1>Rooms</h1>
-        <a href="{{route('records.rooms.create')}}">Create</a>
+        <a href="{{route('rooms.create')}}">Create</a>
     </div>
 
     <table class="w-full">
@@ -38,16 +38,16 @@
                 </td>
                 <td class="whitespace-nowrap px-2">
                     <div class="flex flex-row gap-2 justify-end">
-                        <a href="{{route('records.rooms.room-exclusive-days.index', $room)}}">
+                        <a href="{{route('rooms.room-exclusive-days.index', $room)}}">
                             Set Specific Days
                         </a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.show', $room)}}">
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('rooms.show', $room)}}">
                             <i class="bi-card-list"></i>
                         </a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.rooms.edit', $room)}}">
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('rooms.edit', $room)}}">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <x-buttons.delete action="records.rooms.destroy" :params='$room' item_name='room' btnType='icon'/>
+                        <x-buttons.delete action="rooms.destroy" :params='$room' item_name='room' btnType='icon'/>
                     </div>
                 </td>
 

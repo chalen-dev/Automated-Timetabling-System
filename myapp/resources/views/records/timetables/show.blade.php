@@ -8,5 +8,5 @@
     <p>Semester: {{$timetable->semester}}</p>
     <p>Academic Year: {{$timetable->academic_year}}</p>
     <p>Timetable Description: {{$timetable->timetable_description}}</p>
-    <a href="{{route('records.timetables.index')}}">Back</a>
+    <a href="{{route('timetables.index')}}">Back</a>
 @endsection

@@ -60,7 +60,7 @@ class ProfessorController extends Controller
 
 
         Professor::create($validatedData);
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor created successfully.');
     }
 
@@ -101,7 +101,7 @@ class ProfessorController extends Controller
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
         $professor->update($validatedData);
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor updated successfully.');
     }
 
@@ -111,7 +111,7 @@ class ProfessorController extends Controller
     public function destroy(Professor $professor)
     {
         $professor->delete();
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor deleted successfully.');
     }
 }

@@ -54,7 +54,7 @@ class RoomController extends Controller
         ]);
 
         Room::create($validatedData);
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room created successfully.');
     }
 
@@ -89,7 +89,7 @@ class RoomController extends Controller
         ]);
 
         $room->update($validatedData);
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room updated successfully.');
     }
 
@@ -99,7 +99,7 @@ class RoomController extends Controller
     public function destroy(Room $room)
     {
         $room->delete();
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room deleted successfully.');
     }
 }

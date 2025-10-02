@@ -5,7 +5,7 @@
 @section('content')
     <div class = "flex justify-between">
         <h1>Academic Programs</h1>
-        <a href="{{route('records.academic-programs.create')}}">Create</a>
+        <a href="{{route('academic-programs.create')}}">Create</a>
     </div>
 
     <table class="w-full">
@@ -23,13 +23,13 @@
                 <td>{{$academicProgram->program_abbreviation}}</td>
                 <td class="whitespace-nowrap px-2">
                     <div class="flex flex-row gap-2 justify-end items-center">
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.academic-programs.show', $academicProgram)}}">
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('academic-programs.show', $academicProgram)}}">
                             <i class="bi-card-list"></i>
                         </a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('records.academic-programs.edit', $academicProgram)}}">
+                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('academic-programs.edit', $academicProgram)}}">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <x-buttons.delete action="records.academic-programs.destroy" :params='$academicProgram' item_name='academic program' btnType='icon'/>
+                        <x-buttons.delete action="academic-programs.destroy" :params='$academicProgram' item_name='academic program' btnType='icon'/>
                     </div>
                 </td>
             </tr>

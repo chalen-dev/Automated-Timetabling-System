@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Edit Academic Program</h1>
-    <form action="{{route('records.academic-programs.update', $academicProgram)}}" method="POST">
+    <form action="{{route('academic-programs.update', $academicProgram)}}" method="POST">
         @csrf
         @method('PUT')
 
@@ -29,5 +29,5 @@
 
         <button type="submit">Update</button>
     </form>
-    <a href="{{route('records.academic-programs.index')}}">Back</a>
+    <a href="{{route('academic-programs.index')}}">Back</a>
 @endsection

@@ -9,19 +9,19 @@
 
     <ul class="flex flex-col gap-6 px-4 p-10">
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.timetables.index') }}">Timetables</a>
+            <a href="{{ route('timetables.index') }}">Timetables</a>
         </li>
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.courses.index') }}">Courses</a>
+            <a href="{{ route('courses.index') }}">Courses</a>
         </li>
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.professors.index') }}">Professors</a>
+            <a href="{{ route('professors.index') }}">Professors</a>
         </li>
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.rooms.index') }}">Rooms</a>
+            <a href="{{ route('rooms.index') }}">Rooms</a>
         </li>
         <li class="flex flex-row justify-start items-center h-10 pl-10">
-            <a href="{{ route('records.academic-programs.index') }}">Programs</a>
+            <a href="{{ route('academic-programs.index') }}">Programs</a>
         </li>
     </ul>
 </aside>

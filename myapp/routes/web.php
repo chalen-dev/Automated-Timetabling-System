@@ -41,29 +41,25 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
 
-    // Records Routes Group
-    Route::prefix('records')->name('records.')->group(function () {
+    // Timetable Routes (timetable list, the DASHBOARD)
+    Route::resource('timetables', TimetableController::class);
 
-        // Timetable Routes (timetable list, the DASHBOARD)
-        Route::resource('timetables', TimetableController::class);
+    // courses Routes
+    Route::resource('courses', CourseController::class);
 
-        // courses Routes
-        Route::resource('courses', CourseController::class);
+    // Professor Routes
+    Route::resource('professors', ProfessorController::class);
+        // Specialization Routes (scoped to professors)
+        Route::resource('professors.specializations', SpecializationController::class)->only('create', 'index', 'store', 'destroy');
 
-        // Professor Routes
-        Route::resource('professors', ProfessorController::class);
-            // Specialization Routes (scoped to professors)
-            Route::resource('professors.specializations', SpecializationController::class)->only('create', 'index', 'store', 'destroy');
+    // Academic Program Routes
+    Route::resource('academic-programs', AcademicProgramController::class);
 
-        // Academic Program Routes
-        Route::resource('academic-programs', AcademicProgramController::class);
+    // Room Routes
+    Route::resource('rooms', RoomController::class);
+        // Room Exclusive Day Routes (scoped to rooms)
+        Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)->only('index', 'create', 'store', 'destroy');
 
-        // Room Routes
-        Route::resource('rooms', RoomController::class);
-            // Room Exclusive Day Routes (scoped to rooms)
-            Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)->only('index', 'create', 'store', 'destroy');
-
-    });
 });
 
 

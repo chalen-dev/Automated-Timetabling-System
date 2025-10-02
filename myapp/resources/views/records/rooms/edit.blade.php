@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-5 justify-center items-center">
         <h1>Edit Room</h1>
-        <form action="{{route('records.rooms.update', $room)}}" method="POST">
+        <form action="{{route('rooms.update', $room)}}" method="POST">
             @csrf
             @method('PUT')
             <div class="flex flex-col gap-5">
@@ -42,7 +42,7 @@
                     />
                 </div>
                 <div class="flex justify-between">
-                    <a href="{{route('records.rooms.index')}}">Back</a>
+                    <a href="{{route('rooms.index')}}">Back</a>
                     <button type="submit">Update</button>
                 </div>
 

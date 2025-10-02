@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
         <h1>Create Timetable</h1>
-        <form class = "flex flex-row " action="{{route('records.timetables.store')}}" method="POST">
+        <form class = "flex flex-row " action="{{route('timetables.store')}}" method="POST">
             @csrf
 
             <div class="flex flex-col">
@@ -34,7 +34,7 @@
                     />
                 </div>
                 <div class="flex flex-row w-full justify-between items-center">
-                    <a href="{{route('records.timetables.index')}}">Back</a>
+                    <a href="{{route('timetables.index')}}">Back</a>
                     <button type="submit">Create</button>
                 </div>
             </div>

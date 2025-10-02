@@ -8,5 +8,5 @@
     <p>Room Type: {{$room->room_type}}</p>
     <p>Capacity: {{$room->room_capacity ?? 'N/A'}}</p>
     <p>Course Type Exclusive To: {{$room->course_type_exclusive_to}}</p>
-    <a href="{{route('records.rooms.index')}}">Back</a>
+    <a href="{{route('rooms.index')}}">Back</a>
 @endsection

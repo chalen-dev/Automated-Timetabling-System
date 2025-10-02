@@ -71,7 +71,7 @@ class RoomExclusiveDayController extends Controller
             ]);
         }
 
-        return redirect()->route('records.rooms.room-exclusive-days.index', $room)
+        return redirect()->route('rooms.room-exclusive-days.index', $room)
             ->with('success', 'Exclusive days have been added successfully.');
 
     }
@@ -88,7 +88,7 @@ class RoomExclusiveDayController extends Controller
         $roomExclusiveDay->delete();
 
         return redirect()
-            ->route('records.rooms.room-exclusive-days.index', $room)
+            ->route('rooms.room-exclusive-days.index', $room)
             ->with('success', 'Exclusive day deleted successfully.');
     }
 }

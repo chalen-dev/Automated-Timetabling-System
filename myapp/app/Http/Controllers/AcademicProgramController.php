@@ -36,7 +36,7 @@ class AcademicProgramController extends Controller
         ]);
 
         AcademicProgram::create($validatedData);
-        return redirect()->route('records.academic-programs.index')
+        return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program created successfully.');
     }
 
@@ -68,7 +68,7 @@ class AcademicProgramController extends Controller
         ]);
 
         $academicProgram->update($validatedData);
-        return redirect()->route('records.academic-programs.index')
+        return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program updated successfully');
     }
 
@@ -78,7 +78,7 @@ class AcademicProgramController extends Controller
     public function destroy(AcademicProgram $academicProgram)
     {
         $academicProgram->delete();
-        return redirect()->route('records.academic-programs.index')
+        return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program deleted successfully');
     }
 }
