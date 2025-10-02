@@ -48,13 +48,6 @@ class RoomController extends Controller
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',
-            'monday_exclusive' => 'required|boolean',
-            'tuesday_exclusive' => 'required|boolean',
-            'wednesday_exclusive' => 'required|boolean',
-            'thursday_exclusive' => 'required|boolean',
-            'friday_exclusive' => 'required|boolean',
-            'saturday_exclusive' => 'required|boolean',
-            'sunday_exclusive' => 'required|boolean',
         ]);
 
         Room::create($validatedData);
@@ -90,13 +83,6 @@ class RoomController extends Controller
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',
-            'monday_exclusive' => 'required|boolean',
-            'tuesday_exclusive' => 'required|boolean',
-            'wednesday_exclusive' => 'required|boolean',
-            'thursday_exclusive' => 'required|boolean',
-            'friday_exclusive' => 'required|boolean',
-            'saturday_exclusive' => 'required|boolean',
-            'sunday_exclusive' => 'required|boolean',
         ]);
 
         $room->update($validatedData);
