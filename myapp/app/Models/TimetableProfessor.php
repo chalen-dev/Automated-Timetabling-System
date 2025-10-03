@@ -20,11 +20,6 @@ class TimetableProfessor extends Model
     }
 
     //Convenience Relationships (nge)
-    public function professors()
-    {
-        return $this->belongsToMany(Professor::class, 'timetable_professors');
-    }
-
     public function academicProgram()
     {
         return $this->hasOneThrough(
