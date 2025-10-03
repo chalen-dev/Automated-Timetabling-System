@@ -13,7 +13,8 @@
             <tr>
                 <td>First Name</td>
                 <td>Last Name</td>
-                <td>Professor Type</td>
+                <td>Regular/Non-Regular</td>
+                <td>Academic Program</td>
                 <td>Max Unit Load</td>
                 <td>Course Specializations</td>
                 <td></td>
@@ -25,6 +26,7 @@
                 <td class="flex-2">{{$professor->first_name}}</td>
                 <td class="flex-2">{{$professor->last_name}}</td>
                 <td class="flex-2">{{$professor->professor_type}}</td>
+                <td class="flex-2">{{$professor->academicProgram?->program_abbreviation ?? 'N/A'}}</td>
                 <td class="flex-2">{{$professor->max_unit_load}}</td>
                 <td class="flex-2">
                     {{ $professor->courses->pluck('course_title')->implode(', ') ?: 'N/A' }}

@@ -15,21 +15,23 @@ TimetableProfessorController extends Controller
      */
     public function index(Timetable $timetable)
     {
-        return view('timetabling.timetable-professors.index', compact('timetable'));
+        $professors = $timetable->professors;
+        return view('timetabling.timetable-professors.index', compact('timetable', 'professors'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Timetable $timetable)
     {
-        //
+        $professors = Professor::all();
+        return view('timetabling.timetable-professors.create', compact('timetable', 'professors'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Timetable $timetable)
     {
         //
     }
@@ -37,7 +39,7 @@ TimetableProfessorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TimetableProfessor $timetableProfessor)
+    public function show(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
         //
     }
@@ -45,7 +47,7 @@ TimetableProfessorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TimetableProfessor $timetableProfessor)
+    public function edit(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
         //
     }
@@ -53,7 +55,7 @@ TimetableProfessorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TimetableProfessor $timetableProfessor)
+    public function update(Request $request, Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
         //
     }
@@ -61,7 +63,7 @@ TimetableProfessorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TimetableProfessor $timetableProfessor)
+    public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
         //
     }

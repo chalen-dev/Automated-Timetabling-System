@@ -15,7 +15,7 @@
             </a>
         </li>
         <li>
-            <a href="">
+            <a href="{{route('timetables.timetable-professors.index', $timetable)}}">
                 Professors
             </a>
         </li>

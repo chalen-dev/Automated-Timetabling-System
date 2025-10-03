@@ -51,8 +51,9 @@ Route::middleware([Authenticate::class])->group(function () {
         Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
             ->only('index');
         Route::resource('timetables.session-groups', SessionGroupController::class)
-            ->only('index', 'create', 'edit', 'store', 'update', 'destroy');
-        Route::resource('timetables.timetable-professors', TimetableProfessorController::class);
+            ->except('show');
+        Route::resource('timetables.timetable-professors', TimetableProfessorController::class)
+            ->except('show');
 
     // Courses Routes
     Route::resource('courses', CourseController::class);

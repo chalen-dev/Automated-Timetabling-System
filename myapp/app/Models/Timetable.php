@@ -22,7 +22,9 @@ class Timetable extends Model
         return $this->hasMany(SessionGroup::class);
     }
 
-    public function timetableProfessors(){
-        return $this->hasMany(TimetableProfessor::class);
+    public function professors()
+    {
+        return $this->belongsToMany(Professor::class, 'timetable_professors')
+            ->withTimestamps();
     }
 }
