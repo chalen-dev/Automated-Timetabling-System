@@ -24,7 +24,8 @@ TimetableProfessorController extends Controller
      */
     public function create(Timetable $timetable)
     {
-        $professors = Professor::all();
+        $assignedProfessorIds = $timetable->professors->pluck('id');
+        $professors = Professor::whereNotIn('id', $assignedProfessorIds)->get();
         return view('timetabling.timetable-professors.create', compact('timetable', 'professors'));
     }
 
@@ -33,31 +34,25 @@ TimetableProfessorController extends Controller
      */
     public function store(Request $request, Timetable $timetable)
     {
-        //
-    }
+        $validatedData = $request->validate([
+            'professors' => 'required|array',
+            'professors.*' => 'exists:professors,id'
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Timetable $timetable, TimetableProfessor $timetableProfessor)
-    {
-        //
-    }
+        //No selection
+        if (empty($validatedData['professors'])) {
+            return view('timetabling.timetable-professors.create', [
+                'timetable' => $timetable,
+                'professors' => Professor::all(),
+                'message' => 'Must select a professor.'
+            ]);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Timetable $timetable, TimetableProfessor $timetableProfessor)
-    {
-        //
-    }
+        foreach($validatedData['professors'] as $professorId){
+            $timetable->professors()->attach($professorId);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Timetable $timetable, TimetableProfessor $timetableProfessor)
-    {
-        //
+        return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
 
     /**
@@ -65,6 +60,7 @@ TimetableProfessorController extends Controller
      */
     public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
-        //
+        $timetable->professors()->detach($timetableProfessor);
+        return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
 }

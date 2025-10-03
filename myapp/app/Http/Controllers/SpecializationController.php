@@ -40,7 +40,7 @@ class SpecializationController extends Controller
     public function store(Request $request, Professor $professor)
     {
         $validatedData = $request->validate([
-            'courses'   => 'array',
+            'courses'   => 'required|array',
             'courses.*' => 'exists:courses,id'
         ]);
 

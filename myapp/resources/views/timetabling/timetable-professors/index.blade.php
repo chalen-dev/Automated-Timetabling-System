@@ -20,11 +20,18 @@
             @foreach($professors as $professor)
             <tr>
                 <td>{{$professor->last_name}}, {{$professor->first_name}}</td>
-                <td></td>
-                <td>{{$professor->specializations->pluck('course.course_title')->implode(', ') ?: 'N/A'}}</td>
+                <td>{{$professor->academicProgram?->program_abbreviation ?? 'N/A'}} </td>
                 <td>{{$professor->professor_type}}</td>
                 <td>0/{{$professor->max_unit_load}}</td>
-                <
+                <td>{{$professor->specializations->pluck('course.course_title')->implode(', ') ?: 'N/A'}}</td>
+                <td>
+                    <x-buttons.delete
+                        action="timetables.timetable-professors.destroy"
+                        :params="[$timetable, $professor]"
+                        item_name="professor"
+                        btn_type="icon"
+                    />
+                </td>
             </tr>
             @endforeach
         </tbody>

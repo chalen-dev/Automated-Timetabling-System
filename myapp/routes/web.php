@@ -53,7 +53,7 @@ Route::middleware([Authenticate::class])->group(function () {
         Route::resource('timetables.session-groups', SessionGroupController::class)
             ->except('show');
         Route::resource('timetables.timetable-professors', TimetableProfessorController::class)
-            ->except('show');
+            ->only('index', 'create', 'store', 'destroy');
 
     // Courses Routes
     Route::resource('courses', CourseController::class);
@@ -62,7 +62,7 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::resource('professors', ProfessorController::class);
        //Specialization List
        Route::resource('professors.specializations', SpecializationController::class)
-           ->only('create', 'index', 'store', 'destroy');
+           ->only('index', 'create', 'store', 'destroy');
 
     // Academic Program Routes
     Route::resource('academic-programs', AcademicProgramController::class);

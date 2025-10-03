@@ -6,7 +6,7 @@
     <form action="{{route('professors.specializations.store', $professor)}}" method="POST">
         @csrf
 
-        <h3>Assign Courses to {{$professor->last_name}}, {{$professor->first_name}}</h3>
+        <h1>Assign Courses to {{$professor->last_name}}, {{$professor->first_name}}</h1>
         @if(isset($message))
             <div class="!text-red-500">{{ $message }}</div>
         @endif
@@ -29,7 +29,7 @@
                 @endforeach
             </tbody>
         </table>
-        <button type="submit">Confirm</button>
+        <button type="submit">Add</button>
         <a href="{{route('professors.specializations.index', $professor)}}">Back</a>
     </form>
 @endsection
