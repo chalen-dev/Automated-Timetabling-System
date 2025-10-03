@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicProgram;
+use App\Models\Course;
 use App\Models\Professor;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,7 @@ class ProfessorController extends Controller
 
     public function index()
     {
-        $professors = Professor::all();
+        $professors = Professor::with('specializations.course')->get();
         return view('records.professors.index', compact('professors'));
     }
 
@@ -56,8 +57,10 @@ class ProfessorController extends Controller
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
 
+
+
         Professor::create($validatedData);
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor created successfully.');
     }
 
@@ -75,10 +78,11 @@ class ProfessorController extends Controller
      */
     public function edit(Professor $professor)
     {
+        $courses = Course::all();
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $genderOptions = $this->genderOptions;
         $professorTypeOptions = $this->professorTypeOptions;
-        return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions'));
+        return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions', 'courses'));
     }
 
     /**
@@ -97,7 +101,7 @@ class ProfessorController extends Controller
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
         $professor->update($validatedData);
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor updated successfully.');
     }
 
@@ -107,7 +111,7 @@ class ProfessorController extends Controller
     public function destroy(Professor $professor)
     {
         $professor->delete();
-        return redirect()->route('records.professors.index')
+        return redirect()->route('professors.index')
             ->with('success', 'Professor deleted successfully.');
     }
 }

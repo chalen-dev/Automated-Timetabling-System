@@ -19,7 +19,7 @@ class UserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'], //regex is to disallow the use of certain special characters
             'email' => ['required', 'string', 'email', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[A-Z]/'],
         ]);
 
         //Create user, query to db
@@ -56,7 +56,7 @@ class UserController extends Controller
         //Attempt to login. This code automatically gives the user Auth when successful
         if (Auth::attempt([$fieldType => $request->login, 'password' => $request->password])) {
             //if login successful, redirect here
-            return redirect()->route('records.timetables.index');
+            return redirect()->route('timetables.index');
         }
         //if login failed, redirect back with error message
         return redirect()->back()->withErrors([

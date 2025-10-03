@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\RoomExclusiveDay;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -25,7 +26,9 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::all();
-        return view('records.rooms.index', compact('rooms'));
+        $room = Room::first();
+        $exclusiveDays = $room->roomExclusiveDays->pluck('exclusive_day')->toArray();
+        return view('records.rooms.index', compact('rooms', 'exclusiveDays'));
     }
 
     /**
@@ -44,14 +47,14 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'room_name' => 'required|string',
+            'room_name' => 'required|string|unique:rooms,room_name',
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',
         ]);
 
         Room::create($validatedData);
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room created successfully.');
     }
 
@@ -79,14 +82,14 @@ class RoomController extends Controller
     public function update(Request $request, Room $room)
     {
         $validatedData = $request->validate([
-            'room_name' => 'required|string',
+            'room_name' => 'required|string|unique:rooms,room_name,' . $room->id,
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',
         ]);
 
         $room->update($validatedData);
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room updated successfully.');
     }
 
@@ -96,7 +99,7 @@ class RoomController extends Controller
     public function destroy(Room $room)
     {
         $room->delete();
-        return redirect()->route('records.rooms.index')
+        return redirect()->route('rooms.index')
             ->with('success', 'Room deleted successfully.');
     }
 }

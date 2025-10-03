@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en" x-data>
 <head>
@@ -13,37 +15,44 @@
         })
     </script>
 </head>
+<body class="overflow-x-hidden">
 
-<body class="bg-page flex flex-col align-center ">
-
-    @include('includes.notif.flash-message')
-
-<!-- SIDEBAR -->
-    @auth
-        <x-sidebar.sidebar />
-    @endauth
+@include('includes.notif.flash-message')
 
 <!-- HEADER -->
-        <header class="topbar">
-            @guest
-                @include('components.headers.guest-header')
-            @endguest
-            @auth
-                @include('components.headers.auth-header')
-            @endauth
-        </header>
-<!-- MAIN CONTENT -->
-        <main>
-            <div>
-                @yield('content')
-            </div>
-            <div>
-                @guest
-                    @include('components.footers.footer')
-                @endguest
-            </div>
-        </main>
+<header>
+    @guest
+        @include('components.headers.guest-header')
+    @endguest
+    @auth
+        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+        @if (request()->routeIs('timetables.*.*'))
+            @include('components.headers.timetabling-header')
+        @else
+            @include('components.headers.auth-header')
+        @endif
+    @endauth
+</header>
+<!--Varying padding top values for varying headers-->
+<div class="flex h-screen {{ request()->routeIs('timetables.*.*') ? 'pt-0' : 'pt-16' }}">
+    <!-- SIDEBAR -->
+    @auth
+        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+        @if(request()->routeIs('timetables.*.*'))
+            <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
+        @else
+            <x-sidebars.sidebar />
+        @endif
+    @endauth
 
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 transition-all p-6">
+        @yield('content')
+        @guest
+            @include('components.footers.footer')
+        @endguest
+    </main>
+</div>
 
 </body>
 </html>

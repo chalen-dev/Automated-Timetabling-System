@@ -16,4 +16,8 @@ class AcademicProgram extends Model
     public function professors(){
         return $this->hasMany(Professor::class);
     }
+
+    public function sessionGroups(){
+        return $this->hasMany(SessionGroup::class);
+    }
 }
