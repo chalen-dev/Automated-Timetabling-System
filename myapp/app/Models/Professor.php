@@ -23,17 +23,17 @@ class Professor extends Model
     }
 
     //A professor can have many specializations (one to many)
-    public function specialization(){
+    public function specializations(){
         return $this->hasMany(Specialization::class);
     }
 
     //Convenience accessor for courses yeah
-    public function course()
+    public function courses()
     {
         return $this->hasManyThrough(Course::class, Specialization::class, 'professor_id', 'id', 'id', 'course_id');
     }
 
-    public function timetableProfessor(){
+    public function timetableProfessors(){
         return $this->hasMany(TimetableProfessor::class);
     }
 }

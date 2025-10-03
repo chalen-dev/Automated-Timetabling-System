@@ -65,7 +65,7 @@ class RoomExclusiveDayController extends Controller
         }
 
         foreach($validatedData['exclusive_days'] as $exclusive_day) {
-            $room->roomExclusiveDay()->firstOrCreate([
+            $room->roomExclusiveDays()->firstOrCreate([
                 'room_id' => $room->id,
                 'exclusive_day' => $exclusive_day
             ]);

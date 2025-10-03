@@ -27,7 +27,7 @@
                 <td class="flex-2">{{$professor->professor_type}}</td>
                 <td class="flex-2">{{$professor->max_unit_load}}</td>
                 <td class="flex-2">
-                    {{ $professor->course->pluck('course_title')->implode(', ') ?: 'N/A' }}
+                    {{ $professor->courses->pluck('course_title')->implode(', ') ?: 'N/A' }}
                 </td>
                 <td class="whitespace-nowrap w-fit px-2">
                     <div class="flex flex-row gap-10 justify-end">

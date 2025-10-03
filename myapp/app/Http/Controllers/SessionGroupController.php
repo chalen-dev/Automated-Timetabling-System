@@ -19,7 +19,7 @@ class SessionGroupController extends Controller
      */
     public function index(Timetable $timetable)
     {
-        $sessionGroups = $timetable->sessionGroup()
+        $sessionGroups = $timetable->sessionGroups()
             ->with('academicProgram')
             ->get()
             ->groupBy('program_id');

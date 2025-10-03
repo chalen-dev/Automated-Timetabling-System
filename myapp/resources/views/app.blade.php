@@ -34,7 +34,7 @@
     @endauth
 </header>
 <!--Varying padding top values for varying headers-->
-<div class="flex h-screen {{ request()->routeIs('timetables.*.*') ? 'pt-0' : 'pt-16' }}">
+<div class="flex h-screen">
     <!-- SIDEBAR -->
     @auth
         <!--If the route is any children routes of timetables route, but not the root timetable routes-->
