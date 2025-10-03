@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicProgram;
 use App\Models\SessionGroup;
 use App\Models\Timetable;
 use Illuminate\Http\Request;
 class SessionGroupController extends Controller
 {
-    protected $yearLevelOptions = [
-        '1st' => '1st'
+    protected $year_level_options = [
+        '1st' => '1st',
+        '2nd' => '2nd',
+        '3rd' => '3rd',
+        '4th' => '4th',
     ];
     /**
      * Display a listing of the resource.
      */
     public function index(Timetable $timetable)
     {
-        $sessionGroups = SessionGroup::all();
+        $sessionGroups = $timetable->sessionGroups()
+            ->with('academicProgram')
+            ->get()
+            ->groupBy('program_id');
+
         return view('timetabling.timetable-session-groups.index', compact('timetable', 'sessionGroups'));
     }
 
@@ -24,7 +32,9 @@ class SessionGroupController extends Controller
      */
     public function create(Timetable $timetable)
     {
-        return view('timetabling.timetable-session-groups.create', compact('timetable'));
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        $year_level_options = $this->year_level_options;
+        return view('timetabling.timetable-session-groups.create', compact('timetable', 'academic_program_options', 'year_level_options'));
     }
 
     /**
@@ -35,13 +45,12 @@ class SessionGroupController extends Controller
         $validatedData = $request->validate([
             'group_name' => 'required|string',
             'year_level' => 'required|string',
-            'program_id' => 'required|exists:academic_programs,id',
+            'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
 
         $validatedData['timetable_id'] = $request->route('timetable')->id;
         SessionGroup::create($validatedData);
 
-        SessionGroup::create($validatedData);
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session created successfully.');
     }
@@ -49,7 +58,7 @@ class SessionGroupController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SessionGroup $sessionGroup, Timetable $timetable)
+    public function edit(Timetable $timetable, SessionGroup $sessionGroup)
     {
         return view('timetabling.timetable-session-groups.edit', compact('sessionGroup', 'timetable'));
     }
@@ -57,12 +66,12 @@ class SessionGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SessionGroup $sessionGroup, Timetable $timetable)
+    public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
             'group_name' => 'required|string',
             'year_level' => 'required|string',
-            'program_id' => 'required|exists:academic_programs,id',
+            'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
 
         $sessionGroup->update($validatedData);
@@ -74,7 +83,7 @@ class SessionGroupController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SessionGroup $sessionGroup, Timetable $timetable)
+    public function destroy(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $sessionGroup->delete();
         return redirect()->route('timetables.session-groups.index', $timetable)

@@ -9,7 +9,7 @@ class SessionGroup extends Model
     protected $fillable = [
         'group_name',
         'year_level',
-        'program_id',
+        'academic_program_id',
         'timetable_id',
     ];
 

@@ -31,7 +31,7 @@ class AcademicProgramController extends Controller
     {
         $validatedData = $request->validate([
             'program_name' => 'required|string',
-            'program_abbreviation' => 'required|string',
+            'program_abbreviation' => 'required|string|unique:academic_programs',
             'program_description' => 'nullable|string',
         ]);
 
@@ -63,7 +63,7 @@ class AcademicProgramController extends Controller
     {
         $validatedData = $request -> validate([
             'program_name' => 'required|string',
-            'program_abbreviation' => 'required|string',
+            'program_abbreviation' => 'required|unique:academic_programs,program_abbreviation,' . $academicProgram->id, //Unique input except itself
             'program_description' => 'nullable|string',
         ]);
 

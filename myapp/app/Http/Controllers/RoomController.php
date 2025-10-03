@@ -82,7 +82,7 @@ class RoomController extends Controller
     public function update(Request $request, Room $room)
     {
         $validatedData = $request->validate([
-            'room_name' => 'required|string',
+            'room_name' => 'required|string|unique:rooms,room_name,' . $room->id,
             'room_type' => 'required|string',
             'course_type_exclusive_to' => 'required|string',
             'room_capacity' => 'nullable|integer|min:0|max:50',

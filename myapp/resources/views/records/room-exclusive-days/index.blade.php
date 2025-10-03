@@ -20,7 +20,7 @@
                     <x-buttons.delete
                         action="rooms.room-exclusive-days.destroy"
                         :params="[$room, $day]" {{-- this passes the model, so route gets /room-exclusive-days/{id} --}}
-                        item_name="room exclusive day"
+                        item_name="day"
                         btnType="icon"
                     />
                 </td>

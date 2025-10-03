@@ -18,7 +18,7 @@ class Timetable extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function sessionGroup(){
+    public function sessionGroups(){
         return $this->hasMany(SessionGroup::class);
     }
 }
