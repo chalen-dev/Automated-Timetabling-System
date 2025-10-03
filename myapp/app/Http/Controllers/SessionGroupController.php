@@ -19,7 +19,7 @@ class SessionGroupController extends Controller
      */
     public function index(Timetable $timetable)
     {
-        $sessionGroups = $timetable->sessionGroups()
+        $sessionGroups = $timetable->sessionGroup()
             ->with('academicProgram')
             ->get()
             ->groupBy('program_id');
@@ -60,7 +60,9 @@ class SessionGroupController extends Controller
      */
     public function edit(Timetable $timetable, SessionGroup $sessionGroup)
     {
-        return view('timetabling.timetable-session-groups.edit', compact('sessionGroup', 'timetable'));
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        $year_level_options = $this->year_level_options;
+        return view('timetabling.timetable-session-groups.edit', compact('sessionGroup', 'timetable', 'academic_program_options', 'year_level_options'));
     }
 
     /**

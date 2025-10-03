@@ -3,7 +3,7 @@
 @section('title', 'Create Class Session')
 
 @section('content')
-    <h1>Create Class Section</h1>
+    <h1>Create Class Session</h1>
     <form action="{{route('timetables.session-groups.store', $timetable)}}" method="post">
         @csrf
 

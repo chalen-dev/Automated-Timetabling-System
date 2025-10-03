@@ -13,11 +13,11 @@ class AcademicProgram extends Model
     ];
 
     //An academic program has many professors (one to many)
-    public function professors(){
+    public function professor(){
         return $this->hasMany(Professor::class);
     }
 
-    public function sessionGroups(){
+    public function sessionGroup(){
         return $this->hasMany(SessionGroup::class);
     }
 }

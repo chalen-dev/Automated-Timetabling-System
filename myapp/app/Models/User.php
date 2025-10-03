@@ -46,7 +46,7 @@ class User extends Authenticatable //implements MustVerifyEmail
         ];
     }
 
-    public function timetables()
+    public function timetable()
     {
         return $this->hasMany(Timetable::class);
     }

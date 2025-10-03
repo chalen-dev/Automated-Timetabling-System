@@ -15,7 +15,6 @@
             <h2>
                 Program: {{ $groups->first()->academicProgram->program_abbreviation ?? 'Unknown' }}
             </h2>
-
             <ul>
                 @foreach($groups as $sessionGroup)
                     <li class="flex w-full">

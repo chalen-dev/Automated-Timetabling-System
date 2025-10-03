@@ -26,7 +26,7 @@ class ProfessorController extends Controller
 
     public function index()
     {
-        $professors = Professor::with('specializations.course')->get();
+        $professors = Professor::with('specialization.course')->get();
         return view('records.professors.index', compact('professors'));
     }
 

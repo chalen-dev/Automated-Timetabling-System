@@ -16,7 +16,7 @@ class SpecializationController extends Controller
     {
         $courses = Course::all();
         //Get all specializations tied for the professor
-        $specializations = $professor->specializations()->with('course')->get();
+        $specializations = $professor->specialization()->with('course')->get();
         return view('records.specializations.index', compact('specializations', 'professor', 'courses'));
     }
 
@@ -26,7 +26,7 @@ class SpecializationController extends Controller
     public function create(Professor $professor)
     {
         // get all course IDs already assigned to the professor
-        $assignedCourseIds = $professor->specializations()->pluck('course_id')->toArray();
+        $assignedCourseIds = $professor->specialization()->pluck('course_id')->toArray();
 
         // only get unassigned courses
         $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
@@ -54,7 +54,7 @@ class SpecializationController extends Controller
         }
 
         foreach ($validatedData['courses'] as $courseId) {
-            $professor->specializations()->create([
+            $professor->specialization()->create([
                 'course_id' => $courseId,
             ]);
         }

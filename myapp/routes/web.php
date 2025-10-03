@@ -10,6 +10,7 @@ use App\Http\Controllers\SessionGroupController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\TimetableEditingPaneController;
+use App\Http\Controllers\TimetableProfessorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\Authenticate;
@@ -50,7 +51,8 @@ Route::middleware([Authenticate::class])->group(function () {
         Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
             ->only('index');
         Route::resource('timetables.session-groups', SessionGroupController::class)
-            ->only('index', 'create', 'edit', 'store', 'edit', 'destroy');
+            ->only('index', 'create', 'edit', 'store', 'update', 'destroy');
+        Route::resource('timetables.timetable-professors', TimetableProfessorController::class);
 
     // Courses Routes
     Route::resource('courses', CourseController::class);

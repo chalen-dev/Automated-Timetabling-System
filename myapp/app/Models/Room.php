@@ -13,7 +13,7 @@ class Room extends Model
         'room_capacity',
     ];
 
-    public function roomExclusiveDays(){
+    public function roomExclusiveDay(){
         return $this->hasMany(RoomExclusiveDay::class);
     }
 }
