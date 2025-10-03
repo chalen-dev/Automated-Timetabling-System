@@ -25,7 +25,8 @@
         @include('components.headers.guest-header')
     @endguest
     @auth
-        @if(request()->routeIs('timetables.timetable-editing-pane.index'))
+        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+        @if (request()->routeIs('timetables.*.*'))
             @include('components.headers.timetabling-header')
         @else
             @include('components.headers.auth-header')
@@ -33,11 +34,12 @@
     @endauth
 </header>
 <!--Varying padding top values for varying headers-->
-<div class="flex h-screen {{ request()->routeIs('timetables.timetable-editing-pane.index') ? 'pt-0' : 'pt-16' }}">
+<div class="flex h-screen {{ request()->routeIs('timetables.*.*') ? 'pt-0' : 'pt-16' }}">
     <!-- SIDEBAR -->
     @auth
-        @if(request()->routeIs('timetables.timetable-editing-pane.index'))
-            <x-sidebars.timetabling-sidebar />
+        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+        @if(request()->routeIs('timetables.*.*'))
+            <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
         @else
             <x-sidebars.sidebar />
         @endif

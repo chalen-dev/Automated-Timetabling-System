@@ -6,6 +6,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomExclusiveDayController;
+use App\Http\Controllers\SessionGroupController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\TimetableEditingPaneController;
@@ -48,6 +49,8 @@ Route::middleware([Authenticate::class])->group(function () {
     //Timetabling Editing Pane
         Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
             ->only('index');
+        Route::resource('timetables.session-groups', SessionGroupController::class)
+            ->only('index', 'create', 'edit', 'store', 'edit', 'destroy');
 
     // Courses Routes
     Route::resource('courses', CourseController::class);
