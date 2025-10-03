@@ -43,7 +43,7 @@ class SessionGroupController extends Controller
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
-            'group_name' => 'required|string',
+            'session_name' => 'required|string|unique:session_groups,session_name',
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
@@ -69,7 +69,7 @@ class SessionGroupController extends Controller
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
-            'group_name' => 'required|string',
+            'session_name' => 'required|string|unique:session_groups, session_name' . $sessionGroup->id,
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);

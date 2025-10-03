@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('session_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('group_name');
+            $table->string('session_name');
             $table->enum('year_level', ['1st', '2nd', '3rd', '4th']);
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
             $table->foreignId('timetable_id')->constrained('timetables')->cascadeOnDelete();

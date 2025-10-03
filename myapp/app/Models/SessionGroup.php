@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SessionGroup extends Model
 {
     protected $fillable = [
-        'group_name',
+        'session_name',
         'year_level',
         'academic_program_id',
         'timetable_id',

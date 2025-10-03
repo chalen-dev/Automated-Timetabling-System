@@ -9,7 +9,7 @@
 
         <x-input.text
             label="Session Name"
-            name="group_name"
+            name="session_name"
         />
 
         <x-input.select

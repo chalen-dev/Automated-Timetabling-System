@@ -19,7 +19,7 @@
             <ul>
                 @foreach($groups as $sessionGroup)
                     <li class="flex w-full">
-                        <p>{{ $sessionGroup->group_name }}</p>
+                        <p>{{ $sessionGroup->session_name }}</p>
                         <a href="{{ route('timetables.session-groups.edit', [$timetable, $sessionGroup]) }}">Edit</a>
                         <x-buttons.delete
                             action="timetables.session-groups.destroy"
