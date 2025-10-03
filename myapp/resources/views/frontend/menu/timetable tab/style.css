@@ -84,7 +84,7 @@ header.topbar{
     color:#fff;
 }
 
-/* Overlay when sidebar is open */
+/* Overlay when sidebars is open */
 .overlay{
     position:fixed;
     inset:0;

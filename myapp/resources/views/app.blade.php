@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en" x-data>
 <head>
@@ -30,14 +32,14 @@
         @endif
     @endauth
 </header>
-
-<div class="flex h-screen pt-16">
+<!--Varying padding top values for varying headers-->
+<div class="flex h-screen {{ request()->routeIs('timetables.timetable-editing-pane.index') ? 'pt-0' : 'pt-16' }}">
     <!-- SIDEBAR -->
     @auth
         @if(request()->routeIs('timetables.timetable-editing-pane.index'))
-            <x-sidebar.timetabling-sidebar />
+            <x-sidebars.timetabling-sidebar />
         @else
-            <x-sidebar.sidebar />
+            <x-sidebars.sidebar />
         @endif
     @endauth
 
