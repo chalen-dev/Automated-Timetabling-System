@@ -59,9 +59,9 @@ TimetableProfessorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Timetable $timetable, Professor $professor)
+    public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
-        $timetable->professors()->detach($professor->id);
+        $timetable->professors()->detach($timetableProfessor->id);
 
         return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
