@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
             $table->foreignId('timetable_id')->constrained('timetables')->onDelete('cascade');
+            $table->unique(['room_id', 'timetable_id']);
             $table->timestamps();
         });
     }

@@ -31,4 +31,13 @@ class Timetable extends Model
             'professor_id'
         );
     }
+
+    public function rooms(){
+        return $this->belongsToMany(
+            Room::class,
+            'timetable_rooms',
+            'timetable_id',
+            'room_id'
+        );
+    }
 }

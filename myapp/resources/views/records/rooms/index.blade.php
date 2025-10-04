@@ -20,7 +20,7 @@
                 <td>Room Name</td>
                 <td>Room Type</td>
                 <td>Room Capacity</td>
-                <td>Exclusive Days</td>
+                <td>Class Days</td>
                 <td></td>
             </tr>
         </thead>
@@ -39,7 +39,7 @@
                             ->map(fn($day) => ucfirst($day)) //Makes each day of the Week have uppercase first letter
                             ->implode(', ')
                         :
-                        'N/A'
+                        'No Specific Day/s'
                     }}
                 </td>
                 <td class="whitespace-nowrap px-2">

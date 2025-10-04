@@ -14,7 +14,7 @@ class TimetableRoomController extends Controller
      */
     public function index(Timetable $timetable)
     {
-        $rooms = $timetable->room;
+        $rooms = $timetable->rooms;
         return view('timetabling.timetable-rooms.index', compact('timetable', 'rooms'));
     }
 
@@ -23,8 +23,9 @@ class TimetableRoomController extends Controller
      */
     public function create(Timetable $timetable)
     {
-        $assignedRoomIds = $timetable->room;
-        return view('timetabling.timetable-rooms.index', compact('timetable', 'assignedRoomIds'));
+        $assignedRoomIds = $timetable->rooms->pluck('id');
+        $rooms = Room::whereNotIn('id', $assignedRoomIds)->get();
+        return view('timetabling.timetable-rooms.create', compact('timetable', 'rooms'));
     }
 
     /**
@@ -52,7 +53,7 @@ class TimetableRoomController extends Controller
             $timetable->rooms()->attach($roomId);
         }
 
-        return redirect()->route('timetables.timetable-professors.index', $timetable);
+        return redirect()->route('timetables.timetable-rooms.index', $timetable);
     }
 
     /**
@@ -61,6 +62,6 @@ class TimetableRoomController extends Controller
     public function destroy(Timetable $timetable, TimetableRoom $timetableRoom)
     {
         $timetable->rooms()->detach($timetableRoom->id);
-        return redirect()->route('timetables.timetable-professors.index', $timetable);
+        return redirect()->route('timetables.timetable-rooms.index', $timetable);
     }
 }
