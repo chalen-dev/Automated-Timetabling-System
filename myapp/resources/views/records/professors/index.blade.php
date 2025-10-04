@@ -7,6 +7,12 @@
         <h1>List of Professors</h1>
         <a href="{{route('professors.create')}}">Create</a>
     </div>
+    <form action="{{ route('table.fill', 'professors') }}" method="POST" class="mb-4">
+        @csrf
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+            Fill Professors
+        </button>
+    </form>
 
     <table class="w-full">
         <thead>

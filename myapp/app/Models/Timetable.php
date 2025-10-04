@@ -24,7 +24,11 @@ class Timetable extends Model
 
     public function professors()
     {
-        return $this->belongsToMany(Professor::class, 'timetable_professors')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            Professor::class,
+            'timetable_professors',
+            'timetable_id',
+            'professor_id'
+        );
     }
 }

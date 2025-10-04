@@ -7,6 +7,12 @@
         <h1>Rooms</h1>
         <a href="{{route('rooms.create')}}">Create</a>
     </div>
+    <form action="{{ route('table.fill', 'rooms') }}" method="POST" class="mb-4">
+        @csrf
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
+            Fill Rooms
+        </button>
+    </form>
 
     <table class="w-full">
         <thead>

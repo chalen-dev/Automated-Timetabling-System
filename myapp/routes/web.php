@@ -8,9 +8,11 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomExclusiveDayController;
 use App\Http\Controllers\SessionGroupController;
 use App\Http\Controllers\SpecializationController;
+use App\Http\Controllers\TableFillController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\TimetableEditingPaneController;
 use App\Http\Controllers\TimetableProfessorController;
+use App\Http\Controllers\TimetableRoomController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\Authenticate;
@@ -41,6 +43,9 @@ Route::middleware('guest')->group(function () {
 // Authenticated Routes
 Route::middleware([Authenticate::class])->group(function () {
 
+    //Test (Fill Tables with Values)
+    Route::post('/fill-table/{table}', [TableFillController::class, 'fill'])->name('table.fill');
+
     //Logout
     Route::post('/logout', [UserController::class, 'logout'])
         ->name('logout');
@@ -53,6 +58,8 @@ Route::middleware([Authenticate::class])->group(function () {
         Route::resource('timetables.session-groups', SessionGroupController::class)
             ->except('show');
         Route::resource('timetables.timetable-professors', TimetableProfessorController::class)
+            ->only('index', 'create', 'store', 'destroy');
+        Route::resource('timetables.timetable-rooms', TimetableRoomController::class)
             ->only('index', 'create', 'store', 'destroy');
 
     // Courses Routes

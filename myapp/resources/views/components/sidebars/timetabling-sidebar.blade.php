@@ -20,7 +20,7 @@
             </a>
         </li>
         <li>
-            <a href="">
+            <a href="{{route('timetables.timetable-rooms.index', $timetable)}}">
                 Rooms
             </a>
         </li>

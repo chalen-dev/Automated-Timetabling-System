@@ -35,15 +35,16 @@ TimetableProfessorController extends Controller
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
-            'professors' => 'required|array',
+            'professors' => 'array',
             'professors.*' => 'exists:professors,id'
         ]);
-
+        $assignedProfessorIds = $timetable->professors->pluck('id');
+        $professors = Professor::whereNotIn('id', $assignedProfessorIds)->get();
         //No selection
         if (empty($validatedData['professors'])) {
             return view('timetabling.timetable-professors.create', [
                 'timetable' => $timetable,
-                'professors' => Professor::all(),
+                'professors' => $professors,
                 'message' => 'Must select a professor.'
             ]);
         }
@@ -58,9 +59,10 @@ TimetableProfessorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
+    public function destroy(Timetable $timetable, Professor $professor)
     {
-        $timetable->professors()->detach($timetableProfessor);
+        $timetable->professors()->detach($professor->id);
+
         return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
 }
