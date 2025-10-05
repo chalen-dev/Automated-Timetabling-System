@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('session_group_id')->references('id')->on('session_groups')->onDelete('cascade');
             $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
-            $table->enum('academic_term', ['1st' ,'2nd', 'semestral']);
+            $table->enum('academic_term', ['1st', '2nd', 'semestral'])->nullable();
             $table->timestamps();
         });
     }
