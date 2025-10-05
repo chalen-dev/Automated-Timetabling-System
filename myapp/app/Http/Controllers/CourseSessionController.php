@@ -70,15 +70,16 @@ class CourseSessionController extends Controller
     public function updateTerm(Request $request, Timetable $timetable, SessionGroup $sessionGroup, CourseSession $courseSession)
     {
         $validated = $request->validate([
-            'academic_term' => 'required|in:1st,2nd,semestral',
+            'academic_term' => 'required|array',
+            'academic_term.*' => 'required|in:1st,2nd,semestral',
         ]);
 
         $courseSession->update([
-            'academic_term' => $validated['academic_term'],
+            'academic_term' => $validated['academic_term'][$courseSession->id],
         ]);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
-            ->with('success', 'Academic term updated successfully!');
+            ->with('success', 'Academic term updated!');
     }
 
 

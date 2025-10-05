@@ -14,6 +14,12 @@ class SessionGroupController extends Controller
         '3rd' => '3rd',
         '4th' => '4th',
     ];
+
+    protected $academic_term_options = [
+        '1st' => '1st',
+        '2nd' => '2nd',
+        'semestral' => 'Semestral'
+    ];
     /**
      * Display a listing of the resource.
      */

@@ -5,11 +5,6 @@
 @section('content')
     <h1>{{$timetable->timetable_name}} Class Sessions</h1>
     <a href="{{route('timetables.session-groups.create', $timetable)}}">Add</a>
-    <table>
-        <thead>
-
-        </thead>
-    </table>
     @foreach($sessionGroupsByProgram as $programId => $groups)
         <h2>
             Program: {{ $groups->first()->academicProgram->program_abbreviation ?? 'Unknown' }}
@@ -32,27 +27,59 @@
                             />
                         </div>
                     </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <td>Course Title</td>
+                                <td>Course Name</td>
+                                <td>Units</td>
+                                <td>Type</td>
+                                <td>Academic Term</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($courseSessionsBySessionGroup[$sessionGroup->id] ?? [] as $courseSession)
+                            <tr>
+                                <td>{{ $courseSession->course->course_title ?? 'Unknown Course' }}</td>
+                                <td>{{ $courseSession->course->course_name }}</td>
+                                <td>{{$courseSession->course->unit_load}}</td>
+                                <td>{{$courseSession->course->course_type}}</td>
+                                <td>
+                                    <form method="POST" action="{{ route('timetables.session-groups.course-sessions.update-term', [$timetable, $sessionGroup, $courseSession]) }}">
+                                        @csrf
+                                        @method('PATCH')
 
+                                        <select
+                                            name="academic_term[{{ $courseSession->id }}]"
+                                            onchange="this.form.submit()"
+                                            @if($courseSession->course->duration_type === 'semestral') disabled @endif
+                                        >
+                                            @if($courseSession->course->duration_type === 'semestral')
+                                                <option value="semestral" selected>semestral</option>
+                                            @else
+                                                <option value="">-- Select Term --</option>
+                                                <option value="1st" {{ $courseSession->academic_term == '1st' ? 'selected' : '' }}>1st</option>
+                                                <option value="2nd" {{ $courseSession->academic_term == '2nd' ? 'selected' : '' }}>2nd</option>
+                                                <option value="semestral" {{ $courseSession->academic_term == 'semestral' ? 'selected' : '' }}>semestral</option>
+                                            @endif
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    <x-buttons.delete
+                                        action="timetables.session-groups.course-sessions.destroy"
+                                        :params="[$timetable, $sessionGroup, $courseSession]"
+                                        item_name="course session"
+                                        btnType="icon"
+                                    />
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                     {{-- Nested CourseSessions --}}
-                    <ul class="ml-6 mt-2">
-                        @foreach($courseSessionsBySessionGroup[$sessionGroup->id] ?? [] as $courseSession)
-                            <li class="flex items-center gap-2">
-                                {{ $courseSession->course->course_title ?? 'Unknown Course' }}
 
-                                <form method="POST" action="{{ route('timetables.session-groups.course-sessions.update-term', [$timetable, $sessionGroup, $courseSession]) }}">
-                                    @csrf
-                                    @method('PATCH') <!-- tells Laravel this is a PATCH request -->
-
-                                    <select name="academic_term" onchange="this.form.submit()">
-                                        <option value="">-- Select Term --</option>
-                                        <option value="1st" {{ $courseSession->academic_term == '1st' ? 'selected' : '' }}>1st</option>
-                                        <option value="2nd" {{ $courseSession->academic_term == '2nd' ? 'selected' : '' }}>2nd</option>
-                                        <option value="semestral" {{ $courseSession->academic_term == 'semestral' ? 'selected' : '' }}>semestral</option>
-                                    </select>
-                                </form>
-                            </li>
-                        @endforeach
-                    </ul>
                 </li>
             @endforeach
         </ul>
