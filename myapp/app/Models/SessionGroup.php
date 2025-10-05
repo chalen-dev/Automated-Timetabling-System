@@ -22,4 +22,8 @@ class SessionGroup extends Model
     {
         return $this->belongsTo(Timetable::class);
     }
+
+    public function courseSessions(){
+        return $this->hasMany(CourseSession::class, 'session_group_id');
+    }
 }

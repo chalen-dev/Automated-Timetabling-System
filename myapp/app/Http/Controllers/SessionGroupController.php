@@ -19,13 +19,29 @@ class SessionGroupController extends Controller
      */
     public function index(Timetable $timetable)
     {
+        // Load all SessionGroups with their CourseSessions and the related Course
         $sessionGroups = $timetable->sessionGroups()
-            ->with('academicProgram')
-            ->get()
-            ->groupBy('program_id');
+            ->with([
+                'courseSessions.course', // important: eager load Course for each CourseSession
+                'academicProgram'
+            ])
+            ->get();
 
-        return view('timetabling.timetable-session-groups.index', compact('timetable', 'sessionGroups'));
+        // Group SessionGroups by academic_program_id
+        $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id');
+
+        // Group CourseSessions by session_group_id (separate structure)
+        $courseSessionsBySessionGroup = $sessionGroups->mapWithKeys(function ($sessionGroup) {
+            return [$sessionGroup->id => $sessionGroup->courseSessions];
+        });
+
+        return view(
+            'timetabling.timetable-session-groups.index',
+            compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup')
+        );
     }
+
+
 
     /**
      * Show the form for creating a new resource.

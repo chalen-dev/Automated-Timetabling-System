@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('course_sessions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('session_group_id')->references('id')->on('session_groups');
+            $table->foreignId('course_id')->references('id')->on('courses');
+            $table->enum('academic_term', ['1st' ,'2nd', 'semestral']);
             $table->timestamps();
         });
     }

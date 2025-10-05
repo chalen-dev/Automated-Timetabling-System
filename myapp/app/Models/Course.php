@@ -16,5 +16,8 @@ class Course extends Model
         'unit_load',
         'duration_type'
     ];
-    
+
+    public function courseSessions(){
+        return $this->hasMany(CourseSession::class);
+    }
 }

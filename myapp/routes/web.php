@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\AcademicProgramController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomExclusiveDayController;
@@ -57,6 +58,11 @@ Route::middleware([Authenticate::class])->group(function () {
             ->only('index');
         Route::resource('timetables.session-groups', SessionGroupController::class)
             ->except('show');
+            Route::resource('timetables.session-groups.course-sessions', CourseSessionController::class);
+             Route::patch('timetables/{timetable}/session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
+            [CourseSessionController::class, 'updateTerm'])
+            ->name('timetables.session-groups.course-sessions.update-term');
+
         Route::resource('timetables.timetable-professors', TimetableProfessorController::class)
             ->only('index', 'create', 'store', 'destroy');
         Route::resource('timetables.timetable-rooms', TimetableRoomController::class)
