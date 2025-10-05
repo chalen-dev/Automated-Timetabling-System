@@ -93,7 +93,7 @@ class SessionGroupController extends Controller
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
-            'session_name' => 'required|string|unique:session_groups, session_name' . $sessionGroup->id,
+            'session_name' => 'required|string|unique:session_groups,session_name,' . $sessionGroup->id,
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);
