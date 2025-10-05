@@ -25,20 +25,28 @@ class SessionGroupController extends Controller
      */
     public function index(Timetable $timetable)
     {
-        // Load all SessionGroups with their CourseSessions and the related Course
+        // Load all SessionGroups with CourseSessions and Course
         $sessionGroups = $timetable->sessionGroups()
-            ->with([
-                'courseSessions.course', // important: eager load Course for each CourseSession
-                'academicProgram'
-            ])
+            ->with(['courseSessions.course', 'academicProgram'])
             ->get();
 
-        // Group SessionGroups by academic_program_id
-        $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id');
+        // Group SessionGroups by program
+        $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id')->map(function ($groups) {
+            // Within program, group by year_level (1st → 4th)
+            return $groups->sortBy(function ($g) {
+                // Map year_level to numbers for ordering
+                $map = ['1st' => 1, '2nd' => 2, '3rd' => 3, '4th' => 4];
+                return $map[$g->year_level] ?? 99;
+            });
+        });
 
-        // Group CourseSessions by session_group_id (separate structure)
+        // For each session group, sort CourseSessions by term order
         $courseSessionsBySessionGroup = $sessionGroups->mapWithKeys(function ($sessionGroup) {
-            return [$sessionGroup->id => $sessionGroup->courseSessions];
+            $termOrder = ['1st' => 1, '2nd' => 2, 'semestral' => 3];
+            $sorted = $sessionGroup->courseSessions->sortBy(function ($cs) use ($termOrder) {
+                return $termOrder[$cs->academic_term] ?? 99;
+            });
+            return [$sessionGroup->id => $sorted];
         });
 
         return view(
@@ -46,6 +54,7 @@ class SessionGroupController extends Controller
             compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup')
         );
     }
+
 
 
 
