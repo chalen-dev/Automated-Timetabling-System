@@ -7,13 +7,6 @@
         <h1>Academic Programs</h1>
         <a href="{{route('academic-programs.create')}}">Create</a>
     </div>
-    <form action="{{ route('table.fill', 'academic_programs') }}" method="POST" class="mb-4">
-        @csrf
-        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">
-            Fill Academic Programs
-        </button>
-    </form>
-
     <table class="w-full">
         <thead>
             <tr>

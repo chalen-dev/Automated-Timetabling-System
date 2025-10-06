@@ -45,7 +45,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware([Authenticate::class])->group(function () {
 
     //Test (Fill Tables with Values)
-    Route::post('/fill-table/{table}', [TableFillController::class, 'fill'])->name('table.fill');
+    Route::match(['get'], '/fill-table/{table}', [TableFillController::class, 'fill'])->name('table.fill');
 
     //Logout
     Route::post('/logout', [UserController::class, 'logout'])

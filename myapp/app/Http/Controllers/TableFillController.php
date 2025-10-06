@@ -14,6 +14,9 @@ class TableFillController extends Controller
 {
     public function fill($table)
     {
+        // convert URL-friendly names to actual table names
+        $table = str_replace('-', '_', $table);
+
         // Only allow these tables
         $allowedTables = ['academic_programs', 'courses', 'professors', 'rooms', 'session_groups'];
         if (!in_array($table, $allowedTables)) {
@@ -534,6 +537,15 @@ class TableFillController extends Controller
 
         }
 
-        return back()->with('success', ucfirst(str_replace('_',' ',$table)).' filled successfully!');
+        $message = ucfirst(str_replace('_',' ',$table)) . ' filled successfully!';
+
+        if (request()->isMethod('post')) {
+            // Only redirect after a POST request (like submitting a form)
+            return back()->with('success', $message);
+        }
+
+        // If GET, just stay on the same page (no redirect)
+        session()->flash('success', $message);
+        return redirect()->back();
     }
 }
