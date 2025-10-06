@@ -24,6 +24,11 @@
                 Rooms
             </a>
         </li>
+        <li>
+            <a href="{{route('timetables.generate-timetable.index', $timetable)}}">
+                Generate Timetable
+            </a>
+        </li>
     </ul>
     <div>
         <a href=""></a>

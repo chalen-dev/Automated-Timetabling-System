@@ -6,6 +6,8 @@ use App\Models\CourseSession;
 use App\Models\RoomExclusiveDay;
 use App\Models\Specialization;
 use App\Models\Timetable;
+use App\Models\TimetableProfessor;
+use App\Models\TimetableRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\AcademicProgram;
@@ -18,19 +20,23 @@ class TableFillController extends Controller
 {
     public function fill($table)
     {
+        //THIS CODE IS MEANT TO BE DIRTY FOLKS
         // convert URL-friendly names to actual table names
         $table = str_replace('-', '_', $table);
 
         // Only allow these tables
         $allowedTables = [
             'academic_programs',
-            'courses', 'professors',
+            'courses',
+            'professors',
             'rooms',
             'session_groups',
             'room_exclusive_days',
             'specializations',
             'timetables',
-            'course_sessions'
+            'course_sessions',
+            'timetable_professors',
+            'timetable_rooms'
         ];
         if (!in_array($table, $allowedTables)) {
             abort(403, 'Table not allowed.');
@@ -917,7 +923,7 @@ class TableFillController extends Controller
                 SessionGroup::insertOrIgnore($data);
                 break;
 
-                /*
+            /*
             case 'course_sessions':
                 $data = [
                     //COMSCI SESSION GROUP IDs
@@ -1224,7 +1230,7 @@ class TableFillController extends Controller
                 ];
                 CourseSession::insertOrIgnore($data);
                 break;
-                */ //Original Course Sessions
+            */ //Original Course Sessions
 
             case 'course_sessions':
                 $data = [
@@ -2047,6 +2053,106 @@ class TableFillController extends Controller
                 CourseSession::insertOrIgnore($data);
                 break;
 
+            case 'timetable_professors':
+                $data = [
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 1,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 2,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 3,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 4,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 5,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'professor_id' => 6,
+                    ],
+                ];
+                TimetableProfessor::insertOrIgnore($data);
+                break;
+
+            case 'timetable_rooms':
+                $data = [
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 1,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 2,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 3,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 4,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 5,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 6,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 7,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 8,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 9,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 10,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 11,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 12,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 13,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 14,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 15,
+                    ],
+                    [
+                        'timetable_id' => 1,
+                        'room_id' => 16,
+                    ],
+                ];
+
+                TimetableRoom::insertOrIgnore($data);
+                break;
         }
 
 
