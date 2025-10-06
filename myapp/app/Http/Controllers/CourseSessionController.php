@@ -14,22 +14,41 @@ class CourseSessionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Timetable $timetable, SessionGroup $sessionGroup)
+    public function create(Timetable $timetable, SessionGroup $sessionGroup, Request $request)
     {
-        // Optional: check if the SessionGroup belongs to this Timetable
+        // Ensure the session group belongs to this timetable
         if ($sessionGroup->timetable_id !== $timetable->id) {
             abort(404);
         }
 
         // Get IDs of courses already assigned to this SessionGroup
         $assignedCourseIds = $sessionGroup->courseSessions->pluck('course_id');
-        $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
+
+        // Start query for courses not yet assigned
+        $query = Course::whereNotIn('id', $assignedCourseIds);
+
+        // Apply search filter
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('course_title', 'like', "%{$search}%")
+                    ->orWhere('course_name', 'like', "%{$search}%")
+                    ->orWhere('course_type', 'like', "%{$search}%")
+                    ->orWhere('unit_load', 'like', "%{$search}%")
+                    ->orWhere('duration_type', 'like', "%{$search}%");
+            });
+        }
+
+        $courses = $query->get();
+
+        // Keep track of selected checkboxes from query string
+        $selected = $request->input('courses', []);
 
         return view(
             'timetabling.timetable-course-sessions.create',
-            compact('timetable', 'sessionGroup', 'courses')
+            compact('timetable', 'sessionGroup', 'courses', 'selected')
         );
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -83,13 +102,6 @@ class CourseSessionController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CourseSession $courseSession)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -108,10 +120,19 @@ class CourseSessionController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified course session from storage.
      */
-    public function destroy(CourseSession $courseSession)
+    public function destroy(Timetable $timetable, SessionGroup $sessionGroup, CourseSession $courseSession)
     {
-        //
+        // Optional safety check
+        if ($courseSession->session_group_id !== $sessionGroup->id || $sessionGroup->timetable_id !== $timetable->id) {
+            abort(404);
+        }
+
+        $courseSession->delete();
+
+        return redirect()
+            ->route('timetables.session-groups.index', $timetable)
+            ->with('success', 'Course session deleted successfully!');
     }
 }

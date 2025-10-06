@@ -3,13 +3,11 @@
 @section('title', 'Rooms')
 
 @section('content')
+    <h1>Rooms</h1>
     <div class="flex justify-between">
-        <h1>Rooms</h1>
+        <x-search-bar.search-bar :action="route('rooms.index')" placeholder="Search rooms, course, or days..." />
         <a href="{{route('rooms.create')}}">Create</a>
     </div>
-
-    <x-search-bar.search-bar :action="route('rooms.index')" placeholder="Search rooms, course, or days..." />
-
     <table class="w-full">
         <thead>
             <tr>
@@ -52,11 +50,7 @@
                         <x-buttons.delete action="rooms.destroy" :params='$room' item_name='room' btnType='icon'/>
                     </div>
                 </td>
-
-
-
             </tr>
-
             @endforeach
         </tbody>
     </table>

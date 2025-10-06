@@ -10,9 +10,17 @@ class AcademicProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $academicPrograms = AcademicProgram::all();
+        $search = $request->input('search');
+
+        $academicPrograms = AcademicProgram::query()
+            ->when($search, function ($query, $search) {
+                $query->where('program_name', 'like', "%{$search}%")
+                    ->orWhere('program_abbreviation', 'like', "%{$search}%");
+            })
+            ->get();
+
         return view('records.academic-programs.index', compact('academicPrograms'));
     }
 
