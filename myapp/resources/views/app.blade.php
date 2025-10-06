@@ -18,44 +18,46 @@
 
 @include('includes.notif.flash-message')
 
-<!-- HEADER -->
-<header>
-    @guest
-        @include('components.headers.guest-header')
-    @endguest
-    @auth
-        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
-        @if (request()->routeIs('timetables.*.*'))
-            @include('components.headers.timetabling-header')
-        @else
-            @include('components.headers.auth-header')
-        @endif
-    @endauth
-</header>
-<!--Varying padding top values for varying headers-->
-<div class="flex h-screen pt-16">
-    <!-- SIDEBAR -->
-    @auth
-        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
-        @if(request()->routeIs('timetables.*.*'))
-            <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
-        @else
-            <x-sidebars.sidebar />
-        @endif
-    @endauth
+    <div>
+    <!-- HEADER -->
+        <header>
+            @guest
+                @include('components.headers.guest-header')
+            @endguest
+            @auth
+                <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+                @if (request()->routeIs('timetables.*.*'))
+                    @include('components.headers.timetabling-header')
+                @else
+                    @include('components.headers.auth-header')
+                @endif
+            @endauth
+        </header>
+        <!--Varying padding top values for varying headers-->
+        <div class="flex h-screen pt-16">
+            <!-- SIDEBAR -->
+            @auth
+                <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+                @if(request()->routeIs('timetables.*.*'))
+                    <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
+                @else
+                    <x-sidebars.sidebar />
+                @endif
+            @endauth
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 p-6">
-        <div>
-            @yield('content')
+            <!-- MAIN CONTENT -->
+            <main class="flex-1 p-6">
+                <div>
+                    @yield('content')
+                </div>
+                <div>
+                @guest
+                    @include('components.footers.footer')
+                @endguest
+                </div>
+            </main>
         </div>
-        <div>
-        @guest
-            @include('components.footers.footer')
-        @endguest
-        </div>
-    </main>
-</div>
+    </div>
 @stack('scripts')
 </body>
 </html>

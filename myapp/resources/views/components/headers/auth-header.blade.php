@@ -1,5 +1,5 @@
-<nav class="fixed top-0 left-0 right-0 pt-8 pb-8 pl-12 pr-12 z-50 w-screen flex justify-center items-center content-center bg-amber-300 h-20">
-    <div class="w-full h-16 flex items-center justify-between pl-9 pr-9">
+<nav class="fixed top-0 left-0 right-0 pt-8 pb-8 pl-12 pr-12 z-50 w-screen flex justify-center items-center content-center bg-[#5e0b0b] h-20">
+    <div class="w-full h-16 flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
         <div class="flex items-center gap-4">
             <!-- HAMBURGER BUTTON -->
             <button class = "text-2xl" @click="$store.sidebar.open = true">
