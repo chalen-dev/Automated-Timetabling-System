@@ -9,21 +9,31 @@ class GenerateTimetableController extends Controller
 {
     public function index($timetable)
     {
-        // Show the Generate button
         return view('timetabling.generate-timetable.index', compact('timetable'));
     }
 
     public function generate(Request $request, $timetable)
     {
-        $timetableId = $timetable; // comes directly from route
+        $timetableId = $timetable;
         $exportDir = storage_path('app/exports/input-csvs');
 
+        // Ensure export folder exists
         $this->ensureDirectoryExists($exportDir);
 
+        // Generate query-based CSVs
         $this->generateQueryCSVs($timetableId, $exportDir);
+
+        // Generate timetable_template.csv
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
-        return redirect()->back()->with('success', 'CSV files including timetable_template generated for timetable ID: ' . $timetableId);
+        // Run Python script
+        $pythonScript = base_path("scripts/process_timetable.py");
+        $exportDir = storage_path('app/exports/input-csvs');
+        $command = escapeshellcmd("python $pythonScript $exportDir");
+        $output = shell_exec($command);
+
+        // Redirect back with success message
+        return redirect()->back()->with('success', "CSV files generated and Python script executed. Output: " . $output);
     }
 
     /**
