@@ -21,7 +21,15 @@ class TableFillController extends Controller
         $table = str_replace('-', '_', $table);
 
         // Only allow these tables
-        $allowedTables = ['academic_programs', 'courses', 'professors', 'rooms', 'session_groups', 'room_exclusive_days', 'specializations', 'timetables'];
+        $allowedTables = [
+            'academic_programs',
+            'courses', 'professors',
+            'rooms',
+            'session_groups',
+            'room_exclusive_days',
+            'specializations',
+            'timetables',
+        ];
         if (!in_array($table, $allowedTables)) {
             abort(403, 'Table not allowed.');
         }
@@ -463,8 +471,8 @@ class TableFillController extends Controller
                 break;
 
             case 'professors':
-                //index 1 - CS
-                //index 2 - IT
+                //index 0 - CS
+                //index 1 - IT
                 //Only follows this order in sample data.
                 $program = AcademicProgram::all(); // assign demo professors to first program
                 $data = [
@@ -751,6 +759,150 @@ class TableFillController extends Controller
                     ],
                 ];
                 Timetable::insertOrIgnore($data);
+                break;
+
+            case 'session_groups':
+                //index 0 - CS
+                //index 1 - IT
+                //Only follows this order in sample data.
+                $program = AcademicProgram::all(); // assign demo professors to first program
+                $data = [
+                    [
+                        'session_name' => 'CS 1st Yr A',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 1st Yr B',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 1st Yr C',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 2nd Yr A',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 2nd Yr B',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 2nd Yr C',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 3rd Yr A',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 3rd Yr B',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 3rd Yr C',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 4th Yr A',
+                        'year_level' => '4th',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'CS 4th Yr B',
+                        'year_level' => '4th',
+                        'academic_program_id' => $program[0]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 1st Yr A',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 1st Yr B',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 1st Yr C',
+                        'year_level' => '1st',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 2nd Yr A',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 2nd Yr B',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 2nd Yr C',
+                        'year_level' => '2nd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 3rd Yr A',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 3rd Yr B',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 3rd Yr C',
+                        'year_level' => '3rd',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 4th Yr A',
+                        'year_level' => '4th',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+                    [
+                        'session_name' => 'IT 4th Yr B',
+                        'year_level' => '4th',
+                        'academic_program_id' => $program[1]->id,
+                        'timetable_id' => 1,
+                    ],
+
+
+                ];
+                SessionGroup::insertOrIgnore($data);
                 break;
         }
 
