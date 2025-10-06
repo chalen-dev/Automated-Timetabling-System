@@ -23,24 +23,33 @@ class SessionGroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Timetable $timetable)
+    public function index(Timetable $timetable, Request $request)
     {
-        // Load all SessionGroups with CourseSessions and Course
-        $sessionGroups = $timetable->sessionGroups()
-            ->with(['courseSessions.course', 'academicProgram'])
-            ->get();
+        // Start query for session groups of this timetable
+        $query = $timetable->sessionGroups()->with(['academicProgram', 'courseSessions.course']);
+
+        // Apply search filter
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('session_name', 'like', "%{$search}%")
+                    ->orWhere('year_level', 'like', "%{$search}%")
+                    ->orWhereHas('academicProgram', function($q2) use ($search) {
+                        $q2->where('program_abbreviation', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $sessionGroups = $query->get();
 
         // Group SessionGroups by program
         $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id')->map(function ($groups) {
-            // Within program, group by year_level (1st → 4th)
             return $groups->sortBy(function ($g) {
-                // Map year_level to numbers for ordering
                 $map = ['1st' => 1, '2nd' => 2, '3rd' => 3, '4th' => 4];
                 return $map[$g->year_level] ?? 99;
             });
         });
 
-        // For each session group, sort CourseSessions by term order
+        // Sort CourseSessions by term order (still inside each session group)
         $courseSessionsBySessionGroup = $sessionGroups->mapWithKeys(function ($sessionGroup) {
             $termOrder = ['1st' => 1, '2nd' => 2, 'semestral' => 3];
             $sorted = $sessionGroup->courseSessions->sortBy(function ($cs) use ($termOrder) {
@@ -54,6 +63,8 @@ class SessionGroupController extends Controller
             compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup')
         );
     }
+
+
 
 
 

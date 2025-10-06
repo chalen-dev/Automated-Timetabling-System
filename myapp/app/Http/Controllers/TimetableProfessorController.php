@@ -13,21 +13,53 @@ TimetableProfessorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Timetable $timetable)
+    public function index(Timetable $timetable, Request $request)
     {
-        $professors = $timetable->professors;
+        $query = $timetable->professors();
+
+        // Apply search filter if provided
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhereHas('specializations.course', function ($q2) use ($search) {
+                        $q2->where('course_title', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $professors = $query->get();
+
         return view('timetabling.timetable-professors.index', compact('timetable', 'professors'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Timetable $timetable)
+    public function create(Timetable $timetable, Request $request)
     {
         $assignedProfessorIds = $timetable->professors->pluck('id');
-        $professors = Professor::whereNotIn('id', $assignedProfessorIds)->get();
-        return view('timetabling.timetable-professors.create', compact('timetable', 'professors'));
+
+        $query = Professor::whereNotIn('id', $assignedProfessorIds);
+
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhereHas('specializations.course', function($q2) use ($search) {
+                        $q2->where('course_title', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $professors = $query->get();
+
+        // Pass already selected checkboxes from query string
+        $selected = $request->input('professors', []);
+
+        return view('timetabling.timetable-professors.create', compact('timetable', 'professors', 'selected'));
     }
+
 
     /**
      * Store a newly created resource in storage.
