@@ -46,7 +46,8 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 transition-all p-6 h-fit">
-        @yield('content')
+        <div>
+            @yield('content')
         </div>
         <div>
         @guest
@@ -55,6 +56,6 @@
         </div>
     </main>
 </div>
-
+@stack('scripts')
 </body>
 </html>

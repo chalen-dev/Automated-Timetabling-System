@@ -20,7 +20,7 @@
 
             <x-input.password-text
                 label="PASSWORD"
-                elementId="password"
+                elementId="login_password"
                 type="password"
                 name="password"
                 placeholder="Enter your password"

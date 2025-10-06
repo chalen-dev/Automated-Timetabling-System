@@ -46,7 +46,7 @@
 
             <x-input.password-text
                 label="PASSWORD"
-                elementId="password"
+                elementId="register_password"
                 type="password"
                 name="password"
                 placeholder="At least 8 characters"
