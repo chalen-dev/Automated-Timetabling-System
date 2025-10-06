@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RoomExclusiveDay;
+use App\Models\Specialization;
+use App\Models\Timetable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\AcademicProgram;
@@ -18,7 +21,7 @@ class TableFillController extends Controller
         $table = str_replace('-', '_', $table);
 
         // Only allow these tables
-        $allowedTables = ['academic_programs', 'courses', 'professors', 'rooms', 'session_groups'];
+        $allowedTables = ['academic_programs', 'courses', 'professors', 'rooms', 'session_groups', 'room_exclusive_days', 'specializations', 'timetables'];
         if (!in_array($table, $allowedTables)) {
             abort(403, 'Table not allowed.');
         }
@@ -484,6 +487,15 @@ class TableFillController extends Controller
                         'academic_program_id' => $program[1]->id ?? null
                     ],
                     [
+                        'first_name' => 'Eduardo',
+                        'last_name' => 'Catahuran',
+                        'professor_type' => 'Non-Regular',
+                        'max_unit_load' => 18,
+                        'professor_age' => 20,
+                        'position' => 'Lecturer',
+                        'academic_program_id' => $program[1]->id ?? null
+                    ],
+                    [
                         'first_name' => 'Richard Vincent',
                         'last_name' => 'Misa',
                         'professor_type' => 'Regular',
@@ -493,8 +505,17 @@ class TableFillController extends Controller
                         'academic_program_id' => $program[1]->id ?? null
                     ],
                     [
-                        'first_name' => 'Iris',
-                        'last_name' => 'iforgot sorry',
+                        'first_name' => 'Sir',
+                        'last_name' => 'Buddy',
+                        'professor_type' => 'Regular',
+                        'max_unit_load' => 24,
+                        'professor_age' => 30,
+                        'position' => 'Program Head',
+                        'academic_program_id' => $program[1]->id ?? null
+                    ],
+                    [
+                        'first_name' => 'Ma\'am',
+                        'last_name' => 'Iris',
                         'professor_type' => 'Regular',
                         'max_unit_load' => 24,
                         'professor_age' => 30,
@@ -514,7 +535,31 @@ class TableFillController extends Controller
                         'room_capacity' => 50
                     ],
                     [
+                        'room_name' => 'RM302',
+                        'room_type' => 'lecture',
+                        'course_type_exclusive_to' => 'none',
+                        'room_capacity' => 50
+                    ],
+                    [
+                        'room_name' => 'AVR',
+                        'room_type' => 'lecture',
+                        'course_type_exclusive_to' => 'none',
+                        'room_capacity' => 50
+                    ],
+                    [
                         'room_name' => 'CLV1',
+                        'room_type' => 'comlab',
+                        'course_type_exclusive_to' => 'none',
+                        'room_capacity' => 50
+                    ],
+                    [
+                        'room_name' => 'CLV2',
+                        'room_type' => 'comlab',
+                        'course_type_exclusive_to' => 'none',
+                        'room_capacity' => 50
+                    ],
+                    [
+                        'room_name' => 'CLV3',
                         'room_type' => 'comlab',
                         'course_type_exclusive_to' => 'none',
                         'room_capacity' => 50
@@ -526,7 +571,55 @@ class TableFillController extends Controller
                         'room_capacity' => 50,
                     ],
                     [
+                        'room_name' => 'gym2',
+                        'room_type' => 'gym',
+                        'course_type_exclusive_to' => 'pe',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'gym3',
+                        'room_type' => 'gym',
+                        'course_type_exclusive_to' => 'pe',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'gym4',
+                        'room_type' => 'gym',
+                        'course_type_exclusive_to' => 'pe',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'gym5',
+                        'room_type' => 'gym',
+                        'course_type_exclusive_to' => 'pe',
+                        'room_capacity' => 50,
+                    ],
+                    [
                         'room_name' => 'main1',
+                        'room_type' => 'main',
+                        'course_type_exclusive_to' => 'nstp',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'main2',
+                        'room_type' => 'main',
+                        'course_type_exclusive_to' => 'nstp',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'main3',
+                        'room_type' => 'main',
+                        'course_type_exclusive_to' => 'nstp',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'main4',
+                        'room_type' => 'main',
+                        'course_type_exclusive_to' => 'nstp',
+                        'room_capacity' => 50,
+                    ],
+                    [
+                        'room_name' => 'main5',
                         'room_type' => 'main',
                         'course_type_exclusive_to' => 'nstp',
                         'room_capacity' => 50,
@@ -535,6 +628,130 @@ class TableFillController extends Controller
                 Room::insertOrIgnore($data);
                 break;
 
+            case 'room_exclusive_days':
+                $data = [
+                    [
+                        'room_id' => 12,
+                        'exclusive_day' => 'saturday',
+                    ],
+                    [
+                        'room_id' => 13,
+                        'exclusive_day' => 'saturday',
+                    ],
+                    [
+                        'room_id' => 14,
+                        'exclusive_day' => 'saturday',
+                    ],
+                    [
+                        'room_id' => 15,
+                        'exclusive_day' => 'saturday',
+                    ],
+                    [
+                        'room_id' => 16,
+                        'exclusive_day' => 'saturday',
+                    ],
+                ];
+                RoomExclusiveDay::insertOrIgnore($data);
+                break;
+
+            case 'specializations':
+                $professors = \App\Models\Professor::all();
+                $courses = \App\Models\Course::where('course_type', 'major')->get();
+
+                if ($professors->isEmpty() || $courses->isEmpty()) {
+                    return back()->with('error', 'Please fill professors and courses tables first.');
+                }
+
+                $data = [
+                    // Assign Professor 1 to 3 random major courses
+                    [
+                        'professor_id' => $professors[0]->id ?? null,
+                        'course_id' => $courses[0]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[0]->id ?? null,
+                        'course_id' => $courses[1]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[0]->id ?? null,
+                        'course_id' => $courses[2]->id ?? null,
+                    ],
+
+                    // Assign Professor 2 to 2 random major courses
+                    [
+                        'professor_id' => $professors[1]->id ?? null,
+                        'course_id' => $courses[3]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[1]->id ?? null,
+                        'course_id' => $courses[4]->id ?? null,
+                    ],
+
+                    // Assign Professor 3 to 1 course
+                    [
+                        'professor_id' => $professors[2]->id ?? null,
+                        'course_id' => $courses[5]->id ?? null,
+                    ],
+
+                    // Assign Professor 4 to 2 courses
+                    [
+                        'professor_id' => $professors[3]->id ?? null,
+                        'course_id' => $courses[6]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[3]->id ?? null,
+                        'course_id' => $courses[7]->id ?? null,
+                    ],
+
+                    // Assign Professor 5 (Program Head) to advanced CS subjects
+                    [
+                        'professor_id' => $professors[4]->id ?? null,
+                        'course_id' => $courses[8]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[4]->id ?? null,
+                        'course_id' => $courses[9]->id ?? null,
+                    ],
+
+                    // Assign Professor 6 (Program Head) to IT subjects
+                    [
+                        'professor_id' => $professors[5]->id ?? null,
+                        'course_id' => $courses[10]->id ?? null,
+                    ],
+                    [
+                        'professor_id' => $professors[5]->id ?? null,
+                        'course_id' => $courses[11]->id ?? null,
+                    ],
+                ];
+
+                // Clean out any nulls before insert
+                $data = array_filter($data, function ($row) {
+                    return !is_null($row['professor_id']) && !is_null($row['course_id']);
+                });
+
+                \App\Models\Specialization::insertOrIgnore($data);
+                break;
+
+            case 'timetables':
+                $userId = auth()->user()->id;
+                $data = [
+                    [
+                        'user_id' => $userId,
+                        'timetable_name' => 'CSIT',
+                        'semester' => '1st',
+                        'academic_year' => '2025-2026',
+                        'timetable_description' => null,
+                    ],
+                    [
+                        'user_id' => $userId,
+                        'timetable_name' => 'CSIT',
+                        'semester' => '2nd',
+                        'academic_year' => '2025-2026',
+                        'timetable_description' => null,
+                    ],
+                ];
+                Timetable::insertOrIgnore($data);
+                break;
         }
 
         $message = ucfirst(str_replace('_',' ',$table)) . ' filled successfully!';

@@ -34,7 +34,7 @@
     @endauth
 </header>
 <!--Varying padding top values for varying headers-->
-<div class="flex h-screen">
+<div class="flex h-fit">
     <!-- SIDEBAR -->
     @auth
         <!--If the route is any children routes of timetables route, but not the root timetable routes-->
@@ -46,7 +46,7 @@
     @endauth
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 transition-all p-6">
+    <main class="flex-1 transition-all p-6 h-fit">
         @yield('content')
         @guest
             @include('components.footers.footer')
