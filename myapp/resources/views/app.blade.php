@@ -1,10 +1,9 @@
-
-
 <!doctype html>
 <html lang="en" x-data>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>@yield('title', 'My Laravel App')</title>
     @vite('resources/css/app.css')
     <script src="//unpkg.com/alpinejs" defer></script>
@@ -15,7 +14,7 @@
         })
     </script>
 </head>
-<body class="overflow-x-hidden">
+<body class="bg-page pb-3">
 
 @include('includes.notif.flash-message')
 
@@ -48,9 +47,12 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 transition-all p-6 h-fit">
         @yield('content')
+        </div>
+        <div>
         @guest
             @include('components.footers.footer')
         @endguest
+        </div>
     </main>
 </div>
 
