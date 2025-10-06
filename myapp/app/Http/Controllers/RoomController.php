@@ -23,10 +23,23 @@ class RoomController extends Controller
         'nstp' => 'NSTP',
         'others' => 'Others',
     ];
-    public function index()
+    public function index(Request $request)
     {
-        $rooms = Room::with('roomExclusiveDays')->get(); // eager load to avoid N+1
-        return view('records.rooms.index', compact('rooms'));
+        $search = $request->input('search');
+
+        $rooms = \App\Models\Room::with('roomExclusiveDays')
+            ->when($search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('room_name', 'like', "%{$search}%")
+                        ->orWhere('course_type_exclusive_to', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('roomExclusiveDays', function($q) use ($search) {
+                        $q->where('exclusive_day', 'like', "%{$search}%");
+                    });
+            })
+            ->get();
+
+        return view('records.rooms.index', compact('rooms', 'search'));
     }
 
     /**
