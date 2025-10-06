@@ -33,7 +33,7 @@
 
 body.bg-page {
     position: relative;
-    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .bg-page::before {
@@ -44,9 +44,10 @@ body.bg-page {
     width: 100%;
     height: 250px;
     z-index: -1;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 468' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L1440,0 L1440,180 L0,250 Z' fill='%235E0B0B'/%3E%3C/svg%3E") no-repeat center top;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 468' preserveAspectRatio='none'%3E%3Cpath d='M1488.5 -35.5V280.518L-20.5 467.434V-35.5H1488.5Z' fill='%235E0B0B'/%3E%3C/svg%3E") no-repeat center top;
     background-size: 100% 250px;
 }
+
 
 header.topbar {
     display: flex;
@@ -63,7 +64,8 @@ main {
     display: flex;
     flex-direction: column;
     padding: 0;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    align-content: center;
 }
 
 
