@@ -7,6 +7,7 @@
         <h1>List of Courses</h1>
         <a href="{{route('courses.create')}}">Create</a>
     </div>
+    <x-search-bar.search-bar :action="route('courses.index')" placeholder="Search by course title, course name, or course type..."/>
     <table class="w-full">
         <thead>
             <tr>

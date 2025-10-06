@@ -31,9 +31,17 @@ class CourseController extends Controller
         return false;
     }
     //Display all
-    public function index(){
-        $courses = Course::all();
-        return view('records.courses.index', compact('courses'));
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+
+        $courses = \App\Models\Course::when($search, function($query, $search) {
+            $query->where('course_title', 'like', "%{$search}%")
+                ->orWhere('course_name', 'like', "%{$search}%")
+                ->orWhere('course_type', 'like', "%{$search}%");
+        })->get();
+
+        return view('records.courses.index', compact('courses', 'search'));
     }
 
     //Display specific course

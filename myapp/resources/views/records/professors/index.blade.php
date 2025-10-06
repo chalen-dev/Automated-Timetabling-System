@@ -8,6 +8,8 @@
         <a href="{{route('professors.create')}}">Create</a>
     </div>
 
+    <x-search-bar.search-bar :action="route('professors.index')" placeholder="Search by name or course..." />
+
     <table class="w-full">
         <thead>
             <tr>

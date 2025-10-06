@@ -24,10 +24,23 @@ class ProfessorController extends Controller
         'none' => 'None'
     ];
 
-    public function index()
+    public function index(Request $request)
     {
-        $professors = Professor::with('specializations.course')->get();
-        return view('records.professors.index', compact('professors'));
+        $search = $request->input('search');
+
+        $professors = Professor::with('specializations.course')
+            ->when($search, function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhereHas('specializations.course', function($q2) use ($search) {
+                            $q2->where('course_title', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->get();
+
+        return view('records.professors.index', compact('professors', 'search'));
     }
 
     /**
