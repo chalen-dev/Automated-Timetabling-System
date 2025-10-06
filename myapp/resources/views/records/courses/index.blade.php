@@ -3,11 +3,12 @@
 @section('title', 'Courses')
 
 @section('content')
-    <div class="flex justify-between">
-        <h1>List of Courses</h1>
-        <a href="{{route('courses.create')}}">Create</a>
+    <h1>List of Courses</h1>
+    <div class="flex justify-between mb-4">
+        <x-search-bar.search-bar :action="route('courses.index')" placeholder="Search by course title, course name, or course type..." />
+        <a href="{{ route('courses.create') }}">Create</a>
     </div>
-    <x-search-bar.search-bar :action="route('courses.index')" placeholder="Search by course title, course name, or course type..."/>
+
     <table class="w-full">
         <thead>
             <tr>

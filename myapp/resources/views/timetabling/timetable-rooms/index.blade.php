@@ -5,9 +5,11 @@
 @section('content')
     <h1>Assigned Rooms</h1>
 
-    <x-search-bar.search-bar :action="route('timetables.timetable-rooms.index', $timetable)" />
+    <div class="flex justify-between">
+        <x-search-bar.search-bar :action="route('timetables.timetable-rooms.index', $timetable)" />
+        <a href="{{ route('timetables.timetable-rooms.create', $timetable) }}">Add</a>
+    </div>
 
-    <a href="{{ route('timetables.timetable-rooms.create', $timetable) }}">Add</a>
 
     <table class="w-full mt-2">
         <thead>

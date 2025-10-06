@@ -6,9 +6,10 @@
     <h1>{{ $timetable->timetable_name }} Class Sessions</h1>
 
     {{-- Search bar for Session Groups --}}
-    <x-search-bar.search-bar :action="route('timetables.session-groups.index', $timetable)" />
-
-    <a href="{{ route('timetables.session-groups.create', $timetable) }}">Add</a>
+    <div class="flex justify-between">
+        <x-search-bar.search-bar :action="route('timetables.session-groups.index', $timetable)" />
+        <a href="{{ route('timetables.session-groups.create', $timetable) }}">Add</a>
+    </div>
 
     @foreach($sessionGroupsByProgram as $programId => $groups)
         <h2>Program: {{ $groups->first()->academicProgram->program_abbreviation ?? 'Unknown' }}</h2>

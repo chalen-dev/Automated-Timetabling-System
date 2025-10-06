@@ -5,9 +5,11 @@
 @section('content')
     <h1>Assigned Professors</h1>
 
-    <x-search-bar.search-bar :action="route('timetables.timetable-professors.index', $timetable)" />
+    <div class="flex justify-between">
+        <x-search-bar.search-bar :action="route('timetables.timetable-professors.index', $timetable)" />
+        <a href="{{ route('timetables.timetable-professors.create', $timetable) }}">Add</a>
+    </div>
 
-    <a href="{{ route('timetables.timetable-professors.create', $timetable) }}">Add</a>
 
     <table class="w-full mt-2">
         <thead>

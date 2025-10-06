@@ -8,13 +8,15 @@
         $selected = request()->input('rooms', []);
     @endphp
 
-    <h1>Choose Rooms</h1>
+    <div class="flex justify-between">
+        <h1>Choose Rooms</h1>
+        <x-search-bar.search-bar :action="route('timetables.timetable-rooms.create', $timetable)">
+            @foreach($selected as $id)
+                <input type="hidden" name="rooms[]" value="{{ $id }}">
+            @endforeach
+        </x-search-bar.search-bar>
+    </div>
 
-    <x-search-bar.search-bar :action="route('timetables.timetable-rooms.create', $timetable)">
-        @foreach($selected as $id)
-            <input type="hidden" name="rooms[]" value="{{ $id }}">
-        @endforeach
-    </x-search-bar.search-bar>
 
     <form action="{{ route('timetables.timetable-rooms.store', $timetable) }}" method="POST">
         @csrf

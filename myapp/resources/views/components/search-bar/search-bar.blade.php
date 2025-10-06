@@ -5,7 +5,7 @@
     'buttonText' => 'Search'
 ])
 
-<form method="GET" action="{{ $action }}" class="mb-4 flex gap-2">
+<form method="GET" action="{{ $action }}" class="mb-4 flex gap-2 items-center justify-center">
     <input
         type="text"
         name="{{ $name ?? 'search' }}"

@@ -3,12 +3,14 @@
 @section('title', 'Professors')
 
 @section('content')
+    <h1>List of Professors</h1>
+
     <div class="flex justify-between">
-        <h1>List of Professors</h1>
+        <x-search-bar.search-bar :action="route('professors.index')" placeholder="Search by name or course..." />
         <a href="{{route('professors.create')}}">Create</a>
     </div>
 
-    <x-search-bar.search-bar :action="route('professors.index')" placeholder="Search by name or course..." />
+
 
     <table class="w-full">
         <thead>

@@ -23,16 +23,25 @@ class SpecializationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Professor $professor)
+    public function create(Request $request, Professor $professor)
     {
-        // get all course IDs already assigned to the professor
         $assignedCourseIds = $professor->specializations()->pluck('course_id')->toArray();
 
-        // only get unassigned courses
-        $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
+        $query = Course::whereNotIn('id', $assignedCourseIds);
+
+        // Apply search filter
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('course_name', 'like', "%{$search}%")
+                    ->orWhere('course_title', 'like', "%{$search}%");
+            });
+        }
+
+        $courses = $query->get();
 
         return view('records.specializations.create', compact('professor', 'courses'));
     }
+
 
     /**
      * Store a newly created resource in storage.
