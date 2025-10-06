@@ -1,11 +1,11 @@
-<nav class="top-0 z-50 w-screen">
-    <div class="w-full h-16 flex items-center justify-between pl-9 pr-9">
+<nav class="relative mb-4 z-2 w-full flex justify-center items-center content-center bg-[#5e0b0b] h-18 shadow-2xl">
+    <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
         <div class="flex items-center gap-4">
             <!-- HAMBURGER BUTTON -->
             <button class = "text-2xl" @click="$store.sidebar.open = true">
                 ☰
             </button>
-            <h2>FaculTime</h2>
+            <h2 class="font-bold text-[#5E0B0B]">FaculTime</h2>
         </div>
 
         <div class="flex items-center gap-10 justify-between">
