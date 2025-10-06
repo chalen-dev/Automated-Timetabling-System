@@ -3,7 +3,7 @@
 @section('title', 'Create Timetable')
 
 @section('content')
-    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
+    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] gap-10 justify-center items-center pl-20 pr-20 bg-white rounded-2xl shadow-2xl">
         <h1>Create Timetable</h1>
         <form class = "flex flex-row " action="{{route('timetables.store')}}" method="POST">
             @csrf

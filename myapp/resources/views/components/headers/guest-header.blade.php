@@ -1,5 +1,5 @@
-<nav class="fixed pt-5 z-2 w-screen padding-12 bg-[#5E0B0B]">
-    <div class="flex gap-4 justify-between pl-20 pr-20 z-50 w-full">
+<nav class="relative z-2 pb-4 padding-12 w-full">
+    <div class="flex gap-4 justify-between pl-20 pr-20 z-50">
             <img src="{{asset('umtc_logo.png')}}" class="w-15 h-15" alt="UMTC Logo" >
         <button type=button class="bg-white text-[#5E0B0B] px-4 py-2 rounded-lg shadow h-12 flex items-center">
             @if (request()->routeIs('home') || request()->routeIs('login.form'))

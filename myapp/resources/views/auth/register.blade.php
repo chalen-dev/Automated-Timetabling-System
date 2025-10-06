@@ -4,11 +4,11 @@
 
 @section('content')
 
-    <div class="flex flex-col items-center justify-center w-screen ">
-        <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1 bg-white rounded-xl">
+    <div class="flex flex-col items-center justify-center w-100vh h-100% p-0 content-around">
+        <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
             @csrf
 
-            <h1>Sign Up to Facultime</h1>
+            <h1 class="font-bold p-3">Sign Up to Facultime</h1>
 
             <x-input.auth-text
                 label="USERNAME"
@@ -63,7 +63,7 @@
             />
 
             <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full">Register ➝</button>
-            <p>Already a member? <a href="{{ url('login') }}">Login here</a></p>
+            <p>Already a member? <a href="{{ url('login') }}" class="hover:underline hover:text-[#5E0B0B]">Login here</a></p>
         </form>
     </div>
 

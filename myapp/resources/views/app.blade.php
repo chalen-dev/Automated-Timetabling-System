@@ -14,48 +14,58 @@
         })
     </script>
 </head>
-<body class="bg-page pb-3">
+<body class="bg-page">
 
 @include('includes.notif.flash-message')
 
-<!-- HEADER -->
-<header>
-    @guest
-        @include('components.headers.guest-header')
-    @endguest
-    @auth
-        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
-        @if (request()->routeIs('timetables.*.*'))
-            @include('components.headers.timetabling-header')
-        @else
-            @include('components.headers.auth-header')
-        @endif
-    @endauth
-</header>
-<!--Varying padding top values for varying headers-->
-<div class="flex h-fit">
-    <!-- SIDEBAR -->
-    @auth
-        <!--If the route is any children routes of timetables route, but not the root timetable routes-->
-        @if(request()->routeIs('timetables.*.*'))
-            <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
-        @else
-            <x-sidebars.sidebar />
-        @endif
-    @endauth
-
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 transition-all p-6 h-fit">
-        <div>
-            @yield('content')
+    <div class="p-5">
+    <!-- HEADER -->
+        <header>
+            @guest
+                @include('components.headers.guest-header')
+            @endguest
+            @auth
+                <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+                @if (request()->routeIs('timetables.*.*'))
+                    @include('components.headers.timetabling-header')
+                @else
+                    @include('components.headers.auth-header')
+                @endif
+            @endauth
+        </header>
+        <!--Varying padding top values for varying headers-->
+        @guest
+        <div class="flex justify-around">
+            <!-- MAIN CONTENT -->
+            <main class="flex">
+                <div>
+                    @yield('content')
+                </div>
+            </main>
         </div>
-        <div>
+        @endguest
+        @auth
+            <div class="flex">
+                    <!--If the route is any children routes of timetables route, but not the root timetable routes-->
+                    @if(request()->routeIs('timetables.*.*'))
+                        <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')"/>
+                    @else
+                        <x-sidebars.sidebar />
+                    @endif
+                <!-- MAIN CONTENT -->
+                <main class="flex max-w-[1600px]">
+                    <div>
+                        @yield('content')
+                    </div>
+                </main>
+            </div>
+        @endauth
+    </div>
+@stack('scripts')
+    <div>
         @guest
             @include('components.footers.footer')
         @endguest
-        </div>
-    </main>
-</div>
-@stack('scripts')
+    </div>
 </body>
 </html>
