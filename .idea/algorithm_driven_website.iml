@@ -124,6 +124,10 @@
       <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/maennchen/zipstream-php" />
+      <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/markbaker/complex" />
+      <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/markbaker/matrix" />
+      <excludeFolder url="file://$MODULE_DIR$/myapp/vendor/phpoffice/phpspreadsheet" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
