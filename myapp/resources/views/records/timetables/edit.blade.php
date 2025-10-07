@@ -3,7 +3,7 @@
 @section('title', 'Edit Timetable')
 
 @section('content')
-    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+    <div class="flex flex-col pb-[40px] pr-[50px] pl-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
         <form class = "flex flex-col gap-[50px] items-center" action="{{route('timetables.update', $timetable)}}" method="POST">
             @csrf
             @method('PUT')

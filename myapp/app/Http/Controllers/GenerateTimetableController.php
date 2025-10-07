@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Timetable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GenerateTimetableController extends Controller
 {
-    public function index($timetable)
+    public function index(Timetable $timetable)
     {
         return view('timetabling.generate-timetable.index', compact('timetable'));
     }
 
-    public function generate(Request $request, $timetable)
+    public function generate(Request $request, Timetable $timetable)
     {
-        $timetableId = $timetable;
+        $timetableId = $timetable->id;
         $exportDir = storage_path('app/exports/input-csvs');
 
         // Ensure export folder exists
