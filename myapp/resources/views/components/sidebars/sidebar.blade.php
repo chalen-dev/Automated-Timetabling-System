@@ -99,6 +99,15 @@
                     <span>Pending Users</span>
                 </div>
             </a>
+
+            <a href="{{ route('admin.user-logs') }}">
+                <div class="{{ request()->routeIs('admin.user-logs') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} transition-transform duration-300 pl-10 flex flex-row justify-start items-center h-13 gap-2 rounded-2xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 stroke-current fill-none">
+                        <path d="M3 6h18M3 12h18M3 18h18" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>User Logs</span>
+                </div>
+            </a>
         @endif
     </div>
 </aside>

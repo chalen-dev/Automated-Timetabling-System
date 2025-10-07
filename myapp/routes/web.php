@@ -16,6 +16,7 @@ use App\Http\Controllers\TimetableEditingPaneController;
 use App\Http\Controllers\TimetableProfessorController;
 use App\Http\Controllers\TimetableRoomController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
@@ -75,8 +76,12 @@ Route::middleware([Authenticate::class])->group(function () {
     });
 });
 
-// Admin-only actions (protected by middleware)
+// Admin-only actions
 Route::middleware(['auth', AdminMiddleware::class])->group(function() {
     Route::get('/admin/users', [AdminController::class,'showPending'])->name('admin.pending_users');
     Route::post('/admin/users/{user}/approve', [AdminController::class,'approve'])->name('admin.approve_user');
+
+    // User Logs page
+    Route::get('/admin/user-logs', [UserLogController::class, 'index'])
+        ->name('admin.user-logs');
 });
