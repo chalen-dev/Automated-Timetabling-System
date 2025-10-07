@@ -55,7 +55,7 @@ class TimetableController extends Controller
      */
     public function show(Timetable $timetable)
     {
-        return view('timetables.show', compact('timetable'));
+        return view('records.timetables.show', compact('timetable'));
     }
 
     /**

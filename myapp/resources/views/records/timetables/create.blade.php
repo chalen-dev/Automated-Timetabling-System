@@ -34,16 +34,17 @@
                     />
                 </div>
             </div>
-        </form>
-        <div class="flex flex-row w-full justify-between items-center">
-            <a href="{{route('timetables.index')}}">
-                <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
-                    <span>Back</span>
-                </button>
-            </a>
+            <div class="flex flex-row w-full justify-between items-center">
+                <a href="{{route('timetables.index')}}">
+                    <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
+                        <span>Back</span>
+                    </button>
+                </a>
 
-            <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Create</span></button>
-        </div>
+                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Create</span></button>
+            </div>
+        </form>
+
     </div>
 
 @endsection
