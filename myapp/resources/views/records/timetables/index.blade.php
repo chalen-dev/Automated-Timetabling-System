@@ -32,16 +32,18 @@
                     </a>
                     <div class="flex flex-col justify-evenly">
                         <div class="flex flex-row justify-evenly">
-                            <a class='flex flex-col items-center justify-center' href="{{route('timetables.show', $timetable)}}">
+                            <a class="flex flex-col items-center justify-center pt-[5px] pb-[5px] pl-[10px] pr-[10px] hover:bg-[#cecece] hover:rounded-[10px]" href="{{route('timetables.show', $timetable)}}">
                                 <i class="bi-card-list"></i>
                                 <span>Info</span>
                             </a>
-                            <a class='flex flex-col items-center justify-center' href="{{route('timetables.edit', $timetable)}}">
+                            <a class='flex flex-col items-center justify-center pt-[5px] pb-[5px] pl-[10px] pr-[10px] hover:bg-[#cecece] hover:rounded-[10px]' href="{{route('timetables.edit', $timetable)}}">
                                 <i class="bi bi-pencil-square"></i>
                                 <span>Edit</span>
                             </a>
-                            <a class='flex flex-col items-center justify-center'>
+                            <a class='flex flex-col items-center justify-center cursor-pointer p-[5px] hover:bg-[#cecece] hover:rounded-[10px]'>
+                                <div>
                                 <x-buttons.delete action="timetables.destroy" :params="$timetable" item_name="timetable" btnType="icon"/>
+                                </div>
                                 <span class="text-[red]">Delete</span>
                             </a>
                         </div>

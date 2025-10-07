@@ -53,8 +53,8 @@
                         <x-sidebars.sidebar />
                     @endif
                 <!-- MAIN CONTENT -->
-                <main class="flex max-w-[1600px]">
-                    <div>
+                <main class="flex w-full">
+                    <div class="w-full">
                         @yield('content')
                     </div>
                 </main>

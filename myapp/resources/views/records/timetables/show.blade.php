@@ -1,6 +1,6 @@
 @extends('app')
 
-@section('title', 'Timetable')
+@section('title', 'Timetables')
 
 @section('content')
     <h1>Timetable</h1>
