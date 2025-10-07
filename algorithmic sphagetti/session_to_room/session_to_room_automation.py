@@ -17,10 +17,14 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 # -----------------------------------------------
 # CONFIG / INPUT PATHS
 # -----------------------------------------------
-course_sessions_path   = "/content/course-sessions.csv"
-session_groups_path    = "/content/session-groups.csv"
-timetable_rooms_path   = "/content/timetable-rooms.csv"
-timetable_template_path = "/content/timetable_template.csv"
+base_path = "storage/app/timetable_inputs"
+
+course_sessions_path   = f"{base_path}/course-sessions.csv"
+session_groups_path    = f"{base_path}/session-groups.csv"
+timetable_rooms_path   = f"{base_path}/timetable-rooms.csv"
+timetable_template_path = f"{base_path}/timetable_template.csv"
+
+output_path = f"{base_path}/Generated_Timetable_Output.xlsx"
 
 # -----------------------------------------------
 # LOAD DATA
