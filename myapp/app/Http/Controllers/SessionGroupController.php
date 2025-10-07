@@ -25,7 +25,7 @@ class SessionGroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Timetable $timetable, Request $request)
+    public function index(Timetable $timetable, Request $request, SessionGroup $sessionGroup)
     {
         // Start query for session groups of this timetable
         $query = $timetable->sessionGroups()->with(['academicProgram', 'courseSessions.course']);
@@ -60,9 +60,17 @@ class SessionGroupController extends Controller
             return [$sessionGroup->id => $sorted];
         });
 
+        //Get the fullname of session (concatenated)
+        $sessionFullName = trim(sprintf(
+            '%s %s %s Year',
+            $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown',
+            $sessionGroup->session_name,
+            $sessionGroup->year_level
+        ));
+
         return view(
             'timetabling.timetable-session-groups.index',
-            compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup')
+            compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup', 'sessionFullName')
         );
     }
 
@@ -139,6 +147,7 @@ class SessionGroupController extends Controller
             ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
+            'short_description' => 'string',
         ]);
 
         $sessionGroup->update($validatedData);
@@ -146,6 +155,27 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session updated successfully.');
     }
+
+    public function show(Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        // Load relationships (optional, for displaying related info)
+        $sessionGroup->load(['academicProgram', 'courseSessions.course']);
+
+        $sessionFullName = trim(sprintf(
+            '%s %s %s Year',
+            $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown',
+            $sessionGroup->session_name,
+            $sessionGroup->year_level
+        ));
+
+        return view('timetabling.timetable-session-groups.show',
+            compact(
+            'timetable',
+            'sessionGroup',
+                'sessionFullName'
+            ));
+    }
+
 
     /**
      * Remove the specified resource from storage.
