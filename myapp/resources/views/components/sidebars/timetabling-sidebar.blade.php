@@ -6,7 +6,7 @@
     <ul>
         <li>
             <a href="{{route('timetables.timetable-editing-pane.index', $timetable)}}">
-                Edit Timetable
+                View Timetable
             </a>
         </li>
         <li>

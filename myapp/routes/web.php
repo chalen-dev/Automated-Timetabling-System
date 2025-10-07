@@ -57,8 +57,7 @@ Route::middleware([Authenticate::class])->group(function () {
     //Timetabling Editing Pane
         Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
             ->only('index');
-        Route::resource('timetables.session-groups', SessionGroupController::class)
-            ->except('show');
+        Route::resource('timetables.session-groups', SessionGroupController::class);
 
             Route::resource('timetables.session-groups.course-sessions', CourseSessionController::class);
             Route::patch('timetables/{timetable}/session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',

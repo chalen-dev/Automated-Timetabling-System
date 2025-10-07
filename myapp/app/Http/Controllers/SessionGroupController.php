@@ -6,6 +6,8 @@ use App\Models\AcademicProgram;
 use App\Models\SessionGroup;
 use App\Models\Timetable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
 class SessionGroupController extends Controller
 {
     protected $year_level_options = [
@@ -23,7 +25,7 @@ class SessionGroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Timetable $timetable, Request $request)
+    public function index(Timetable $timetable, Request $request, SessionGroup $sessionGroup)
     {
         // Start query for session groups of this timetable
         $query = $timetable->sessionGroups()->with(['academicProgram', 'courseSessions.course']);
@@ -58,9 +60,17 @@ class SessionGroupController extends Controller
             return [$sessionGroup->id => $sorted];
         });
 
+        //Get the fullname of session (concatenated)
+        $sessionFullName = trim(sprintf(
+            '%s %s %s Year',
+            $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown',
+            $sessionGroup->session_name,
+            $sessionGroup->year_level
+        ));
+
         return view(
             'timetabling.timetable-session-groups.index',
-            compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup')
+            compact('timetable', 'sessionGroupsByProgram', 'courseSessionsBySessionGroup', 'sessionFullName')
         );
     }
 
@@ -85,12 +95,22 @@ class SessionGroupController extends Controller
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
-            'session_name' => 'required|string|unique:session_groups,session_name',
+            'session_name' => [
+                'required',
+                'string',
+                'max:4',
+                Rule::unique('session_groups')->where(function ($query) use ($request) {
+                    return $query
+                        ->where('year_level', $request->year_level)
+                        ->where('academic_program_id', $request->academic_program_id);
+                }),
+            ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
+            'short_description' => 'string',
         ]);
 
-        $validatedData['timetable_id'] = $request->route('timetable')->id;
+        $validatedData['timetable_id'] = $timetable->id;
         SessionGroup::create($validatedData);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
@@ -113,9 +133,21 @@ class SessionGroupController extends Controller
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
-            'session_name' => 'required|string|unique:session_groups,session_name,' . $sessionGroup->id,
+            'session_name' => [
+                'required',
+                'string',
+                'max:4',
+                Rule::unique('session_groups')
+                    ->ignore($sessionGroup->id)
+                    ->where(function ($query) use ($request) {
+                        return $query
+                            ->where('year_level', $request->year_level)
+                            ->where('academic_program_id', $request->academic_program_id);
+                    }),
+            ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
+            'short_description' => 'string',
         ]);
 
         $sessionGroup->update($validatedData);
@@ -123,6 +155,27 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session updated successfully.');
     }
+
+    public function show(Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        // Load relationships (optional, for displaying related info)
+        $sessionGroup->load(['academicProgram', 'courseSessions.course']);
+
+        $sessionFullName = trim(sprintf(
+            '%s %s %s Year',
+            $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown',
+            $sessionGroup->session_name,
+            $sessionGroup->year_level
+        ));
+
+        return view('timetabling.timetable-session-groups.show',
+            compact(
+            'timetable',
+            'sessionGroup',
+                'sessionFullName'
+            ));
+    }
+
 
     /**
      * Remove the specified resource from storage.

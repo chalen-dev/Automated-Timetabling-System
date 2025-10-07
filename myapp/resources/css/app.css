@@ -27,13 +27,13 @@
 }
 
 /** Testing **/
-/*{
+{
     outline: 1px solid black;
-}*/
+}
 
 body.bg-page {
     position: relative;
-    overflow-y: hidden;
+    /*overflow-y: hidden; /*walai ni ngano pugngan man sa pagscroll */
     margin: 0;
     color: #222;
     justify-content: center;
