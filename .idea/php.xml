@@ -244,6 +244,10 @@
       <path value="$PROJECT_DIR$/myapp/vendor/symfony/var-dumper" />
       <path value="$PROJECT_DIR$/myapp/vendor/symfony/yaml" />
       <path value="$PROJECT_DIR$/myapp/vendor/theseer/tokenizer" />
+      <path value="$PROJECT_DIR$/myapp/vendor/maennchen/zipstream-php" />
+      <path value="$PROJECT_DIR$/myapp/vendor/markbaker/complex" />
+      <path value="$PROJECT_DIR$/myapp/vendor/markbaker/matrix" />
+      <path value="$PROJECT_DIR$/myapp/vendor/phpoffice/phpspreadsheet" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
