@@ -1,7 +1,7 @@
 <?php
 
-
 use App\Http\Controllers\AcademicProgramController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\GenerateTimetableController;
@@ -17,89 +17,66 @@ use App\Http\Controllers\TimetableProfessorController;
 use App\Http\Controllers\TimetableRoomController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 
+// Default Page
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
-// Default Page, either Homepage or timetables, depending on authentication status
-Route::get('/', [WelcomeController::class, 'index'])
-    ->name('home');
-
-// Guest Routes (Unauthenticated)
+// Guest Routes
 Route::middleware('guest')->group(function () {
+    Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register.form');
+    Route::post('/register', [UserController::class, 'register'])->name('register');
 
-    // Register
-    Route::get('/register', [UserController::class, 'showRegisterForm'])
-        ->name('register.form');
-    Route::post('/register', [UserController::class, 'register'])
-        ->name('register');
-
-    // Login
-    Route::get('/login', [UserController::class, 'showLoginForm'])
-        ->name('login.form');
-    Route::post('/login', [UserController::class, 'login'])
-        ->name('login');
-
+    Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [UserController::class, 'login'])->name('login');
 });
 
 // Authenticated Routes
 Route::middleware([Authenticate::class])->group(function () {
+    Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
-    //Test (Fill Tables with Values)
-    Route::match(['get'], '/fill-table/{table}', [TableFillController::class, 'fill'])->name('table.fill');
-
-    //Logout
-    Route::post('/logout', [UserController::class, 'logout'])
-        ->name('logout');
-
-    //Timetable List(act as dashboard)
+    // Timetables & related resources (same for admin and normal users)
     Route::resource('timetables', TimetableController::class);
-    //Timetabling Editing Pane
-        Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)
-            ->only('index');
-        Route::resource('timetables.session-groups', SessionGroupController::class);
+    Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
+    Route::resource('timetables.session-groups', SessionGroupController::class);
+    Route::resource('timetables.session-groups.course-sessions', CourseSessionController::class);
+    Route::patch(
+        'timetables/{timetable}/session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
+        [CourseSessionController::class, 'updateTerm']
+    )->name('timetables.session-groups.course-sessions.update-term');
 
-            Route::resource('timetables.session-groups.course-sessions', CourseSessionController::class);
-            Route::patch('timetables/{timetable}/session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
-                [CourseSessionController::class, 'updateTerm'])
-                 ->name('timetables.session-groups.course-sessions.update-term');
+    Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store','destroy');
+    Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store','destroy');
 
-        Route::resource('timetables.timetable-professors', TimetableProfessorController::class)
-            ->only('index', 'create', 'store', 'destroy');
-        Route::resource('timetables.timetable-rooms', TimetableRoomController::class)
-            ->only('index', 'create', 'store', 'destroy');
+    Route::resource('timetables.generate-timetable', GenerateTimetableController::class);
+    Route::get('timetables/{timetable}/generate', [GenerateTimetableController::class, 'index'])->name('timetables.generate');
+    Route::post('timetables/{timetable}/generate', [GenerateTimetableController::class, 'generate'])->name('timetables.generate.post');
 
-        Route::resource('timetables.generate-timetable', GenerateTimetableController::class);
-            Route::get('timetables/{timetable}/generate', [GenerateTimetableController::class, 'index'])->name('timetables.generate');
-            Route::post('timetables/{timetable}/generate', [GenerateTimetableController::class, 'generate'])->name('timetables.generate.post');
-
-
-    // Courses Routes
+    // Courses
     Route::resource('courses', CourseController::class);
 
-    //Professor List
+    // Professors
     Route::resource('professors', ProfessorController::class);
-       //Specialization List
-       Route::resource('professors.specializations', SpecializationController::class)
-           ->only('index', 'create', 'store', 'destroy');
+    Route::resource('professors.specializations', SpecializationController::class)->only('index','create','store','destroy');
 
-    // Academic Program Routes
+    // Academic Programs
     Route::resource('academic-programs', AcademicProgramController::class);
 
-    //Room List
+    // Rooms
     Route::resource('rooms', RoomController::class);
-        //Room Exclusive Day List
-        Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)
-            ->only('index', 'create', 'store', 'destroy');
+    Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)->only('index','create','store','destroy');
 
+    // Test route (Tinker)
+    Route::get('/test-file', function() {
+        $path = base_path("scripts/public/exports/timetables/1.xlsx");
+        return file_exists($path) ? "Exists" : "Missing: $path";
+    });
 });
 
-
-//TEST TINKER ROUTES
-Route::get('/test-file', function() {
-    $path = base_path("scripts/public/exports/timetables/1.xlsx");
-    return file_exists($path) ? "Exists" : "Missing: $path";
+// Admin-only actions (protected by middleware)
+Route::middleware(['auth', AdminMiddleware::class])->group(function() {
+    Route::get('/admin/users', [AdminController::class,'showPending'])->name('admin.pending_users');
+    Route::post('/admin/users/{user}/approve', [AdminController::class,'approve'])->name('admin.approve_user');
 });
-
-
-

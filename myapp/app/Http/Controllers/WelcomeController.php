@@ -3,18 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WelcomeController extends Controller
 {
     public function index(){
-        //If not authenticated, redirect to login
-        if (!auth()->check())
-            return view('auth.login');
+        if (!auth()->check()) {
+            return redirect()->route('login.form');
+        }
 
-        //Else, redirect to timetables and pass in user details.
         $user = auth()->user();
-        return view('records.timetables.index', compact('user'));
 
+        if ($user->role === 'pending') {
+            Auth::logout();
+            return redirect()->route('login.form')
+                ->withErrors(['login_error' => 'Your account is pending admin approval.']);
+        }
 
+        // Admins and normal users go to the same dashboard
+        return redirect()->route('timetables.index');
     }
 }

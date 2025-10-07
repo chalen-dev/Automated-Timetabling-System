@@ -89,6 +89,17 @@
                 <span>Programs</span>
             </div>
         </a>
+        {{-- Admin-only menus --}}
+        @if(auth()->check() && auth()->user()->role === 'admin')
+            <a href="{{ route('admin.pending_users') }}">
+                <div class="{{ request()->routeIs('admin.pending_users') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} transition-transform duration-300 pl-10 flex flex-row justify-start items-center h-13 gap-2 rounded-2xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 stroke-current fill-none">
+                        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-7 9a7 7 0 0 1 14 0Z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Pending Users</span>
+                </div>
+            </a>
+        @endif
     </div>
 </aside>
 
