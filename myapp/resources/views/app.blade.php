@@ -38,9 +38,7 @@
         <div class="flex justify-around">
             <!-- MAIN CONTENT -->
             <main class="flex">
-                <div>
-                    @yield('content')
-                </div>
+                @yield('content')
             </main>
         </div>
         @endguest
@@ -53,7 +51,7 @@
                         <x-sidebars.sidebar />
                     @endif
                 <!-- MAIN CONTENT -->
-                <main class="flex max w-full">
+                <main class="flex max-w-full">
                     <div>
                         @yield('content')
                     </div>

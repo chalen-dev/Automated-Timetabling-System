@@ -13,10 +13,12 @@
         </div>
 
         @foreach($sessionGroupsByProgram as $programId => $groups)
-            <h2>Program: {{ $groups->first()->academicProgram->program_abbreviation ?? 'Unknown' }}</h2>
+            <div class="flex justify-center items-center">
+                <h2 class="font-bold text-xl">Program: {{ $groups->first()->academicProgram->program_abbreviation ?? 'Unknown' }}</h2>
+            </div>
+
 
             @foreach($groups as $sessionGroup)
-
                 <div class="flex justify-between mb-2 w-full">
                     <p> {{ $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown' }} {{$sessionGroup->session_name }} {{ $sessionGroup->year_level }} Year</p>
                     <div class="flex gap-2">
