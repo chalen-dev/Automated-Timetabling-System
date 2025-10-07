@@ -17,12 +17,19 @@ class RoomExclusiveDayController extends Controller
         'saturday' => 'Saturday',
         'sunday' => 'Sunday',
     ];
+
     /**
      * Display a listing of the resource.
      */
     public function index(Room $room)
     {
         $assignedExclusiveDays = $room->roomExclusiveDays; // returns collection of RoomExclusiveDay models
+
+        $this->logAction('viewed_room_exclusive_days', [
+            'room_id' => $room->id,
+            'assigned_days' => $assignedExclusiveDays->pluck('exclusive_day')->toArray()
+        ]);
+
         return view('records.room-exclusive-days.index', [
             'room' => $room,
             'assignedExclusiveDays' => $assignedExclusiveDays,
@@ -35,11 +42,16 @@ class RoomExclusiveDayController extends Controller
      */
     public function create(Room $room)
     {
-        //get all days already assigned to the room
+        // Get all days already assigned to the room
         $assignedDays = RoomExclusiveDay::where('room_id', $room->id)->pluck('exclusive_day')->toArray();
 
-        //get all unassigned days
+        // Get all unassigned days
         $unassignedDays = array_diff_key($this->exclusiveDays, array_flip($assignedDays));
+
+        $this->logAction('accessed_create_room_exclusive_day_form', [
+            'room_id' => $room->id,
+            'unassigned_days' => array_values($unassignedDays)
+        ]);
 
         return view('records.room-exclusive-days.create', compact('room', 'unassignedDays'));
     }
@@ -49,12 +61,10 @@ class RoomExclusiveDayController extends Controller
      */
     public function store(Request $request, Room $room)
     {
-
         $validatedData = $request->validate([
             'exclusive_days' => 'required|array',
             'exclusive_days.*' => 'in:' . implode(',', array_keys($this->exclusiveDays))
         ]);
-
 
         if (empty($validatedData['exclusive_days'])) {
             return view('records.room-exclusive-days.create', [
@@ -64,16 +74,25 @@ class RoomExclusiveDayController extends Controller
             ]);
         }
 
-        foreach($validatedData['exclusive_days'] as $exclusive_day) {
-            $room->roomExclusiveDays()->firstOrCreate([
+        $addedDays = [];
+        foreach ($validatedData['exclusive_days'] as $exclusive_day) {
+            $roomExclusiveDay = $room->roomExclusiveDays()->firstOrCreate([
                 'room_id' => $room->id,
                 'exclusive_day' => $exclusive_day
             ]);
+
+            if ($roomExclusiveDay->wasRecentlyCreated) {
+                $addedDays[] = $exclusive_day;
+            }
         }
+
+        $this->logAction('added_room_exclusive_days', [
+            'room_id' => $room->id,
+            'added_days' => $addedDays
+        ]);
 
         return redirect()->route('rooms.room-exclusive-days.index', $room)
             ->with('success', 'Exclusive days have been added successfully.');
-
     }
 
     /**
@@ -85,10 +104,32 @@ class RoomExclusiveDayController extends Controller
             abort(404);
         }
 
+        $deletedDay = $roomExclusiveDay->exclusive_day;
         $roomExclusiveDay->delete();
+
+        $this->logAction('deleted_room_exclusive_day', [
+            'room_id' => $room->id,
+            'deleted_day' => $deletedDay
+        ]);
 
         return redirect()
             ->route('rooms.room-exclusive-days.index', $room)
             ->with('success', 'Exclusive day deleted successfully.');
+    }
+
+    /**
+     * Log user actions.
+     */
+    protected function logAction(string $action, array $details = [])
+    {
+        if (auth()->check()) {
+            \App\Models\UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }

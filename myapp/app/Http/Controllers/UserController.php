@@ -28,6 +28,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => trim($request->email),
                 'password' => Hash::make($request->password),
+                'role' => 'pending', // <-- Add this
             ]);
         }
         catch (\Exception $e) {
@@ -42,27 +43,35 @@ class UserController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request){
-
-        //Input validation
+    public function login(Request $request)
+    {
         $request->validate([
-            'login' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'login' => ['required','string'],
+            'password' => ['required','string'],
         ]);
 
-        //Determines if inputted username or email
         $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
-        //Attempt to login. This code automatically gives the user Auth when successful
         if (Auth::attempt([$fieldType => $request->login, 'password' => $request->password])) {
-            //if login successful, redirect here
-            return redirect()->route('timetables.index');
+            $user = Auth::user();
+
+            switch ($user->role) {
+                case 'pending':
+                    Auth::logout();
+                    return redirect()->route('login.form')
+                        ->withErrors(['login_error' => 'Your account is pending admin approval.']);
+
+                case 'user':
+                case 'admin':
+                    return redirect()->route('timetables.index'); // shared dashboard
+            }
         }
-        //if login failed, redirect back with error message
+
         return redirect()->back()->withErrors([
-            'login_error' => 'Credentials provided do not match our records.',
+            'login_error' => 'Credentials do not match our records.',
         ]);
     }
+
 
     public function logout(Request $request){
         //Log out user

@@ -785,141 +785,24 @@ class TableFillController extends Controller
                 //Only follows this order in sample data.
                 $program = AcademicProgram::all(); // assign demo professors to first program
                 $data = [
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '4th',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '4th',
-                        'academic_program_id' => $program[0]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '1st',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '2nd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'C',
-                        'year_level' => '3rd',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'A',
-                        'year_level' => '4th',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-                    [
-                        'session_name' => 'B',
-                        'year_level' => '4th',
-                        'academic_program_id' => $program[1]->id,
-                        'timetable_id' => 1,
-                    ],
-
-
+                    ['id' => 1, 'session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 2, 'session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 3, 'session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 4, 'session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 5, 'session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 6, 'session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 7, 'session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 8, 'session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['id' => 9, 'session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 10, 'session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 11, 'session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 12, 'session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 13, 'session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 14, 'session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 15, 'session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['id' => 16, 'session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
                 ];
+
                 SessionGroup::insertOrIgnore($data);
                 break;
 
@@ -1232,6 +1115,7 @@ class TableFillController extends Controller
                 break;
             */ //Original Course Sessions
 
+            /*
             case 'course_sessions':
                 $data = [
                     //COMSCI SESSION GROUP IDs
@@ -2048,6 +1932,152 @@ class TableFillController extends Controller
                         'course_id' => 42,
                         'academic_term' => '2nd',
                     ],
+
+                ];
+                CourseSession::insertOrIgnore($data);
+                break;
+                */ //Version 2
+
+            case 'course_sessions':
+                $data = [
+                    //COMSCI SESSION GROUPS
+                    //CS 1st Year - A (new id 1)
+                    ['session_group_id' => 1, 'course_id' => 1, 'academic_term' => '1st'],
+                    ['session_group_id' => 1, 'course_id' => 2, 'academic_term' => '1st'],
+                    ['session_group_id' => 1, 'course_id' => 3, 'academic_term' => '1st'],
+                    ['session_group_id' => 1, 'course_id' => 4, 'academic_term' => '1st'],
+                    ['session_group_id' => 1, 'course_id' => 5, 'academic_term' => '2nd'],
+                    ['session_group_id' => 1, 'course_id' => 6, 'academic_term' => '2nd'],
+                    ['session_group_id' => 1, 'course_id' => 7, 'academic_term' => 'semestral'],
+                    ['session_group_id' => 1, 'course_id' => 8, 'academic_term' => 'semestral'],
+
+                    //CS 1st Year - B (new id 2)
+                    ['session_group_id' => 2, 'course_id' => 1, 'academic_term' => '1st'],
+                    ['session_group_id' => 2, 'course_id' => 2, 'academic_term' => '1st'],
+                    ['session_group_id' => 2, 'course_id' => 3, 'academic_term' => '1st'],
+                    ['session_group_id' => 2, 'course_id' => 4, 'academic_term' => '1st'],
+                    ['session_group_id' => 2, 'course_id' => 5, 'academic_term' => '2nd'],
+                    ['session_group_id' => 2, 'course_id' => 6, 'academic_term' => '2nd'],
+                    ['session_group_id' => 2, 'course_id' => 7, 'academic_term' => 'semestral'],
+                    ['session_group_id' => 2, 'course_id' => 8, 'academic_term' => 'semestral'],
+
+                    //CS 2nd Year - A (new id 3)
+                    ['session_group_id' => 3, 'course_id' => 9, 'academic_term' => '1st'],
+                    ['session_group_id' => 3, 'course_id' => 10, 'academic_term' => '1st'],
+                    ['session_group_id' => 3, 'course_id' => 11, 'academic_term' => '1st'],
+                    ['session_group_id' => 3, 'course_id' => 12, 'academic_term' => '2nd'],
+                    ['session_group_id' => 3, 'course_id' => 13, 'academic_term' => '2nd'],
+                    ['session_group_id' => 3, 'course_id' => 14, 'academic_term' => '2nd'],
+                    ['session_group_id' => 3, 'course_id' => 15, 'academic_term' => '2nd'],
+
+                    //CS 2nd Year - B (new id 4)
+                    ['session_group_id' => 4, 'course_id' => 9, 'academic_term' => '1st'],
+                    ['session_group_id' => 4, 'course_id' => 10, 'academic_term' => '1st'],
+                    ['session_group_id' => 4, 'course_id' => 11, 'academic_term' => '1st'],
+                    ['session_group_id' => 4, 'course_id' => 12, 'academic_term' => '2nd'],
+                    ['session_group_id' => 4, 'course_id' => 13, 'academic_term' => '2nd'],
+                    ['session_group_id' => 4, 'course_id' => 14, 'academic_term' => '2nd'],
+                    ['session_group_id' => 4, 'course_id' => 15, 'academic_term' => '2nd'],
+
+                    //CS 3rd Year - A (new id 5)
+                    ['session_group_id' => 5, 'course_id' => 16, 'academic_term' => '1st'],
+                    ['session_group_id' => 5, 'course_id' => 17, 'academic_term' => '1st'],
+                    ['session_group_id' => 5, 'course_id' => 18, 'academic_term' => '1st'],
+                    ['session_group_id' => 5, 'course_id' => 19, 'academic_term' => '1st'],
+                    ['session_group_id' => 5, 'course_id' => 20, 'academic_term' => '2nd'],
+                    ['session_group_id' => 5, 'course_id' => 21, 'academic_term' => '2nd'],
+                    ['session_group_id' => 5, 'course_id' => 22, 'academic_term' => '2nd'],
+                    ['session_group_id' => 5, 'course_id' => 23, 'academic_term' => '2nd'],
+
+                    //CS 3rd Year - B (new id 6)
+                    ['session_group_id' => 6, 'course_id' => 16, 'academic_term' => '1st'],
+                    ['session_group_id' => 6, 'course_id' => 17, 'academic_term' => '1st'],
+                    ['session_group_id' => 6, 'course_id' => 18, 'academic_term' => '1st'],
+                    ['session_group_id' => 6, 'course_id' => 19, 'academic_term' => '1st'],
+                    ['session_group_id' => 6, 'course_id' => 20, 'academic_term' => '2nd'],
+                    ['session_group_id' => 6, 'course_id' => 21, 'academic_term' => '2nd'],
+                    ['session_group_id' => 6, 'course_id' => 22, 'academic_term' => '2nd'],
+                    ['session_group_id' => 6, 'course_id' => 23, 'academic_term' => '2nd'],
+
+                    //CS 4th Year - A (new id 7)
+                    ['session_group_id' => 7, 'course_id' => 24, 'academic_term' => '1st'],
+                    ['session_group_id' => 7, 'course_id' => 25, 'academic_term' => '1st'],
+                    ['session_group_id' => 7, 'course_id' => 26, 'academic_term' => '1st'],
+                    ['session_group_id' => 7, 'course_id' => 27, 'academic_term' => '2nd'],
+                    ['session_group_id' => 7, 'course_id' => 28, 'academic_term' => '2nd'],
+
+                    //CS 4th Year - B (new id 8)
+                    ['session_group_id' => 8, 'course_id' => 24, 'academic_term' => '1st'],
+                    ['session_group_id' => 8, 'course_id' => 25, 'academic_term' => '1st'],
+                    ['session_group_id' => 8, 'course_id' => 26, 'academic_term' => '1st'],
+                    ['session_group_id' => 8, 'course_id' => 27, 'academic_term' => '2nd'],
+                    ['session_group_id' => 8, 'course_id' => 28, 'academic_term' => '2nd'],
+
+                    //IT first year - A (new id 9)
+                    ['session_group_id' => 9, 'course_id' => 1, 'academic_term' => '1st'],
+                    ['session_group_id' => 9, 'course_id' => 3, 'academic_term' => '1st'],
+                    ['session_group_id' => 9, 'course_id' => 29, 'academic_term' => '1st'],
+                    ['session_group_id' => 9, 'course_id' => 4, 'academic_term' => '1st'],
+                    ['session_group_id' => 9, 'course_id' => 30, 'academic_term' => '2nd'],
+                    ['session_group_id' => 9, 'course_id' => 2, 'academic_term' => '2nd'],
+                    ['session_group_id' => 9, 'course_id' => 7, 'academic_term' => 'semestral'],
+                    ['session_group_id' => 9, 'course_id' => 8, 'academic_term' => 'semestral'],
+
+                    //IT first year - B (new id 10)
+                    ['session_group_id' => 10, 'course_id' => 1, 'academic_term' => '1st'],
+                    ['session_group_id' => 10, 'course_id' => 3, 'academic_term' => '1st'],
+                    ['session_group_id' => 10, 'course_id' => 29, 'academic_term' => '1st'],
+                    ['session_group_id' => 10, 'course_id' => 4, 'academic_term' => '1st'],
+                    ['session_group_id' => 10, 'course_id' => 30, 'academic_term' => '2nd'],
+                    ['session_group_id' => 10, 'course_id' => 2, 'academic_term' => '2nd'],
+                    ['session_group_id' => 10, 'course_id' => 7, 'academic_term' => 'semestral'],
+                    ['session_group_id' => 10, 'course_id' => 8, 'academic_term' => 'semestral'],
+
+                    //IT second year - A (new id 11)
+                    ['session_group_id' => 11, 'course_id' => 9, 'academic_term' => '1st'],
+                    ['session_group_id' => 11, 'course_id' => 31, 'academic_term' => '1st'],
+                    ['session_group_id' => 11, 'course_id' => 22, 'academic_term' => '1st'],
+                    ['session_group_id' => 11, 'course_id' => 32, 'academic_term' => '1st'],
+                    ['session_group_id' => 11, 'course_id' => 11, 'academic_term' => '1st'],
+                    ['session_group_id' => 11, 'course_id' => 33, 'academic_term' => '2nd'],
+                    ['session_group_id' => 11, 'course_id' => 34, 'academic_term' => '2nd'],
+                    ['session_group_id' => 11, 'course_id' => 14, 'academic_term' => '2nd'],
+
+                    //IT second year - B (new id 12)
+                    ['session_group_id' => 12, 'course_id' => 9, 'academic_term' => '1st'],
+                    ['session_group_id' => 12, 'course_id' => 31, 'academic_term' => '1st'],
+                    ['session_group_id' => 12, 'course_id' => 22, 'academic_term' => '1st'],
+                    ['session_group_id' => 12, 'course_id' => 32, 'academic_term' => '1st'],
+                    ['session_group_id' => 12, 'course_id' => 11, 'academic_term' => '1st'],
+                    ['session_group_id' => 12, 'course_id' => 33, 'academic_term' => '2nd'],
+                    ['session_group_id' => 12, 'course_id' => 34, 'academic_term' => '2nd'],
+                    ['session_group_id' => 12, 'course_id' => 14, 'academic_term' => '2nd'],
+
+                    //IT third year - A (new id 13)
+                    ['session_group_id' => 13, 'course_id' => 24, 'academic_term' => '1st'],
+                    ['session_group_id' => 13, 'course_id' => 35, 'academic_term' => '1st'],
+                    ['session_group_id' => 13, 'course_id' => 36, 'academic_term' => '1st'],
+                    ['session_group_id' => 13, 'course_id' => 37, 'academic_term' => '2nd'],
+                    ['session_group_id' => 13, 'course_id' => 38, 'academic_term' => '2nd'],
+                    ['session_group_id' => 13, 'course_id' => 39, 'academic_term' => '2nd'],
+                    ['session_group_id' => 13, 'course_id' => 40, 'academic_term' => '2nd'],
+
+                    //IT third year - B (new id 14)
+                    ['session_group_id' => 14, 'course_id' => 24, 'academic_term' => '1st'],
+                    ['session_group_id' => 14, 'course_id' => 35, 'academic_term' => '1st'],
+                    ['session_group_id' => 14, 'course_id' => 36, 'academic_term' => '1st'],
+                    ['session_group_id' => 14, 'course_id' => 37, 'academic_term' => '2nd'],
+                    ['session_group_id' => 14, 'course_id' => 38, 'academic_term' => '2nd'],
+                    ['session_group_id' => 14, 'course_id' => 39, 'academic_term' => '2nd'],
+                    ['session_group_id' => 14, 'course_id' => 40, 'academic_term' => '2nd'],
+
+                    //IT fourth year - A (new id 15)
+                    ['session_group_id' => 15, 'course_id' => 41, 'academic_term' => '1st'],
+                    ['session_group_id' => 15, 'course_id' => 42, 'academic_term' => '2nd'],
+
+                    //IT fourth year - B (new id 16)
+                    ['session_group_id' => 16, 'course_id' => 41, 'academic_term' => '1st'],
+                    ['session_group_id' => 16, 'course_id' => 42, 'academic_term' => '2nd'],
 
                 ];
                 CourseSession::insertOrIgnore($data);

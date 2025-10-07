@@ -10,24 +10,18 @@ use Illuminate\Http\Request;
 
 class CourseSessionController extends Controller
 {
-
     /**
      * Show the form for creating a new resource.
      */
     public function create(Timetable $timetable, SessionGroup $sessionGroup, Request $request)
     {
-        // Ensure the session group belongs to this timetable
         if ($sessionGroup->timetable_id !== $timetable->id) {
             abort(404);
         }
 
-        // Get IDs of courses already assigned to this SessionGroup
         $assignedCourseIds = $sessionGroup->courseSessions->pluck('course_id');
-
-        // Start query for courses not yet assigned
         $query = Course::whereNotIn('id', $assignedCourseIds);
 
-        // Apply search filter
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('course_title', 'like', "%{$search}%")
@@ -39,16 +33,18 @@ class CourseSessionController extends Controller
         }
 
         $courses = $query->get();
-
-        // Keep track of selected checkboxes from query string
         $selected = $request->input('courses', []);
+
+        $this->logAction('accessed_create_course_session_form', [
+            'timetable_id' => $timetable->id,
+            'session_group_id' => $sessionGroup->id
+        ]);
 
         return view(
             'timetabling.timetable-course-sessions.create',
             compact('timetable', 'sessionGroup', 'courses', 'selected')
         );
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -59,24 +55,30 @@ class CourseSessionController extends Controller
             'courses' => 'array',
             'courses.*' => 'exists:courses,id'
         ]);
+
         $assignedCourseIds = $sessionGroup->courseSessions->pluck('course_id');
         $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
+
         if(empty($validatedData['courses'])) {
             return view('timetabling.timetable-course-sessions.create', [
-              'timetable' => $timetable,
-              'sessionGroup' => $sessionGroup,
-              'courses' => $courses,
-              'message' => 'Must select a course.'
+                'timetable' => $timetable,
+                'sessionGroup' => $sessionGroup,
+                'courses' => $courses,
+                'message' => 'Must select a course.'
             ]);
         }
 
-        // Loop through each selected course
         foreach ($validatedData['courses'] as $courseId) {
-            // Optional safety check to avoid duplicates
             if (!$sessionGroup->courseSessions()->where('course_id', $courseId)->exists()) {
-                $sessionGroup->courseSessions()->create([
+                $courseSession = $sessionGroup->courseSessions()->create([
                     'course_id' => $courseId,
-                    // add other fields here if your CourseSession has more (e.g., start_time, end_time)
+                ]);
+
+                $this->logAction('create_course_session', [
+                    'timetable_id' => $timetable->id,
+                    'session_group_id' => $sessionGroup->id,
+                    'course_id' => $courseId,
+                    'course_session_id' => $courseSession->id
                 ]);
             }
         }
@@ -97,26 +99,15 @@ class CourseSessionController extends Controller
             'academic_term' => $validated['academic_term'][$courseSession->id],
         ]);
 
+        $this->logAction('update_course_session_term', [
+            'timetable_id' => $timetable->id,
+            'session_group_id' => $sessionGroup->id,
+            'course_session_id' => $courseSession->id,
+            'academic_term' => $validated['academic_term'][$courseSession->id]
+        ]);
+
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Academic term updated!');
-    }
-
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CourseSession $courseSession)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, CourseSession $courseSession)
-    {
-        //
     }
 
     /**
@@ -124,15 +115,36 @@ class CourseSessionController extends Controller
      */
     public function destroy(Timetable $timetable, SessionGroup $sessionGroup, CourseSession $courseSession)
     {
-        // Optional safety check
         if ($courseSession->session_group_id !== $sessionGroup->id || $sessionGroup->timetable_id !== $timetable->id) {
             abort(404);
         }
 
         $courseSession->delete();
 
+        $this->logAction('delete_course_session', [
+            'timetable_id' => $timetable->id,
+            'session_group_id' => $sessionGroup->id,
+            'course_session_id' => $courseSession->id
+        ]);
+
         return redirect()
             ->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Course session deleted successfully!');
+    }
+
+    /**
+     * Log user actions.
+     */
+    protected function logAction(string $action, array $details = [])
+    {
+        if(auth()->check()) {
+            \App\Models\UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }
