@@ -9,7 +9,7 @@
         @method('PUT')
 
         <x-input.text
-            label="Session Name"
+            label="Session Letter"
             name="session_name"
             :value="$sessionGroup->session_name"
         />
@@ -26,6 +26,12 @@
             name="year_level"
             :options="$year_level_options"
             :value="$sessionGroup->year_level"
+        />
+
+        <x-input.text-area
+            label="Short Description"
+            name="short_description"
+            rows="4"
         />
 
         <button type="submit">Confirm</button>
