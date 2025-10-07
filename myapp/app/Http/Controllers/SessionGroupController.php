@@ -6,6 +6,8 @@ use App\Models\AcademicProgram;
 use App\Models\SessionGroup;
 use App\Models\Timetable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
 class SessionGroupController extends Controller
 {
     protected $year_level_options = [
@@ -85,12 +87,22 @@ class SessionGroupController extends Controller
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
-            'session_name' => 'required|string|unique:session_groups,session_name',
+            'session_name' => [
+                'required',
+                'string',
+                'max:4',
+                Rule::unique('session_groups')->where(function ($query) use ($request) {
+                    return $query
+                        ->where('year_level', $request->year_level)
+                        ->where('academic_program_id', $request->academic_program_id);
+                }),
+            ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
+            'short_description' => 'string',
         ]);
 
-        $validatedData['timetable_id'] = $request->route('timetable')->id;
+        $validatedData['timetable_id'] = $timetable->id;
         SessionGroup::create($validatedData);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
@@ -113,7 +125,18 @@ class SessionGroupController extends Controller
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
-            'session_name' => 'required|string|unique:session_groups,session_name,' . $sessionGroup->id,
+            'session_name' => [
+                'required',
+                'string',
+                'max:4',
+                Rule::unique('session_groups')
+                    ->ignore($sessionGroup->id)
+                    ->where(function ($query) use ($request) {
+                        return $query
+                            ->where('year_level', $request->year_level)
+                            ->where('academic_program_id', $request->academic_program_id);
+                    }),
+            ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
         ]);

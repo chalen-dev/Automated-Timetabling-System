@@ -8,7 +8,7 @@
         @csrf
 
         <x-input.text
-            label="Session Name"
+            label="Session Letter"
             name="session_name"
         />
 
@@ -22,6 +22,12 @@
             label="Year Level"
             name="year_level"
             :options="$year_level_options"
+        />
+
+        <x-input.text-area
+            label="Short Description"
+            name="short_description"
+            rows="4"
         />
 
         <button type="submit">Add</button>
