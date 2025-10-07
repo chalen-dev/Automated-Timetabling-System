@@ -28,11 +28,31 @@
                             @foreach ($row as $colIndex => $cell)
                                 @php $span = $rowspanData[$colIndex][$rowIndex] ?? 1; @endphp
                                 @if ($span > 0)
-                                    <td class="border border-gray-700 px-1 py-1 text-center text-[0.65rem] md:text-sm whitespace-normal break-words" rowspan="{{ $span }}">
+                                    <td class="border border-gray-700 px-3 py-2 text-center text-sm" rowspan="{{ $span }}">
+                                        @php
+                                            $parts = explode('_', $cell);
+                                            if (count($parts) === 4) {
+                                                [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
+
+                                                $sessionGroup = \App\Models\SessionGroup::find($sessionGroupId);
+                                                $courseSession = \App\Models\CourseSession::find($courseSessionId);
+                                                $courseTitle = $courseSession->course->course_title ?? '';
+                                                $displayName = ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr)
+                                                            . ' ' . ($sessionGroup->session_name ?? $sessionName)
+                                                            . ' ' . ($sessionGroup->year_level ?? $parts[1]) . ' Year';
+                                            } else {
+                                                $displayName = $cell;
+                                                $courseTitle = '';
+                                            }
+                                        @endphp
+
                                         @if (strtolower(trim($cell)) === 'vacant')
-                                            <span class="text-gray-400 italic">Vacant</span>
+                                            <span class="text-gray-500 italic">Vacant</span>
                                         @else
-                                            {{ $cell }}
+                                            <div>{{ $displayName }}</div>
+                                            @if (!empty($courseTitle))
+                                                <div class="text-xs italic mt-1">{{ $courseTitle }}</div>
+                                            @endif
                                         @endif
                                     </td>
                                 @endif
