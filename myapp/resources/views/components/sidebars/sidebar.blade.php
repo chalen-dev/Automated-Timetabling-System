@@ -77,7 +77,7 @@
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    class="w-6 h-6 stroke-current"
+                    class="w-6 h-6 stroke-current fill-none"
                 >
                     <path
                         d="M12 2l9 5-9 5-9-5 9-5zm0 10l9 5-9 5-9-5 9-5z"
