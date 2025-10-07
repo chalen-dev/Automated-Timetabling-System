@@ -22,6 +22,7 @@
                     <span>Create New Timetable</span>
                 </a>
             </li>
+
             @foreach($timetables as $timetable)
                 <li class="flex flex-col justify-between h-50 w-75 p-5 bg-white shadow-2xl rounded-2xl hover:-translate-y-[6px] hover:shadow-[0_8px_18px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out">
                     <a href="{{route('timetables.timetable-editing-pane.index', $timetable)}}">
@@ -41,18 +42,13 @@
                                 <span>Edit</span>
                             </a>
                             <a class='flex flex-col items-center justify-center cursor-pointer p-[5px] hover:bg-[#cecece] hover:rounded-[10px]'>
-                                <div>
                                 <x-buttons.delete action="timetables.destroy" :params="$timetable" item_name="timetable" btnType="icon"/>
-                                </div>
                                 <span class="text-[red]">Delete</span>
                             </a>
                         </div>
                         <div class="bg-red-500">
-
                         </div>
-
                     </div>
-
                 </li>
             @endforeach
         </ul>
