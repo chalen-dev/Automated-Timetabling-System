@@ -21,7 +21,7 @@
                     </svg>
                     <span>Create New Timetable</span>
                 </a>
-
+            </li>
             @foreach($timetables as $timetable)
                 <li class="flex flex-col justify-between h-50 w-75 p-5 bg-white shadow-2xl rounded-2xl hover:-translate-y-[6px] hover:shadow-[0_8px_18px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out">
                     <a href="{{route('timetables.timetable-editing-pane.index', $timetable)}}">
