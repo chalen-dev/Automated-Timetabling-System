@@ -7,5 +7,4 @@
         <h1>Timetable View</h1>
         <p>{{$timetable->timetable_name}} {{$timetable->semester}} semester ({{$timetable->academic_year}})</p>
     </div>
-
 @endsection
