@@ -38,7 +38,7 @@ class GenerateTimetableController extends Controller
         // Define expected XLSX output path
         $outputFile = base_path("scripts/public/exports/timetables/{$timetableId}.xlsx");
 
-        // Execute and wait
+        // Execute and wait for a while bossing
         $descriptorSpec = [
             0 => ["pipe", "r"],
             1 => ["pipe", "w"],
