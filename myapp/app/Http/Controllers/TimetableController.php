@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Timetable;
+use App\Models\UserLog;
 use Illuminate\Http\Request;
 
 class TimetableController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     private $semesterOptions = [
         '1st' => '1st',
         '2nd' => '2nd'
@@ -18,21 +16,21 @@ class TimetableController extends Controller
     public function index()
     {
         $timetables = Timetable::all();
+
+        $this->logAction('viewed_timetables_list');
+
         return view('records.timetables.index', compact('timetables'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $semesterOptions = $this->semesterOptions;
+
+        $this->logAction('accessed_create_timetable_form');
+
         return view('records.timetables.create', compact('semesterOptions'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -44,32 +42,39 @@ class TimetableController extends Controller
 
         $validatedData['user_id'] = auth()->id();
 
-        Timetable::create($validatedData);
+        $timetable = Timetable::create($validatedData);
+
+        $this->logAction('create_timetable', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name
+        ]);
 
         return redirect()->route('timetables.index')
             ->with('success', 'Timetable created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Timetable $timetable)
     {
+        $this->logAction('viewed_timetable', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name
+        ]);
+
         return view('records.timetables.show', compact('timetable'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Timetable $timetable)
     {
         $semesterOptions = $this->semesterOptions;
+
+        $this->logAction('accessed_edit_timetable_form', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name
+        ]);
+
         return view('records.timetables.edit', compact('timetable', 'semesterOptions'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
@@ -83,17 +88,43 @@ class TimetableController extends Controller
 
         $timetable->update($validatedData);
 
+        $this->logAction('update_timetable', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name
+        ]);
+
         return redirect()->route('timetables.index')
             ->with('success', 'Timetable updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Timetable $timetable)
     {
+        $timetableData = [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name
+        ];
+
         $timetable->delete();
+
+        $this->logAction('delete_timetable', $timetableData);
+
         return redirect()->route('timetables.index')
             ->with('success', 'Timetable deleted successfully.');
+    }
+
+    /**
+     * Log user actions.
+     */
+    protected function logAction(string $action, array $details = [])
+    {
+        if(auth()->check()) {
+            UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }

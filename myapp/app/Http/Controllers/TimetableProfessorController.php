@@ -5,19 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Professor;
 use App\Models\Timetable;
 use App\Models\TimetableProfessor;
+use App\Models\UserLog;
 use Illuminate\Http\Request;
 
-class
-TimetableProfessorController extends Controller
+class TimetableProfessorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Timetable $timetable, Request $request)
     {
         $query = $timetable->professors();
 
-        // Apply search filter if provided
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
@@ -30,16 +26,18 @@ TimetableProfessorController extends Controller
 
         $professors = $query->get();
 
+        // Log view action
+        $this->logAction('viewed_timetable_professors', [
+            'timetable_id' => $timetable->id,
+            'professors_count' => $professors->count()
+        ]);
+
         return view('timetabling.timetable-professors.index', compact('timetable', 'professors'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Timetable $timetable, Request $request)
     {
         $assignedProfessorIds = $timetable->professors->pluck('id');
-
         $query = Professor::whereNotIn('id', $assignedProfessorIds);
 
         if ($search = $request->input('search')) {
@@ -53,26 +51,26 @@ TimetableProfessorController extends Controller
         }
 
         $professors = $query->get();
-
-        // Pass already selected checkboxes from query string
         $selected = $request->input('professors', []);
+
+        // Log access to create form
+        $this->logAction('accessed_timetable_professor_create_form', [
+            'timetable_id' => $timetable->id
+        ]);
 
         return view('timetabling.timetable-professors.create', compact('timetable', 'professors', 'selected'));
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
             'professors' => 'array',
             'professors.*' => 'exists:professors,id'
         ]);
+
         $assignedProfessorIds = $timetable->professors->pluck('id');
         $professors = Professor::whereNotIn('id', $assignedProfessorIds)->get();
-        //No selection
+
         if (empty($validatedData['professors'])) {
             return view('timetabling.timetable-professors.create', [
                 'timetable' => $timetable,
@@ -83,18 +81,40 @@ TimetableProfessorController extends Controller
 
         foreach($validatedData['professors'] as $professorId){
             $timetable->professors()->attach($professorId);
+
+            // Log each professor assignment
+            $this->logAction('assigned_professor_to_timetable', [
+                'timetable_id' => $timetable->id,
+                'professor_id' => $professorId
+            ]);
         }
 
         return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
     {
         $timetable->professors()->detach($timetableProfessor->id);
 
+        // Log removal
+        $this->logAction('removed_professor_from_timetable', [
+            'timetable_id' => $timetable->id,
+            'professor_id' => $timetableProfessor->id
+        ]);
+
         return redirect()->route('timetables.timetable-professors.index', $timetable);
+    }
+
+    protected function logAction(string $action, array $details = [])
+    {
+        if(auth()->check()) {
+            UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }

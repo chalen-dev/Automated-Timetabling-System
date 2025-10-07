@@ -16,7 +16,6 @@ class TimetableRoomController extends Controller
     {
         $query = $timetable->rooms();
 
-        // Optional search filter
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('room_name', 'like', "%{$search}%")
@@ -27,6 +26,12 @@ class TimetableRoomController extends Controller
         }
 
         $rooms = $query->get();
+
+        // Log viewing timetable rooms
+        $this->logAction('viewed_timetable_rooms', [
+            'timetable_id' => $timetable->id,
+            'search' => $search
+        ]);
 
         return view('timetabling.timetable-rooms.index', compact('timetable', 'rooms'));
     }
@@ -37,10 +42,8 @@ class TimetableRoomController extends Controller
     public function create(Timetable $timetable, Request $request)
     {
         $assignedRoomIds = $timetable->rooms->pluck('id');
-
         $query = Room::whereNotIn('id', $assignedRoomIds);
 
-        // Optional: search filter
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('room_name', 'like', "%{$search}%")
@@ -51,9 +54,11 @@ class TimetableRoomController extends Controller
         }
 
         $rooms = $query->get();
-
-        // Keep track of currently selected checkboxes from query string
         $selected = $request->input('rooms', []);
+
+        $this->logAction('accessed_assign_rooms_form', [
+            'timetable_id' => $timetable->id
+        ]);
 
         return view('timetabling.timetable-rooms.create', compact('timetable', 'rooms', 'selected'));
     }
@@ -81,6 +86,13 @@ class TimetableRoomController extends Controller
 
         foreach($validatedData['rooms'] as $roomId) {
             $timetable->rooms()->attach($roomId);
+
+            $room = Room::find($roomId);
+            $this->logAction('assigned_room_to_timetable', [
+                'timetable_id' => $timetable->id,
+                'room_id' => $room->id,
+                'room_name' => $room->room_name
+            ]);
         }
 
         return redirect()->route('timetables.timetable-rooms.index', $timetable);
@@ -91,7 +103,32 @@ class TimetableRoomController extends Controller
      */
     public function destroy(Timetable $timetable, TimetableRoom $timetableRoom)
     {
+        $room = Room::find($timetableRoom->id);
+
         $timetable->rooms()->detach($timetableRoom->id);
+
+        $this->logAction('removed_room_from_timetable', [
+            'timetable_id' => $timetable->id,
+            'room_id' => $room->id,
+            'room_name' => $room->room_name
+        ]);
+
         return redirect()->route('timetables.timetable-rooms.index', $timetable);
+    }
+
+    /**
+     * Log user actions.
+     */
+    protected function logAction(string $action, array $details = [])
+    {
+        if(auth()->check()) {
+            \App\Models\UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }
