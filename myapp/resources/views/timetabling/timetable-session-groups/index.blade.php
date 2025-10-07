@@ -4,14 +4,16 @@
 
 @section('content')
     <div class="w-full pl-39 pt-23 p-4">
-        <div class="flex flex-row mb-7 justify-between">
+        <div class="flex flex-row mb-7 justify-between items-center">
             {{-- Search bar for Session Groups --}}
             <div class="flex flex-col text-[#5e0b0b]">
                 <h1 class="text-[18px] text-white">{{ $timetable->timetable_name }} Class Sessions</h1>
                 <x-search-bar.search-bar :action="route('timetables.session-groups.index', $timetable)" />
             </div>
 
-            <a href="{{ route('timetables.session-groups.create', $timetable) }}" class="flex align-center box-border pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#ffffff] text-[#5e0b0b] cursor-pointer shadow-2xl font-[600]">Add</a>
+            <a href="{{ route('timetables.session-groups.create', $timetable) }}" class="flex align-center box-border pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-yellow-500 text-[#5e0b0b] cursor-pointer shadow-2xl font-[600]">
+                Add
+            </a>
         </div>
 
         @foreach($sessionGroupsByProgram as $programId => $groups)
@@ -29,18 +31,32 @@
                     </div>
                     <div class="pr-6 pb-1">
                         <div class="flex gap-3">
-                            <a href="{{ route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup]) }}">Add Sessions</a>
-                            <a href="{{ route('timetables.session-groups.show', [$timetable, $sessionGroup]) }}">
+                            <!-- Add Sessions Button -->
+                            <a href="{{ route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup]) }}"
+                               class="bg-[#800000] text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-[#660000] active:bg-[#4d0000] transition-all duration-150">
+                                Add Sessions
+                            </a>
+
+
+                            <!-- Show Button -->
+                            <a href="{{ route('timetables.session-groups.show', [$timetable, $sessionGroup]) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150">
                                 <i class="bi-card-list"></i>
                             </a>
-                            <a href="{{ route('timetables.session-groups.edit', [$timetable, $sessionGroup]) }}">
+
+                            <!-- Edit Button -->
+                            <a href="{{ route('timetables.session-groups.edit', [$timetable, $sessionGroup]) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
+
+                            <!-- Delete Button -->
                             <x-buttons.delete
                                 action="timetables.session-groups.destroy"
                                 :params="[$timetable, $sessionGroup]"
                                 item_name="session"
                                 btnType="icon"
+                                class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150"
                             />
                         </div>
                     </div>

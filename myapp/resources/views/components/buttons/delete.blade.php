@@ -2,7 +2,8 @@
     'action',       // route name
     'params',       // array of route params (can be 1 or many)
     'item_name',
-    'btnType' => 'normal'
+    'btnType' => 'normal',
+    'class' => '',  // default value to avoid undefined variable
 ])
 
 <form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center ">
@@ -11,7 +12,8 @@
     <button
         type="submit"
         onclick="return confirm('Are you sure you want to delete this {{ $item_name }}?')"
-        class="text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer"
+        class="text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer
+               hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition-all duration-150 {{ $class }}"
     >
         @if($btnType === 'normal')
             <p>Delete</p>

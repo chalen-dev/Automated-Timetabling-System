@@ -3,62 +3,77 @@
 @section('title', 'Professors')
 
 @section('content')
-    <h1>List of Professors</h1>
+    <div class="w-full p-4">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-20 items-center justify-center">
+                <h1 class="text-xl font-bold text-white">List of Professors</h1>
+                <x-search-bar.search-bar
+                    :action="route('professors.index')"
+                    placeholder="Search by name or course..."
+                />
+            </div>
+            <a href="{{ route('professors.create') }}"
+               class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
+                Create
+            </a>
+        </div>
 
-    <div class="flex justify-between">
-        <x-search-bar.search-bar :action="route('professors.index')" placeholder="Search by name or course..." />
-        <a href="{{route('professors.create')}}">Create</a>
-    </div>
-
-
-
-    <table class="w-full">
-        <thead>
+        <table class="w-full text-left border-separate border-spacing-0 bg-white rounded-lg shadow-md overflow-hidden">
+            <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
-                <td>First Name</td>
-                <td>Last Name</td>
-                <td>Regular/Non-Regular</td>
-                <td>Academic Program</td>
-                <td>Max Unit Load</td>
-                <td>Course Specializations</td>
-                <td></td>
+                <th class="px-6 py-3 font-semibold">First Name</th>
+                <th class="px-6 py-3 font-semibold">Last Name</th>
+                <th class="px-6 py-3 font-semibold">Regular/Non-Regular</th>
+                <th class="px-6 py-3 font-semibold">Academic Program</th>
+                <th class="px-6 py-3 font-semibold">Max Unit Load</th>
+                <th class="px-6 py-3 font-semibold">Course Specializations</th>
+                <th class="px-6 py-3 font-semibold text-center">Action</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody class="text-gray-700">
             @foreach($professors as $professor)
-            <tr>
-                <td class="flex-2">{{$professor->first_name}}</td>
-                <td class="flex-2">{{$professor->last_name}}</td>
-                <td class="flex-2">{{$professor->professor_type}}</td>
-                <td class="flex-2">{{$professor->academicProgram?->program_abbreviation ?? 'N/A'}}</td>
-                <td class="flex-2">{{$professor->max_unit_load}}</td>
-                <td class="flex-2">
-                    {{ $professor->courses->pluck('course_title')->implode(', ') ?: 'N/A' }}
-                </td>
-                <td class="whitespace-nowrap w-fit px-2">
-                    <div class="flex flex-row gap-10 justify-end">
+                <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-3">{{ $professor->first_name }}</td>
+                    <td class="px-6 py-3">{{ $professor->last_name }}</td>
+                    <td class="px-6 py-3">{{ $professor->professor_type }}</td>
+                    <td class="px-6 py-3">{{ $professor->academicProgram?->program_abbreviation ?? 'N/A' }}</td>
+                    <td class="px-6 py-3">{{ $professor->max_unit_load }}</td>
+                    <td class="px-6 py-3">
+                        {{ $professor->courses->pluck('course_title')->implode(', ') ?: 'N/A' }}
+                    </td>
+                    <td class="px-6 py-3 text-center">
                         <div class="flex flex-row gap-2 justify-center items-center">
-                            <a class="flex items-center justify-center" href="{{route('professors.specializations.index', $professor)}}">Specializations</a>
-                        </div>
-                        <div class="flex flex-row gap-2">
-                            <a class = 'flex items-center justify-center w-10 h-10' href="{{route('professors.show', $professor)}}">
+                            <!-- Specializations Button -->
+                            <a href="{{ route('professors.specializations.index', $professor) }}"
+                               class="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-semibold shadow hover:bg-gray-300 hover:text-gray-900 active:bg-gray-400 transition-all duration-150">
+                                Specializations
+                            </a>
+
+                            <!-- Show Button -->
+                            <a href="{{ route('professors.show', $professor) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
                                 <i class="bi-card-list"></i>
                             </a>
-                            <a class = 'flex items-center justify-center w-10 h-10' href="{{route('professors.edit', $professor)}}">
+
+                            <!-- Edit Button -->
+                            <a href="{{ route('professors.edit', $professor) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
+
+                            <!-- Delete Button -->
                             <x-buttons.delete
                                 action="professors.destroy"
-                                :params='$professor'
-                                item_name='professor'
-                                btnType='icon'/>
+                                :params="$professor"
+                                item_name="professor"
+                                btnType="icon"
+                                class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10"
+                            />
                         </div>
-
-                    </div>
-                </td>
-            </tr>
+                    </td>
+                </tr>
             @endforeach
-        </tbody>
-    </table>
-
+            </tbody>
+        </table>
+    </div>
 @endsection

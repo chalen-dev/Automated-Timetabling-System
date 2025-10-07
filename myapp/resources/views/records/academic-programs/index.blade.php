@@ -3,45 +3,66 @@
 @section('title', 'Academic Programs')
 
 @section('content')
-    <h1>Academic Programs</h1>
+    <div class="w-full p-4">
 
+        <!-- Header: Title + Search + Create Button -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-20 items-center justify-between">
+                <h1 class="text-xl font-bold mb-0 text-white">Academic Programs</h1>
+                <x-search-bar.search-bar
+                    :action="route('academic-programs.index')"
+                    placeholder="Search by program name or abbreviation..."
+                    name="search"
+                />
+            </div>
 
-    <!-- Search Bar Component -->
-    <div class="flex justify-between mb-4">
-        <x-search-bar.search-bar
-            :action="route('academic-programs.index')"
-            placeholder="Search by program name or abbreviation..."
-            name="search"
-        />
-        <a href="{{ route('academic-programs.create') }}" class="bg-blue-500 text-white px-3 py-1 rounded">Create</a>
-    </div>
+            <a href="{{ route('academic-programs.create') }}"
+               class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
+                Create
+            </a>
+        </div>
 
-    <table class="w-full">
-        <thead>
-        <tr>
-            <td>Program Name</td>
-            <td>Program Abbreviation</td>
-            <td></td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($academicPrograms as $academicProgram)
+        <!-- Table -->
+        <table class="w-full text-left border-separate border-spacing-0 bg-white rounded-lg shadow-md overflow-hidden">
+            <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
-                <td>{{ $academicProgram->program_name }}</td>
-                <td>{{ $academicProgram->program_abbreviation }}</td>
-                <td class="whitespace-nowrap px-2">
-                    <div class="flex flex-row gap-2 justify-end items-center">
-                        <a class='flex items-center justify-center w-10 h-10' href="{{ route('academic-programs.show', $academicProgram) }}">
-                            <i class="bi-card-list"></i>
-                        </a>
-                        <a class='flex items-center justify-center w-10 h-10' href="{{ route('academic-programs.edit', $academicProgram) }}">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <x-buttons.delete action="academic-programs.destroy" :params='$academicProgram' item_name='academic program' btnType='icon'/>
-                    </div>
-                </td>
+                <th class="px-6 py-3 font-semibold">Program Name</th>
+                <th class="px-6 py-3 font-semibold">Program Abbreviation</th>
+                <th class="px-6 py-3 font-semibold text-center">Action</th>
             </tr>
-        @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="text-gray-700">
+            @foreach($academicPrograms as $academicProgram)
+                <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-3">{{ $academicProgram->program_name }}</td>
+                    <td class="px-6 py-3">{{ $academicProgram->program_abbreviation }}</td>
+                    <td class="px-6 py-3 text-center">
+                        <div class="flex flex-row gap-2 justify-center items-center">
+                            <!-- Show Button -->
+                            <a href="{{ route('academic-programs.show', $academicProgram) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
+                                <i class="bi-card-list"></i>
+                            </a>
+
+                            <!-- Edit Button -->
+                            <a href="{{ route('academic-programs.edit', $academicProgram) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <!-- Delete Button -->
+                            <x-buttons.delete
+                                action="academic-programs.destroy"
+                                :params="$academicProgram"
+                                item_name="academic program"
+                                btnType="icon"
+                                class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10"
+                            />
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
 @endsection

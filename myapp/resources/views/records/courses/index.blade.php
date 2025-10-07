@@ -3,47 +3,69 @@
 @section('title', 'Courses')
 
 @section('content')
-    <h1>List of Courses</h1>
-    <div class="flex justify-between mb-4">
-        <x-search-bar.search-bar :action="route('courses.index')" placeholder="Search by course title, course name, or course type..." />
-        <a href="{{ route('courses.create') }}">Create</a>
-    </div>
+    <div class="w-full p-4">
 
-    <table class="w-full">
-        <thead>
+
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex gap-20 items-center justify-between">
+                <h1 class="text-xl font-bold mb-4 text-white">List of Courses</h1>
+                <x-search-bar.search-bar
+                    :action="route('courses.index')"
+                    placeholder="Search by course title, course name, or course type..."
+                />
+            </div>
+            <a href="{{ route('courses.create') }}"
+               class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
+                Create
+            </a>
+        </div>
+
+        <table class="w-full text-left border-separate border-spacing-0 bg-white rounded-lg shadow-md overflow-hidden">
+            <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
-                <td>Course Title</td>
-                <td>Course Name</td>
-                <td>Course Type</td>
-                <td>Duration</td>
-                <td>Units</td>
-                <td></td>
+                <th class="px-6 py-3 font-semibold">Course Title</th>
+                <th class="px-6 py-3 font-semibold">Course Name</th>
+                <th class="px-6 py-3 font-semibold">Course Type</th>
+                <th class="px-6 py-3 font-semibold">Duration</th>
+                <th class="px-6 py-3 font-semibold">Units</th>
+                <th class="px-6 py-3 font-semibold text-center">Action</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody class="text-gray-700">
             @foreach($courses as $course)
-            <tr >
-                <td>{{$course->course_title}}</td>
-                <td>{{$course->course_name}}</td>
-                <td>{{$course->course_type}}</td>
-                <td>{{$course->duration_type}}</td>
-                <td>{{$course->unit_load}}</td>
-                <td class="whitespace-nowrap px-2">
-                    <div class="flex flex-row gap-2 justify-end">
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('courses.show', $course)}}">
-                            <i class="bi-card-list"></i>
-                        </a>
-                        <a class = 'flex items-center justify-center w-10 h-10' href="{{route('courses.edit', $course)}}">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <x-buttons.delete action="courses.destroy" :params='$course' item_name='course' btnType='icon'/>
-                    </div>
-                </td>
-            </tr>
+                <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-3">{{ $course->course_title }}</td>
+                    <td class="px-6 py-3">{{ $course->course_name }}</td>
+                    <td class="px-6 py-3">{{ $course->course_type }}</td>
+                    <td class="px-6 py-3">{{ $course->duration_type }}</td>
+                    <td class="px-6 py-3">{{ $course->unit_load }}</td>
+                    <td class="px-6 py-3 text-center">
+                        <div class="flex flex-row gap-2 justify-center">
+                            <!-- Show Button -->
+                            <a href="{{ route('courses.show', $course) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
+                                <i class="bi-card-list"></i>
+                            </a>
+
+                            <!-- Edit Button -->
+                            <a href="{{ route('courses.edit', $course) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <!-- Delete Button -->
+                            <x-buttons.delete
+                                action="courses.destroy"
+                                :params="$course"
+                                item_name="course"
+                                btnType="icon"
+                                class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10"
+                            />
+                        </div>
+                    </td>
+                </tr>
             @endforeach
-        </tbody>
-    </table>
-
-
-
+            </tbody>
+        </table>
+    </div>
 @endsection
