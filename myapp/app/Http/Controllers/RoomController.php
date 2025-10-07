@@ -14,8 +14,6 @@ class RoomController extends Controller
     private $roomTypeOptions = [
         'lecture' => 'Lecture',
         'comlab' => 'Computer Lab',
-        'gym' => 'Gym',
-        'main' => 'Main',
     ];
     private $courseTypeExclusiveToOptions = [
         'none' => 'None',

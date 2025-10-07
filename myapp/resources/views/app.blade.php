@@ -38,9 +38,7 @@
         <div class="flex justify-around">
             <!-- MAIN CONTENT -->
             <main class="flex">
-                <div>
-                    @yield('content')
-                </div>
+                @yield('content')
             </main>
         </div>
         @endguest
