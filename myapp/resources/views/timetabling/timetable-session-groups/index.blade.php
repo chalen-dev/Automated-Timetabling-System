@@ -3,7 +3,7 @@
 @section('title', $timetable->timetable_name . ' Class Sessions')
 
 @section('content')
-    <div class="w-full pl-39 pt-23 p-4">
+    <div class="w-full pl-39 p-4">
         <div class="flex flex-row mb-7 justify-between items-center">
             {{-- Search bar for Session Groups --}}
             <div class="flex flex-col text-[#5e0b0b]">
