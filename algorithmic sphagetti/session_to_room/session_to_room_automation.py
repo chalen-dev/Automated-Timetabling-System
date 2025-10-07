@@ -1,3 +1,4 @@
+# @title
 # Colab-ready greedy timetabling script (fixed)
 # - Paste this into a single Google Colab cell and run.
 # - Requires your CSVs to be in the working directory (or at /content or /mnt/data).
@@ -286,22 +287,23 @@ for idx, row in cs_sorted.iterrows():
     if not placed:
         unassigned.append({'session_code':code, 'course_session_id': int(row.get('course_session_id', np.nan)), 'reason':'no feasible placement'})
 
-# ---------- Export to XLSX with 12 sheets + overview + unassigned ----------
+# ---------- Export to XLSX with 12 timetable sheets + 2 overviews + unassigned ----------
 from openpyxl import Workbook
 import openpyxl
 import math
 
 out_path = "/content/timetables_output.xlsx"
-# Build per-term-day DataFrames
 days = ['Mon','Tue','Wed','Thu','Fri','Sat']
 terms = ['1st','2nd']
+
+# --- Build base timetable sheets ---
 sheets = {}
 for t in terms:
     for d in days:
         df = pd.DataFrame('vacant', index=time_labels, columns=room_cols)
         sheets[(t,d)] = df
 
-# Fill sheets using assignments
+# --- Fill timetable sheets from assignments ---
 for a in assignments:
     t = a['term']
     d = a['day']
@@ -310,45 +312,43 @@ for a in assignments:
     room = a['room']
     code = a['session_code']
     df = sheets[(t, d)]
-    # fill region
     for s in range(start, start + slots):
-        if s < 0 or s >= len(time_labels):
-            continue
-        df.iloc[s, df.columns.get_loc(room)] = code
+        if 0 <= s < len(time_labels):
+            df.iloc[s, df.columns.get_loc(room)] = code
 
-# Write to Excel
+# --- Write all sheets to Excel ---
 with pd.ExcelWriter(out_path, engine='openpyxl') as writer:
+    # 12 timetable sheets (2 terms × 6 days)
     for t in terms:
         for d in days:
-            sheetname = f"{t}_{d}"
-            # truncate sheetname if too long
-            sheetname = sheetname[:31]
-            sheets[(t,d)].to_excel(writer, sheet_name=sheetname)
-    # overview: pivot assignments by session_code
+            sheetname = f"{t}_{d}"[:31]
+            sheets[(t, d)].to_excel(writer, sheet_name=sheetname)
+
+    # --- Two overviews (1st and 2nd term) ---
     if assignments:
         ov = pd.DataFrame(assignments)
-        session_codes = sorted(ov['session_code'].unique())
-        rows = []
-        for sc in session_codes:
-            row = {'session_code': sc}
-            sub = ov[ov['session_code']==sc]
-            for t in terms:
+        for t in terms:
+            ov_t = ov[ov['term'] == t]
+            session_codes = sorted(ov_t['session_code'].unique())
+            rows = []
+            for sc in session_codes:
+                row = {'session_code': sc}
+                sub = ov_t[ov_t['session_code'] == sc]
                 for d in days:
-                    key = f"{t}_{d}"
-                    sel = sub[(sub['term']==t) & (sub['day']==d)]
-                    row[key] = ", ".join(sorted(sel['room'].astype(str).unique())) if not sel.empty else "vacant"
-            rows.append(row)
-        pd.DataFrame(rows).to_excel(writer, sheet_name="overview", index=False)
+                    sel = sub[sub['day'] == d]
+                    row[d] = ", ".join(sorted(sel['room'].astype(str).unique())) if not sel.empty else "vacant"
+                rows.append(row)
+            pd.DataFrame(rows).to_excel(writer, sheet_name=f"{t}_overview", index=False)
 
+    # --- Unassigned sheet ---
     if unassigned:
         pd.DataFrame(unassigned).to_excel(writer, sheet_name="unassigned", index=False)
 
-print("Saved timetable workbook to:", out_path)
-
-# ---------- Print summary ----------
-print(f"Assignments: {len(assignments)} rows")
+print("✅ Saved timetable workbook to:", out_path)
+print(f"Sheets: 12 timetable pages + 2 overviews + {'1 unassigned' if unassigned else 'no unassigned'} sheet")
+print(f"Total assigned sessions: {len(assignments)}")
 print(f"Unassigned sessions: {len(unassigned)}")
 if len(unassigned) > 0:
-    print("Sample unassigned (first 10):")
+    print("Sample unassigned:")
     for u in unassigned[:10]:
         print(" -", u)
