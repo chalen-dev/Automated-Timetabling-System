@@ -10,6 +10,7 @@
             name="{{ $name }}"
             id="{{ $name }}"
             value="{{ old($name, $value ?? $default) }}"
+            class="border border-gray-300 rounded-lg px-4 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[black] focus:border-transparent transition"
             @if(isset($min)) min="{{ $min }}" @endif
             @if(isset($max)) max="{{ $max }}" @endif
             @if(isset($step)) step="{{ $step }}" @endif

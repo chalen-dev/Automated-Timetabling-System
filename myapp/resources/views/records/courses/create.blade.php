@@ -2,11 +2,10 @@
 
 @section('title', 'Create Course')
 
-
 @section('content')
-    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
-        <h1>Create Course</h1>
-        <form class="flex flex-col gap-4 justify-start" action="{{route('courses.store')}}" method="POST" >
+    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] gap-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+        <h1 class="font-bold text-[18px]">Create Course</h1>
+        <form class="flex flex-col" action="{{route('courses.store')}}" method="POST" >
             @csrf
 
             <div class="flex justify-center gap-7">
@@ -41,7 +40,7 @@
                 </div>
 
                 <div class="flex flex-col justify-center gap-5">
-                    <div class="flex flex-row gap-5">
+                    <div class="flex flex-col gap-5">
                         <x-input.number
                             label="Total Lecture Class Days per Week"
                             name="total_lecture_class_days"
@@ -64,30 +63,33 @@
                         <div class="!text-red-500">{{$errors->first('total_days')}}</div>
                     @endif
                 </div>
-            </div>
-            <div class="flex justify-center items-center gap-20">
-                <x-input.number
-                    label="Number of Units"
-                    name="unit_load"
-                    :default="0.0"
-                    :min="0.0"
-                    :max="10.0"
-                    :step="0.1"
-                />
+                <div class="flex justify-center flex-col items-center gap-[20px]">
+                    <x-input.number
+                        label="Number of Units"
+                        name="unit_load"
+                        :default="0.0"
+                        :min="0.0"
+                        :max="10.0"
+                        :step="0.1"
+                    />
 
-                <x-input.radio-group
-                    label="Course Duration"
-                    name="duration_type"
-                    :options="$durationTypeOptions"
-                    default=""
-                />
+                    <x-input.radio-group
+                        label="Course Duration"
+                        name="duration_type"
+                        :options="$durationTypeOptions"
+                        default=""
+                    />
+                </div>
             </div>
-
-            <div class="flex justify-center items-center gap-100">
-                <a href="{{route('courses.index')}}">Back</a>
-                <button type="submit">Create</button>
-            </div>
-
         </form>
+        <div class="flex flex-row w-full justify-between items-center">
+            <a href="{{route('courses.index')}}">
+                <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
+                    <span>Back</span>
+                </button>
+            </a>
+
+            <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Create</span></button>
+        </div>
     </div>
 @endsection

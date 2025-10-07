@@ -5,13 +5,13 @@
     'btnType' => 'normal'
 ])
 
-<form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center">
+<form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center ">
     @csrf
     @method('DELETE')
     <button
         type="submit"
         onclick="return confirm('Are you sure you want to delete this {{ $item_name }}?')"
-        class="text-red-500 bg-transparent border-none flex items-center justify-center rounded"
+        class="text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer"
     >
         @if($btnType === 'normal')
             <p>Delete</p>
