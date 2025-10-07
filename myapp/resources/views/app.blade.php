@@ -7,7 +7,7 @@
     <title>@yield('title', 'My Laravel App')</title>
     @vite('resources/css/app.css')
     <script src="//unpkg.com/alpinejs" defer></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('sidebar', { open: false }) // start hidden

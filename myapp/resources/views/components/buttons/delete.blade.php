@@ -1,18 +1,18 @@
 @props([
-    'action',       // route name
-    'params',       // array of route params (can be 1 or many)
+    'action',
+    'params',
     'item_name',
     'btnType' => 'normal',
-    'class' => '',  // default value to avoid undefined variable
+    'class' => '',
 ])
 
-<form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center ">
+<form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center delete-form">
     @csrf
     @method('DELETE')
     <button
-        type="submit"
-        onclick="return confirm('Are you sure you want to delete this {{ $item_name }}?')"
-        class="text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer
+        type="button"
+        data-item-name="{{ $item_name }}"
+        class="delete-btn text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer
                hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition-all duration-150 {{ $class }}"
     >
         @if($btnType === 'normal')
@@ -22,3 +22,31 @@
         @endif
     </button>
 </form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.delete-btn').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = button.closest('form');
+                const itemName = button.dataset.itemName;
+
+                Swal.fire({
+                    title: `Are you sure?`,
+                    text: `You are about to delete "${itemName}". This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+

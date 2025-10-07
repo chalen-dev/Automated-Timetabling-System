@@ -3,14 +3,14 @@
 @section('title', 'Edit Course')
 
 @section('content')
-    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
-        <h1>Edit Course</h1>
-        <form action="{{route('courses.update', $course)}}" method="POST" class="flex flex-col gap-4 justify-start">
+    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] gap-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+        <h1 class="font-bold text-[18px]">Edit Course</h1>
+        <form class="flex flex-col gap-10 w-full" action="{{ route('courses.update', $course) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="flex justify-center gap-7">
-                <div class="flex flex-col justify-center items-stretch">
+                <div class="flex flex-col justify-center items-stretch gap-5">
                     <x-input.text
                         label="Course Title"
                         name="course_title"
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="flex flex-col justify-center gap-5">
-                    <div class="flex flex-row gap-5">
+                    <div class="flex flex-col gap-5">
                         <x-input.number
                             label="Total Lecture Class Days per Week"
                             name="total_lecture_class_days"
@@ -67,37 +67,43 @@
                         />
                     </div>
                     @if($errors->has('total_days'))
-                        <div class="!text-red-500">{{$errors->first('total_days')}}</div>
+                        <div class="!text-red-500">{{ $errors->first('total_days') }}</div>
                     @endif
+                </div>
+
+                <div class="flex justify-center flex-col items-center gap-[20px]">
+                    <x-input.number
+                        label="Number of Units"
+                        name="unit_load"
+                        :default="0.0"
+                        :min="0.0"
+                        :max="10.0"
+                        :step="0.1"
+                        :value="old('unit_load', $course->unit_load)"
+                    />
+
+                    <x-input.radio-group
+                        label="Course Duration"
+                        name="duration_type"
+                        :options="$durationTypeOptions"
+                        default=""
+                        :value="old('duration_type', $course->duration_type)"
+                    />
                 </div>
             </div>
 
-            <div class="flex justify-center items-center gap-20">
-                <x-input.number
-                    label="Number of Units"
-                    name="unit_load"
-                    :default="0.0"
-                    :min="0.0"
-                    :max="10.0"
-                    :step="0.1"
-                    :value="old('unit_load', $course->unit_load)"
-                />
+            <!-- Added gap above buttons for breathing room -->
+            <div class="flex flex-row w-full justify-between items-center mt-[40px]">
+                <a href="{{ route('courses.index') }}">
+                    <button type="button" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
+                        <span>Back</span>
+                    </button>
+                </a>
 
-                <x-input.radio-group
-                    label="Course Duration"
-                    name="duration_type"
-                    :options="$durationTypeOptions"
-                    default=""
-                    :value="old('duration_type', $course->duration_type)"
-                />
+                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]">
+                    <span>Confirm Changes</span>
+                </button>
             </div>
-
-            <div class="flex justify-center items-center gap-100">
-                <a href="{{route('courses.index')}}">Back</a>
-                <button type="submit">Confirm Changes</button>
-            </div>
-
         </form>
     </div>
-
 @endsection

@@ -3,13 +3,15 @@
 @section('title', 'Create Professor')
 
 @section('content')
-    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
-        <h1>Create Professor</h1>
-        <form action="{{route('professors.store')}}" method="post">
+    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] gap-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+        <h1 class="font-bold text-[18px]">Create Professor</h1>
+
+        <form action="{{ route('professors.store') }}" method="POST" class="flex flex-col gap-10 w-full">
             @csrf
 
-            <div class="flex gap-10">
-                <div class="flex flex-col">
+            <div class="flex justify-center gap-7 w-full">
+                <!-- Left Column -->
+                <div class="flex flex-col justify-center items-stretch gap-5">
                     <x-input.text
                         label="First Name"
                         name="first_name"
@@ -43,12 +45,12 @@
                         :max="120"
                         :step="1"
                     />
-
                 </div>
-                <div class="flex flex-col">
 
+                <!-- Right Column -->
+                <div class="flex flex-col justify-center items-stretch gap-5">
                     <x-input.radio-group
-                        label="Professor Type (Regular/Non Regular)"
+                        label="Professor Type"
                         name="professor_type"
                         :options="$professorTypeOptions"
                     />
@@ -64,21 +66,20 @@
                         name="position"
                     />
                 </div>
-
-
             </div>
 
+            <!-- Buttons with breathing room -->
+            <div class="flex flex-row w-full justify-between items-center mt-[40px]">
+                <a href="{{ route('professors.index') }}">
+                    <button type="button" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
+                        Back
+                    </button>
+                </a>
 
-            <div class="flex justify-center items-center gap-100">
-                <a href="{{route('professors.index')}}">Back</a>
-                <button type="submit">Create</button>
+                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]">
+                    Create
+                </button>
             </div>
-
         </form>
-
-
     </div>
-
-
-
 @endsection

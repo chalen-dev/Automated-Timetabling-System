@@ -76,6 +76,23 @@ class TimetableEditingPaneController extends Controller
         // Calculate rowspan
         $rowspanData = $this->calculateVerticalRowspan($tableData);
 
+        // --- Color palette for timetable cells ---
+        $colors = [
+            '#A8D5BA', // mint green
+            '#F6C1C1', // soft pink
+            '#FFD9A8', // light orange
+            '#C1E0F6', // soft blue
+            '#E3C1F6', // lavender
+            '#FFF1A8', // soft yellow
+            '#F6E0C1', // beige
+            '#C1F6E3', // aqua
+            '#F6C1E0', // pinkish lavender
+            '#D9C1F6', // light purple
+        ];
+
+        // Track colors for each cell to avoid adjacent duplicates
+        $cellColors = [];
+
         // --- Logging ---
         $this->logAction('viewed_timetable', [
             'timetable_id' => $timetable->id,
@@ -83,8 +100,11 @@ class TimetableEditingPaneController extends Controller
             'error' => $error,
         ]);
 
-        return view('timetabling.timetable-editing-pane.index', compact('timetable', 'tableData', 'rowspanData', 'error'));
+        return view('timetabling.timetable-editing-pane.index', compact(
+            'timetable', 'tableData', 'rowspanData', 'error', 'colors', 'cellColors'
+        ));
     }
+
 
     /**
      * Log user actions
