@@ -3,14 +3,9 @@
 @section('title', $timetable->timetable_name)
 
 @section('content')
-    <div class="flex flex-col w-full p-4 text-white">
-        <h1 class="text-2xl font-bold mb-2">Timetable View</h1>
-        <p class="mb-4">
-            {{ $timetable->timetable_name }} — {{ $timetable->semester }} semester ({{ $timetable->academic_year }})
-        </p>
-
+    <div class="flex flex-col w-full p-4 pt-23 pl-39 text-white">
         @if (!empty($tableData) && isset($tableData[0]))
-            <div class="overflow-x-auto bg-[#1e1e2f] rounded-lg shadow-md">
+            <div class="overflow-x-auto bg-[#1A1A2E] rounded-lg shadow-md">
                 <table class="min-w-full border-collapse border border-gray-500 table-auto w-full text-xs md:text-sm">
                     <thead class="bg-[#2e2e3f] text-yellow-300 text-[0.7rem] md:text-sm">
                     <tr>
@@ -24,7 +19,7 @@
                     <tbody>
                     @foreach ($tableData as $rowIndex => $row)
                         @if ($rowIndex === 0) @continue @endif
-                        <tr class="{{ $rowIndex % 2 === 0 ? 'bg-[#252536]' : 'bg-[#1e1e2f]' }}">
+                        <tr class="{{ $rowIndex % 2 === 0 ? 'bg-[#252536]' : 'bg-[#1A1A2E]' }}">
                             @foreach ($row as $colIndex => $cell)
                                 @php $span = $rowspanData[$colIndex][$rowIndex] ?? 1; @endphp
                                 @if ($span > 0)
