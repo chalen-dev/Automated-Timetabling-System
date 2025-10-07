@@ -95,4 +95,11 @@ Route::middleware([Authenticate::class])->group(function () {
 });
 
 
+//TEST TINKER ROUTES
+Route::get('/test-file', function() {
+    $path = base_path("scripts/public/exports/timetables/1.xlsx");
+    return file_exists($path) ? "Exists" : "Missing: $path";
+});
+
+
 
