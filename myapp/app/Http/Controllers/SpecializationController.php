@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Professor;
 use App\Models\Specialization;
+use App\Models\UserLog;
 use Illuminate\Http\Request;
 
 class SpecializationController extends Controller
@@ -15,8 +16,13 @@ class SpecializationController extends Controller
     public function index(Professor $professor)
     {
         $courses = Course::all();
-        //Get all specializations tied for the professor
         $specializations = $professor->specializations()->with('course')->get();
+
+        $this->logAction('viewed_specializations', [
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->name ?? 'N/A'
+        ]);
+
         return view('records.specializations.index', compact('specializations', 'professor', 'courses'));
     }
 
@@ -29,7 +35,6 @@ class SpecializationController extends Controller
 
         $query = Course::whereNotIn('id', $assignedCourseIds);
 
-        // Apply search filter
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('course_name', 'like', "%{$search}%")
@@ -39,9 +44,13 @@ class SpecializationController extends Controller
 
         $courses = $query->get();
 
+        $this->logAction('accessed_create_specialization_form', [
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->name ?? 'N/A'
+        ]);
+
         return view('records.specializations.create', compact('professor', 'courses'));
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -53,7 +62,6 @@ class SpecializationController extends Controller
             'courses.*' => 'exists:courses,id'
         ]);
 
-        // No selection
         if (empty($validatedData['courses'])) {
             return view('records.specializations.create', [
                 'professor' => $professor,
@@ -63,21 +71,56 @@ class SpecializationController extends Controller
         }
 
         foreach ($validatedData['courses'] as $courseId) {
-            $professor->specializations()->create([
+            $specialization = $professor->specializations()->create([
                 'course_id' => $courseId,
+            ]);
+
+            // Log each course added
+            $this->logAction('create_specialization', [
+                'professor_id' => $professor->id,
+                'professor_name' => $professor->name ?? 'N/A',
+                'course_id' => $courseId,
+                'specialization_id' => $specialization->id
             ]);
         }
 
-        return redirect()->route('professors.specializations.index', $professor);
+        return redirect()->route('professors.specializations.index', $professor)
+            ->with('success', 'Specializations added successfully.');
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Professor $professor, Specialization $specialization)
     {
+        $specializationData = [
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->name ?? 'N/A',
+            'course_id' => $specialization->course_id,
+            'specialization_id' => $specialization->id
+        ];
+
         $specialization->delete();
+
+        $this->logAction('delete_specialization', $specializationData);
 
         return redirect()->route('professors.specializations.index', $professor)
             ->with('success', 'Specialization deleted successfully.');
+    }
+
+    /**
+     * Log user actions.
+     */
+    protected function logAction(string $action, array $details = [])
+    {
+        if (auth()->check()) {
+            UserLog::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'description' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
     }
 }
