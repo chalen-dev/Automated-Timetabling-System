@@ -31,10 +31,5 @@
                 </div>
             </a>
         </div>
-        <a href="">
-            <div class="hover:bg-[#911A141A] justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
-                button
-            </div>
-        </a>
     </div>
 </nav>

@@ -35,7 +35,7 @@
     </header>
 
     <!-- MAIN AREA -->
-    <div class="flex">
+    <div class="flex pt-20">
         <!-- Sidebar only for authenticated users -->
         @auth
             @if(request()->routeIs('timetables.*.*'))
