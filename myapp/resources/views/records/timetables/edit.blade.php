@@ -3,12 +3,11 @@
 @section('title', 'Edit Timetable')
 
 @section('content')
-    <div class="flex flex-col gap-10 justify-center items-center pl-20 pr-20">
-        <h1>Edit Timetable</h1>
-        <form class = "flex flex-row gap-7 w-full" action="{{route('timetables.update', $timetable)}}" method="POST">
+    <div class="flex flex-col pt-[40px] pb-[40px] pr-[50px] pl-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+        <form class = "flex flex-col gap-[50px] items-center" action="{{route('timetables.update', $timetable)}}" method="POST">
             @csrf
             @method('PUT')
-
+            <h1 class="font-bold text-[18px]">Edit Timetable</h1>
             <div class="flex flex-col">
                 <div class="flex gap-7 w-full">
                     <x-input.text
@@ -38,17 +37,16 @@
                         :value="old('timetable_description', $timetable->timetable_description)"
                     />
                 </div>
-                <div class="flex flex-row w-full justify-between items-center">
-                    <a href="{{route('timetables.index')}}">Back</a>
-                    <button type="submit">Confirm Changes</button>
-                </div>
             </div>
-
-
-
-
+            <div class="flex flex-row w-full justify-between items-center">
+                <a href="{{route('timetables.index')}}">
+                    <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600] hover:bg-[#828282]">
+                        <span>Back</span>
+                    </button>
+                </a>
+                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Save</span></button>
+            </div>
         </form>
-
     </div>
 
 @endsection

@@ -61,11 +61,11 @@
             </div>
         @endauth
     </div>
-@stack('scripts')
     <div>
         @guest
             @include('components.footers.footer')
         @endguest
     </div>
+@stack('scripts')
 </body>
 </html>
