@@ -14,16 +14,21 @@ from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 import itertools
 import warnings
+import sys
 warnings.filterwarnings("ignore")
 
 # ----- CONFIG -----
-COURSE_SESSIONS_CSV = "course-sessions.csv"
-SESSION_GROUPS_CSV = "session-groups.csv"
-TEMPLATE_CSV = "timetable_template.csv"
-PROFESSORS_CSV = "timetable-professors.csv"  # optional
-ROOMS_CSV = "timetable-rooms.csv"
 
-OUTPUT_XLSX = "timetables_output_fast.xlsx"
+input_dir = sys.argv[1]        # folder with CSVs
+output_dir = sys.argv[2]       # folder to save XLSX
+timetable_id = sys.argv[3]     # optional, for naming
+OUTPUT_XLSX = f"{output_dir}/timetable_{timetable_id}.xlsx"
+
+# CSV paths
+COURSE_SESSIONS_CSV = f"{input_dir}/course-sessions.csv"
+SESSION_GROUPS_CSV = f"{input_dir}/session-groups.csv"
+TEMPLATE_CSV = f"{input_dir}/timetable_template.csv"
+ROOMS_CSV = f"{input_dir}/timetable-rooms.csv"
 
 LUNCH_START = "12:00"
 LUNCH_END = "12:30"
