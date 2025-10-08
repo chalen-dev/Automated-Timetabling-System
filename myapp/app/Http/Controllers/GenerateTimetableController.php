@@ -31,45 +31,8 @@ class GenerateTimetableController extends Controller
         $pythonScript = base_path("scripts/process_timetable.py");
         $exportDir = storage_path('app/exports/input-csvs');
         $command = escapeshellcmd("python $pythonScript $exportDir $timetableId");
-        // Run Python script
-        $pythonScript = base_path("scripts/process_timetable.py");
-        $exportDir = storage_path('app/exports/input-csvs');
-        $command = escapeshellcmd("python3 $pythonScript $exportDir $timetableId");
 
-        // Define expected XLSX output path
-        $outputFile = base_path("scripts/public/exports/timetables/{$timetableId}.xlsx");
-
-        // Execute and wait for a while bossing
-        $descriptorSpec = [
-            0 => ["pipe", "r"],
-            1 => ["pipe", "w"],
-            2 => ["pipe", "w"],
-        ];
-
-        $process = proc_open($command, $descriptorSpec, $pipes);
-        if (is_resource($process)) {
-            fclose($pipes[0]);
-            $stdout = stream_get_contents($pipes[1]);
-            fclose($pipes[1]);
-            $stderr = stream_get_contents($pipes[2]);
-            fclose($pipes[2]);
-            $returnCode = proc_close($process);
-        }
-
-        // Wait up to 30 seconds for the XLSX file to appear
-        $timeout = 30;
-        $elapsed = 0;
-        while (!file_exists($outputFile) && $elapsed < $timeout) {
-            sleep(1);
-            $elapsed++;
-        }
-
-        // Check if file exists now
-        if (file_exists($outputFile)) {
-            return redirect()->back()->with('success', "✅ Timetable generated successfully! Output file: {$outputFile}");
-        } else {
-            return redirect()->back()->with('error', "❌ Timetable generation failed. Python output: {$stdout}\nError: {$stderr}");
-        }
+        return redirect()->back()->with('success', "Timetable generated successfully! Output file");
 
 
     }

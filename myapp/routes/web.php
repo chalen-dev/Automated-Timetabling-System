@@ -77,6 +77,10 @@ Route::middleware([Authenticate::class])->group(function () {
         $path = base_path("scripts/public/exports/timetables/1.xlsx");
         return file_exists($path) ? "Exists" : "Missing: $path";
     });
+
+    Route::get('/fill/{table}', [TableFillController::class, 'fill'])
+        ->where('table', '[A-Za-z0-9_]+'); // optional: restrict to valid table names
+
 });
 
 // Admin-only actions
