@@ -21,7 +21,7 @@
                 <!-- Add button: yellow -->
                 <button type="submit" form="specializationsForm"
                         class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
-                    Add
+                    Save
                 </button>
 
                 <!-- Back button: gray -->

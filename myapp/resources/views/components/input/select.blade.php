@@ -9,7 +9,7 @@
 
 <div class="mb-3 flex flex-col gap-2">
     @if($label)
-        <label for="{{ $name }}" class="text-sm font-medium">{{ $label }}:</label>
+        <label for="{{ $name }}" >{{ $label }}:</label>
     @endif
 
     <select

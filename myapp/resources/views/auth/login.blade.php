@@ -5,10 +5,9 @@
 @section('content')
 
     <div class="flex flex-col items-center justify-center w-100vh h-100% pb-10 content-around">
-        <form action="{{ url('login') }}" method="post" class="flex flex-col w-90 justify-center rounded-xl items-center p-5 gap-3 bg-white shadow-2xl">
+        <form action="{{ url('login') }}" method="POST" class="flex flex-col w-90 content-between rounded-xl items-center p-5 gap-3 bg-white shadow-2xl">
             @csrf
-            <h1 class="font-bold p-3">Login to FaculTime</h1>
-            <br>
+            <h1 class="font-bold p-1">Login to FaculTime</h1>
             <x-input.auth-text
                 label="USERNAME or EMAIL"
                 type="text"
@@ -33,9 +32,9 @@
                 <div class="!text-red-500 mt-1">{{$errors->first('login_error')}}</div>
             @endif
 
-            <button type="submit" class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold w-full">Login ➝</button>
+            <button type="submit" class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold w-full hover:cursor-pointer">Login ➝</button>
 
-            <p>Don't have an account? <a href="{{ url('register') }}" class="hover:underline hover:text-[#5E0B0B]">Sign Up</a></p>
+            <p>Don't have an account? <a href="{{ url('register') }}" class="underline hover:font-bold text-[#5E0B0B]">Sign Up</a></p>
 
         </form>
     </div>
