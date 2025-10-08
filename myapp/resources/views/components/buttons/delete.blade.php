@@ -13,10 +13,10 @@
     <button
         type="submit"
         data-item-name="{{ $item_name }}"
-        class="delete-btn text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer
-               hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition-all duration-150 {{ $class }}"
+        class="delete-btn flex items-center justify-center rounded cursor-pointer transition-all duration-150 {{ $class }}"
     >
-        @if($btnType === 'normal')
+
+    @if($btnType === 'normal')
             <p>Delete</p>
         @elseif($btnType === 'icon')
             <i class="bi bi-trash"></i>

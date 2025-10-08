@@ -83,6 +83,10 @@ Route::middleware([Authenticate::class])->group(function () {
 Route::middleware(['auth', AdminMiddleware::class])->group(function() {
     Route::get('/admin/users', [AdminController::class,'showPending'])->name('admin.pending_users');
     Route::post('/admin/users/{user}/approve', [AdminController::class,'approve'])->name('admin.approve_user');
+    Route::post('/admin/users/{id}/toggle-authorize', [AdminController::class, 'toggleAuthorize'])
+        ->name('admin.toggle_authorize');
+    Route::delete('/admin/users/{id}/decline', [AdminController::class, 'declineUser'])
+        ->name('admin.decline_user');
 
     // User Logs page
     Route::get('/admin/user-logs', [UserLogController::class, 'index'])
