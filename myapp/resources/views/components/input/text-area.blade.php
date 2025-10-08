@@ -10,7 +10,7 @@
         name="{{ $name }}"
         id="{{ $name }}"
         rows="{{ $rows ?? 4 }}"
-        class="w-100 border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-black focus:outline-none resize-none"
+        class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-black focus:outline-none resize-none"
     >{{ $value ?: old($name, $default ?? '') }}</textarea>
 
     @error($name)

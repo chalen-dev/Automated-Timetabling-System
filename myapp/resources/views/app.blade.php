@@ -36,7 +36,7 @@
 
     <!-- MAIN AREA -->
     @auth
-    <div class="flex pt-20">
+    <div class="flex pt-24">
         <!-- Sidebar only for authenticated users -->
             @if(request()->routeIs('timetables.*.*'))
                 <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')" />

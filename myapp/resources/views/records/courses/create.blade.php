@@ -8,8 +8,8 @@
         <form class="flex flex-col" action="{{route('courses.store')}}" method="POST" >
             @csrf
 
-            <div class="flex justify-center gap-7">
-                <div class="flex flex-col justify-center items-stretch">
+            <div class="flex justify-center align-top gap-7">
+                <div class="flex flex-col justify-between items-stretch">
                     <x-input.text
                         label="Course Title"
                         name="course_title"
@@ -21,7 +21,7 @@
                     />
                 </div>
 
-                <div class="flex flex-col justify-center gap-5">
+                <div class="flex flex-col justify-between gap-5">
                     <x-input.select
                         label="Course Type"
                         name="course_type"
@@ -39,8 +39,7 @@
                     />
                 </div>
 
-                <div class="flex flex-col justify-center gap-5">
-                    <div class="flex flex-col gap-5">
+                <div class="flex flex-col justify-between gap-5">
                         <x-input.number
                             label="Total Lecture Class Days per Week"
                             name="total_lecture_class_days"
@@ -58,12 +57,11 @@
                             :max="6"
                             :step="1"
                         />
-                    </div>
                     @if($errors->has('total_days'))
                         <div class="!text-red-500">{{$errors->first('total_days')}}</div>
                     @endif
                 </div>
-                <div class="flex justify-center flex-col items-center gap-[20px]">
+                <div class="flex justify-between flex-col items-center gap-[20px]">
                     <x-input.number
                         label="Number of Units"
                         name="unit_load"

@@ -41,9 +41,9 @@
                                 <i class="bi bi-pencil-square"></i>
                                 <span>Edit</span>
                             </a>
-                            <a class='flex flex-col items-center justify-center cursor-pointer p-[5px] hover:bg-[#cecece] hover:rounded-[10px]'>
+                            <a class='flex flex-col items-center justify-center cursor-pointer p-[5px] hover:bg-red-100 hover:rounded-[10px]'>
                                 <x-buttons.delete action="timetables.destroy" :params="$timetable" item_name="timetable" btnType="icon"/>
-                                <span class="text-[red]">Delete</span>
+                                <x-buttons.delete action="timetables.destroy" :params="$timetable" item_name="timetable" btnType="normal"/>
                             </a>
                         </div>
                         <div class="bg-red-500">

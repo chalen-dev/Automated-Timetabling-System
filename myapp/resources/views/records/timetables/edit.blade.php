@@ -3,7 +3,7 @@
 @section('title', 'Edit Timetable')
 
 @section('content')
-    <div class="flex flex-col pb-[40px] pr-[50px] pl-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
+    <div class="flex flex-col pb-[40px] pr-[50px] pl-[50px] pt-[40px] justify-center items-center bg-white rounded-2xl shadow-2xl">
         <form class = "flex flex-col gap-[50px] items-center" action="{{route('timetables.update', $timetable)}}" method="POST">
             @csrf
             @method('PUT')
@@ -29,7 +29,8 @@
                         name="academic_year"
                         :value="old('academic_year', $timetable->academic_year)"
                     />
-
+                </div>
+                <div>
                     <x-input.text-area
                         label="Description"
                         name="timetable_description"
