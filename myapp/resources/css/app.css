@@ -52,15 +52,13 @@ body.bg-page {
 }
 
 
-header.topbar {
+header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 16px 16px;     /* solid white */
     border-radius: 12px;       /* round corners */
-    margin: 20px;
-    position: sticky;
-    z-index: 1; /* keep it above the wave */
+    position: fixed;
+    width: 97.3%;
+    z-index: 2; /* keep it above the wave */
 }
 
 main {

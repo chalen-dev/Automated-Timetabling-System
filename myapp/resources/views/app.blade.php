@@ -14,7 +14,7 @@
         })
     </script>
 </head>
-<body class="bg-page">
+<body class="bg-page h-full">
 
 @include('includes.notif.flash-message')
 
@@ -35,22 +35,30 @@
     </header>
 
     <!-- MAIN AREA -->
+    @auth
     <div class="flex pt-20">
         <!-- Sidebar only for authenticated users -->
-        @auth
             @if(request()->routeIs('timetables.*.*'))
                 <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')" />
             @else
                 <x-sidebars.sidebar />
             @endif
-        @endauth
-
         <!-- CONTENT for everyone -->
         <main class="flex-1 p-5">
             @yield('content')
         </main>
     </div>
+    @endauth
+    @guest
+        <div class="flex pt-18">
+            <!-- CONTENT for everyone -->
+            <main class="flex-1 p-5">
+                @yield('content')
+            </main>
+        </div>
+    @endguest
 </div>
+
 <!-- FOOTER for guests only -->
 @guest
     @include('components.footers.footer')
