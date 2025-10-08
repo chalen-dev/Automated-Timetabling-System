@@ -67,20 +67,35 @@ class TimetableEditingPaneController extends Controller
                 $sheet = $spreadsheet->getSheet($sheetIndex);
                 $sheetName = $sheet->getTitle();
 
-                // Automatically generate friendly display name
-                // Example: 1stTerm_Monday => 1st Term - Monday
-                $sheetDisplayName = preg_replace_callback(
-                    '/(\d)(st|nd|rd|th)(Term)_([A-Za-z]+)/',
-                    function ($matches) {
-                        return $matches[1] . $matches[2] . ' Term - ' . $matches[4];
-                    },
-                    $sheetName
-                );
+                // ===== Equivalent mapping for readable sheet names =====
+                $termMapping = [
+                    '1st' => '1st Term',
+                    '2nd' => '2nd Term',
+                    '3rd' => '3rd Term',
+                    '4th' => '4th Term', // optional future term
+                ];
 
-                // Fallback: replace underscores with spaces if pattern doesn't match
-                if (!$sheetDisplayName) {
+                $weekdayMapping = [
+                    'Mon' => 'Monday',
+                    'Tue' => 'Tuesday',
+                    'Wed' => 'Wednesday',
+                    'Thu' => 'Thursday',
+                    'Fri' => 'Friday',
+                    'Sat' => 'Saturday',
+                    'Sun' => 'Sunday',
+                ];
+
+                $parts = explode('_', $sheetName);
+                if (count($parts) === 2) {
+                    [$termPart, $dayPart] = $parts;
+                    $termName = $termMapping[$termPart] ?? $termPart;
+                    $dayName = $weekdayMapping[$dayPart] ?? $dayPart;
+                    $sheetDisplayName = "{$dayName} {$termName}";
+                } else {
+                    // fallback: replace underscores with spaces
                     $sheetDisplayName = str_replace('_', ' ', $sheetName);
                 }
+                // ===== End mapping =====
 
                 $tableData = $sheet->toArray(null, true, true, false);
             } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
@@ -111,7 +126,6 @@ class TimetableEditingPaneController extends Controller
             'colors', 'cellColors', 'sheetIndex', 'totalSheets', 'sheetName', 'sheetDisplayName'
         ));
     }
-
 
     protected function logAction(string $action, array $details = [])
     {

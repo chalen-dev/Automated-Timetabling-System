@@ -19,7 +19,9 @@ class CourseSessionController extends Controller
             abort(404);
         }
 
-        $assignedCourseIds = $sessionGroup->courseSessions->pluck('course_id');
+        $assignedCourseIds = CourseSession::where('session_group_id', $sessionGroup->id)
+            ->pluck('course_id')
+            ->toArray();
         $query = Course::whereNotIn('id', $assignedCourseIds);
 
         if ($search = $request->input('search')) {

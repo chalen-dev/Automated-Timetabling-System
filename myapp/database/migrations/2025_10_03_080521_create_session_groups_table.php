@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('session_groups', function (Blueprint $table) {
@@ -18,15 +15,17 @@ return new class extends Migration
             $table->text('short_description')->nullable();
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
             $table->foreignId('timetable_id')->constrained('timetables')->cascadeOnDelete();
+
+            // ✅ Composite unique key from the start
+            $table->unique(['timetable_id', 'academic_program_id', 'year_level', 'session_name'], 'session_groups_unique_combo');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('session_groups');
     }
 };
+

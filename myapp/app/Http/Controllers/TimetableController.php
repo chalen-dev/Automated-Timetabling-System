@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Timetable;
 use App\Models\UserLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TimetableController extends Controller
 {
@@ -104,7 +105,14 @@ class TimetableController extends Controller
             'timetable_name' => $timetable->timetable_name
         ];
 
+        // Delete the timetable from the database
         $timetable->delete();
+
+        // Delete the corresponding XLSX file if it exists
+        $filePath = "exports/timetables/{$timetable->id}.xlsx";
+        if (Storage::exists($filePath)) {
+            Storage::delete($filePath);
+        }
 
         $this->logAction('delete_timetable', $timetableData);
 

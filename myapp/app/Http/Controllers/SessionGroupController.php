@@ -97,18 +97,19 @@ class SessionGroupController extends Controller
                 'required',
                 'string',
                 'max:4',
-                Rule::unique('session_groups')->where(function ($query) use ($request) {
-                    return $query
-                        ->where('year_level', $request->year_level)
-                        ->where('academic_program_id', $request->academic_program_id);
+                Rule::unique('session_groups')->where(function ($query) use ($request, $timetable) {
+                    return $query->where('timetable_id', $timetable->id)
+                        ->where('academic_program_id', $request->academic_program_id)
+                        ->where('year_level', $request->year_level);
                 }),
             ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
-            'short_description' => 'string',
+            'short_description' => 'nullable|string',
         ]);
 
         $validatedData['timetable_id'] = $timetable->id;
+
         $sessionGroup = SessionGroup::create($validatedData);
 
         $this->logAction('create_session_group', [
@@ -120,6 +121,7 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session created successfully.');
     }
+
 
     // ---------- EDIT ----------
     public function edit(Timetable $timetable, SessionGroup $sessionGroup)
@@ -143,16 +145,16 @@ class SessionGroupController extends Controller
                 'string',
                 'max:4',
                 Rule::unique('session_groups')
-                    ->ignore($sessionGroup->id)
-                    ->where(function ($query) use ($request) {
-                        return $query
-                            ->where('year_level', $request->year_level)
-                            ->where('academic_program_id', $request->academic_program_id);
+                    ->ignore($sessionGroup->id) // Ignore the current row
+                    ->where(function ($query) use ($request, $timetable) {
+                        return $query->where('timetable_id', $timetable->id)
+                            ->where('academic_program_id', $request->academic_program_id)
+                            ->where('year_level', $request->year_level);
                     }),
             ],
             'year_level' => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
-            'short_description' => 'string',
+            'short_description' => 'nullable|string',
         ]);
 
         $sessionGroup->update($validatedData);
@@ -165,6 +167,7 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session updated successfully.');
     }
+
 
     // ---------- SHOW ----------
     public function show(Timetable $timetable, SessionGroup $sessionGroup)

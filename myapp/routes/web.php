@@ -11,6 +11,7 @@ use App\Http\Controllers\RoomExclusiveDayController;
 use App\Http\Controllers\SessionGroupController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TableFillController;
+use App\Http\Controllers\TestAdminController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\TimetableEditingPaneController;
 use App\Http\Controllers\TimetableProfessorController;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 // Default Page
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
+
 // Guest Routes
 Route::middleware('guest')->group(function () {
     Route::get('/register', [UserController::class, 'showRegisterForm'])->name('register.form');
@@ -32,6 +34,7 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [UserController::class, 'login'])->name('login');
+    Route::get('/create-admin', [TestAdminController::class, 'createAdmin']);
 });
 
 // Authenticated Routes
@@ -49,8 +52,7 @@ Route::middleware([Authenticate::class])->group(function () {
     )->name('timetables.session-groups.course-sessions.update-term');
 
     Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store');
-        Route::delete('/timetables/{timetable}/timetable-professors/{professor}',
-            [TimetableProfessorController::class, 'destroy'])
+        Route::delete('/timetables/{timetable}/timetable-professors/{professor}',[TimetableProfessorController::class, 'destroy'])
             ->name('timetables.timetable-professors.destroy');
     Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store','destroy');
 

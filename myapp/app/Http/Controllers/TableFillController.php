@@ -785,23 +785,24 @@ class TableFillController extends Controller
                 //Only follows this order in sample data.
                 $program = AcademicProgram::all(); // assign demo professors to first program
                 $data = [
-                    ['id' => 1, 'session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 2, 'session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 3, 'session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 4, 'session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 5, 'session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 6, 'session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 7, 'session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 8, 'session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
-                    ['id' => 9, 'session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 10, 'session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 11, 'session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 12, 'session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 13, 'session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 14, 'session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 15, 'session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
-                    ['id' => 16, 'session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[0]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '1st', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '2nd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '3rd', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'A', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
+                    ['session_name' => 'B', 'year_level' => '4th', 'academic_program_id' => $program[1]->id, 'timetable_id' => 1],
                 ];
+
 
                 SessionGroup::insertOrIgnore($data);
                 break;
