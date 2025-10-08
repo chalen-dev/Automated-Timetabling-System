@@ -17,6 +17,13 @@
             </div>
         @endif
 
+        <!-- Error Message -->
+        @if(session('error'))
+            <div class="w-full mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded overflow-auto max-h-64">
+                {!! session('error') !!}
+            </div>
+        @endif
+
         <!-- Form -->
         <form action="{{ route('timetables.generate.post', $timetable) }}" method="POST" class="w-full flex justify-center">
             @csrf

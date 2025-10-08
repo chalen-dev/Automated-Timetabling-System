@@ -52,7 +52,7 @@ class TimetableEditingPaneController extends Controller
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0); // which sheet to show
-        $xlsxPath = base_path("scripts/public/exports/timetables/{$timetable->id}.xlsx");
+        $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
         $tableData = [];
         $error = null;
         $totalSheets = 0;

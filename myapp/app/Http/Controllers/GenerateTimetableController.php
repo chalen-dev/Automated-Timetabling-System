@@ -16,26 +16,51 @@ class GenerateTimetableController extends Controller
     public function generate(Request $request, Timetable $timetable)
     {
         $timetableId = $timetable->id;
-        $exportDir = storage_path('app/exports/input-csvs');
 
-        // Ensure export folder exists
+        // Directories in storage
+        $exportDir = storage_path('app/exports/input-csvs');       // CSVs
+        $outputDir = storage_path('app/exports/timetables');       // XLSX output
+
+        // Ensure directories exist
         $this->ensureDirectoryExists($exportDir);
+        $this->ensureDirectoryExists($outputDir);
 
-        // Generate query-based CSVs
+        // Generate CSVs
         $this->generateQueryCSVs($timetableId, $exportDir);
-
-        // Generate timetable_template.csv
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
-        // Run Python script
+        // Run Python script using Windows venv
         $pythonScript = base_path("scripts/process_timetable.py");
-        $exportDir = storage_path('app/exports/input-csvs');
-        $command = escapeshellcmd("python $pythonScript $exportDir $timetableId");
+        $pythonPath   = base_path("venv\\Scripts\\python.exe"); // Windows venv path
 
-        return redirect()->back()->with('success', "Timetable generated successfully! Output file");
+        // Pass both input and output directories to Python
+        $command = "\"$pythonPath\" "
+            . escapeshellarg($pythonScript) . " "
+            . escapeshellarg($exportDir) . " "
+            . escapeshellarg($outputDir) . " "
+            . escapeshellarg($timetableId) . " 2>&1";
 
+        exec($command, $output, $status);
+        $outputText = implode("\n", $output);
 
+        if ($status !== 0) {
+            // Show full Python error in scrollable box
+            return redirect()->back()->with('error', "<pre>" . e($outputText) . "</pre>");
+        }
+
+        // XLSX file path in storage
+        $outputFile = $outputDir . DIRECTORY_SEPARATOR . "{$timetableId}.xlsx";
+
+        if (!file_exists($outputFile)) {
+            return redirect()->back()->with('error', "Timetable XLSX not found after generation.");
+        }
+
+        $outputUrl = asset("storage/exports/timetables/{$timetableId}.xlsx");
+
+        return redirect()->back()->with('success', "✅ Timetable generated successfully! <a href='{$outputUrl}' target='_blank'>Download XLSX</a>");
     }
+
+
 
     /**
      * Ensure the export directory exists

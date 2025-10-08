@@ -78,8 +78,7 @@ Route::middleware([Authenticate::class])->group(function () {
         return file_exists($path) ? "Exists" : "Missing: $path";
     });
 
-    Route::get('/fill/{table}', [TableFillController::class, 'fill'])
-        ->where('table', '[A-Za-z0-9_]+'); // optional: restrict to valid table names
+
 
 });
 
@@ -95,4 +94,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function() {
     // User Logs page
     Route::get('/admin/user-logs', [UserLogController::class, 'index'])
         ->name('admin.user-logs');
+
+    //Test fill with dummy data
+    Route::get('/fill/{table}', [TableFillController::class, 'fill'])
+        ->where('table', '[A-Za-z0-9_-]+'); // allows letters, numbers, underscores, and dashes
 });
