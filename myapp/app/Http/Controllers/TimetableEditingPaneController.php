@@ -51,20 +51,37 @@ class TimetableEditingPaneController extends Controller
 
     public function index(Timetable $timetable, Request $request)
     {
-        $sheetIndex = (int) $request->query('sheet', 0); // which sheet to show
+        $sheetIndex = (int) $request->query('sheet', 0);
         $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
         $tableData = [];
         $error = null;
         $totalSheets = 0;
         $sheetName = null;
+        $sheetDisplayName = null;
 
         if (file_exists($xlsxPath)) {
             try {
                 $spreadsheet = IOFactory::load($xlsxPath);
                 $totalSheets = $spreadsheet->getSheetCount();
-                $sheetIndex = max(0, min($sheetIndex, $totalSheets - 1)); // clamp
+                $sheetIndex = max(0, min($sheetIndex, $totalSheets - 1));
                 $sheet = $spreadsheet->getSheet($sheetIndex);
                 $sheetName = $sheet->getTitle();
+
+                // Automatically generate friendly display name
+                // Example: 1stTerm_Monday => 1st Term - Monday
+                $sheetDisplayName = preg_replace_callback(
+                    '/(\d)(st|nd|rd|th)(Term)_([A-Za-z]+)/',
+                    function ($matches) {
+                        return $matches[1] . $matches[2] . ' Term - ' . $matches[4];
+                    },
+                    $sheetName
+                );
+
+                // Fallback: replace underscores with spaces if pattern doesn't match
+                if (!$sheetDisplayName) {
+                    $sheetDisplayName = str_replace('_', ' ', $sheetName);
+                }
+
                 $tableData = $sheet->toArray(null, true, true, false);
             } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
                 $error = "Error reading spreadsheet: " . $e->getMessage();
@@ -91,9 +108,10 @@ class TimetableEditingPaneController extends Controller
 
         return view('timetabling.timetable-editing-pane.index', compact(
             'timetable', 'tableData', 'rowspanData', 'error',
-            'colors', 'cellColors', 'sheetIndex', 'totalSheets', 'sheetName'
+            'colors', 'cellColors', 'sheetIndex', 'totalSheets', 'sheetName', 'sheetDisplayName'
         ));
     }
+
 
     protected function logAction(string $action, array $details = [])
     {

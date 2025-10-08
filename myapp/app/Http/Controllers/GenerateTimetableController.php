@@ -57,7 +57,7 @@ class GenerateTimetableController extends Controller
 
         $outputUrl = asset("storage/exports/timetables/{$timetableId}.xlsx");
 
-        return redirect()->back()->with('success', "✅ Timetable generated successfully! <a href='{$outputUrl}' target='_blank'>Download XLSX</a>");
+        return redirect()->back()->with('success', "Timetable generated successfully!");
     }
 
 

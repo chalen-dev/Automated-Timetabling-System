@@ -4,50 +4,52 @@
 @section('content')
     <div class="flex flex-col w-full p-4 pt-23 pl-39 text-gray-800">
 
-        <!-- Sheet Navigation -->
-        <div class="flex justify-between items-center mb-4">
+        @php
+            $prevSheet = $sheetIndex > 0 ? $sheetIndex - 1 : null;
+            $nextSheet = ($sheetIndex < $totalSheets - 1 && $sheetIndex < 11) ? $sheetIndex + 1 : null;
+        @endphp
+
+            <!-- Sheet Navigation -->
+        <div class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
             <div>
-                <h2 class="text-lg font-semibold text-gray-700">
-                    Sheet: {{ $sheetName ?? ('Sheet ' . ($sheetIndex + 1)) }}
+                <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
+                    Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
                 </h2>
-                <p class="text-sm text-gray-500">
+
+                <p class="text-sm text-gray-500 mt-1">
                     Showing sheet {{ $sheetIndex + 1 }} of {{ min($totalSheets, 12) }}
                 </p>
             </div>
 
             <div class="flex gap-2">
-                @php
-                    $prevSheet = $sheetIndex > 0 ? $sheetIndex - 1 : null;
-                    $nextSheet = ($sheetIndex < $totalSheets - 1 && $sheetIndex < 11) ? $sheetIndex + 1 : null;
-                @endphp
-
                 @if ($prevSheet !== null)
                     <a id="prevBtn"
                        href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $prevSheet]) }}"
-                       class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow transition">
-                        ← Previous
+                       class="flex items-center gap-1 px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg shadow transition duration-150">
+                        <span class="text-lg">←</span> Previous
                     </a>
                 @else
-                    <button class="px-4 py-2 bg-gray-200 text-gray-400 rounded-lg shadow cursor-not-allowed">
-                        ← Previous
+                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                        <span class="text-lg">←</span> Previous
                     </button>
                 @endif
 
                 @if ($nextSheet !== null)
                     <a id="nextBtn"
                        href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $nextSheet]) }}"
-                       class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition">
-                        Next →
+                       class="flex items-center gap-1 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow transition duration-150">
+                        Next <span class="text-lg">→</span>
                     </a>
                 @else
-                    <button class="px-4 py-2 bg-gray-200 text-gray-400 rounded-lg shadow cursor-not-allowed">
-                        Next →
+                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                        Next <span class="text-lg">→</span>
                     </button>
                 @endif
             </div>
         </div>
 
-        @if (!empty($tableData) && isset($tableData[0]))
+
+    @if (!empty($tableData) && isset($tableData[0]))
             <div class="overflow-x-auto bg-white rounded-lg shadow-md">
                 <table class="min-w-full border-collapse table-auto text-xs md:text-sm">
                     <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
