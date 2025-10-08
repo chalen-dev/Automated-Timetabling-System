@@ -136,7 +136,7 @@ timetable_term1 = generate_timetable(term1_df, timetable_rooms, timetable_templa
 timetable_term2 = generate_timetable(term2_df, timetable_rooms, timetable_template.copy())
 
 # -----------------------------------------------
-# CREATE XLSX OUTPUT
+# CREATE XLSX OUTPUT yeah
 # -----------------------------------------------
 wb = Workbook()
 wb.remove(wb.active)
