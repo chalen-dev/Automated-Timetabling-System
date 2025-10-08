@@ -2,7 +2,7 @@
     <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
         <div class="flex items-center gap-4">
             <!-- HAMBURGER BUTTON -->
-            <button class = "text-2xl" @click="$store.sidebar.open = true">
+            <button class = "text-2xl cursor-pointer" @click="$store.sidebar.open = true">
                 ☰
             </button>
             <h2 class="font-bold text-[#5E0B0B]">FaculTime</h2>
@@ -16,7 +16,7 @@
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit">Logout</button>
+                <button type="submit" class="cursor-pointer p-3 rounded-[12px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500">Logout</button>
             </form>
         </div>
     </div>

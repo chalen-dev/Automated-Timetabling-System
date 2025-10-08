@@ -4,7 +4,7 @@
 >
     <div class="flex justify-end p-4">
         <!-- CLOSE BUTTON -->
-        <button @click="$store.sidebar.open = false">✕</button>
+        <button class="cursor-pointer p-1 px-2 rounded-[6px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500" @click="$store.sidebar.open = false">✕</button>
     </div>
 
     <div class="flex flex-col gap-6 px-4 p-10 font-bold">
