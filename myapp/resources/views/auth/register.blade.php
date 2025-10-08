@@ -62,8 +62,8 @@
                 placeholder=""
             />
 
-            <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full">Register ➝</button>
-            <p>Already a member? <a href="{{ url('login') }}" class="hover:underline hover:text-[#5E0B0B]">Login here</a></p>
+            <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full hover:cursor-pointer">Register ➝</button>
+            <p>Already a member? <a href="{{ url('login') }}" class="underline hover:font-bold text-[#5E0B0B]">Login here</a></p>
         </form>
     </div>
 

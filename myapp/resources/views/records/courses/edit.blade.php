@@ -10,7 +10,7 @@
             @method('PUT')
 
             <div class="flex justify-center gap-7">
-                <div class="flex flex-col justify-center items-stretch gap-5">
+                <div class="flex flex-col justify-between items-stretch gap-5">
                     <x-input.text
                         label="Course Title"
                         name="course_title"
@@ -24,7 +24,7 @@
                     />
                 </div>
 
-                <div class="flex flex-col justify-center gap-5">
+                <div class="flex flex-col justify-between gap-5">
                     <x-input.select
                         label="Course Type"
                         name="course_type"
@@ -43,9 +43,7 @@
                         :value="old('class_hours', $course->class_hours)"
                     />
                 </div>
-
-                <div class="flex flex-col justify-center gap-5">
-                    <div class="flex flex-col gap-5">
+                    <div class="flex flex-col justify-between gap-5">
                         <x-input.number
                             label="Total Lecture Class Days per Week"
                             name="total_lecture_class_days"
@@ -65,13 +63,12 @@
                             :step="1"
                             :value="old('total_laboratory_class_days', $course->total_laboratory_class_days)"
                         />
-                    </div>
                     @if($errors->has('total_days'))
                         <div class="!text-red-500">{{ $errors->first('total_days') }}</div>
                     @endif
                 </div>
 
-                <div class="flex justify-center flex-col items-center gap-[20px]">
+                <div class="flex justify-between flex-col items-center gap-[20px]">
                     <x-input.number
                         label="Number of Units"
                         name="unit_load"
