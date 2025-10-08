@@ -8,21 +8,18 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class TimetableEditingPaneController extends Controller
 {
-    /**
-     * Calculate vertical rowspan for a timetable table
-     */
     private function calculateVerticalRowspan(array $tableData): array
     {
         $rowspanData = [];
         $rowCount = count($tableData);
-        if ($rowCount < 2) return $rowspanData; // no data
+        if ($rowCount < 2) return $rowspanData;
 
         $colCount = count($tableData[0] ?? []);
 
         for ($col = 0; $col < $colCount; $col++) {
             $rowspanData[$col] = [];
             $currentValue = null;
-            $startRow = 1; // first row after header
+            $startRow = 1;
             $spanCount = 0;
 
             for ($row = 1; $row < $rowCount; $row++) {
@@ -52,19 +49,22 @@ class TimetableEditingPaneController extends Controller
         return $rowspanData;
     }
 
-    /**
-     * Show timetable view
-     */
-    public function index(Timetable $timetable)
+    public function index(Timetable $timetable, Request $request)
     {
+        $sheetIndex = (int) $request->query('sheet', 0); // which sheet to show
         $xlsxPath = base_path("scripts/public/exports/timetables/{$timetable->id}.xlsx");
         $tableData = [];
         $error = null;
+        $totalSheets = 0;
+        $sheetName = null;
 
         if (file_exists($xlsxPath)) {
             try {
                 $spreadsheet = IOFactory::load($xlsxPath);
-                $sheet = $spreadsheet->getSheet(0);
+                $totalSheets = $spreadsheet->getSheetCount();
+                $sheetIndex = max(0, min($sheetIndex, $totalSheets - 1)); // clamp
+                $sheet = $spreadsheet->getSheet($sheetIndex);
+                $sheetName = $sheet->getTitle();
                 $tableData = $sheet->toArray(null, true, true, false);
             } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
                 $error = "Error reading spreadsheet: " . $e->getMessage();
@@ -73,45 +73,31 @@ class TimetableEditingPaneController extends Controller
             $error = "Timetable file not found.";
         }
 
-        // Calculate rowspan
         $rowspanData = $this->calculateVerticalRowspan($tableData);
 
-        // --- Color palette for timetable cells ---
         $colors = [
-            '#A8D5BA', // mint green
-            '#F6C1C1', // soft pink
-            '#FFD9A8', // light orange
-            '#C1E0F6', // soft blue
-            '#E3C1F6', // lavender
-            '#FFF1A8', // soft yellow
-            '#F6E0C1', // beige
-            '#C1F6E3', // aqua
-            '#F6C1E0', // pinkish lavender
-            '#D9C1F6', // light purple
+            '#A8D5BA', '#F6C1C1', '#FFD9A8', '#C1E0F6', '#E3C1F6',
+            '#FFF1A8', '#F6E0C1', '#C1F6E3', '#F6C1E0', '#D9C1F6',
         ];
 
-        // Track colors for each cell to avoid adjacent duplicates
         $cellColors = [];
 
-        // --- Logging ---
         $this->logAction('viewed_timetable', [
             'timetable_id' => $timetable->id,
             'file_exists' => file_exists($xlsxPath),
+            'sheet_index' => $sheetIndex,
             'error' => $error,
         ]);
 
         return view('timetabling.timetable-editing-pane.index', compact(
-            'timetable', 'tableData', 'rowspanData', 'error', 'colors', 'cellColors'
+            'timetable', 'tableData', 'rowspanData', 'error',
+            'colors', 'cellColors', 'sheetIndex', 'totalSheets', 'sheetName'
         ));
     }
 
-
-    /**
-     * Log user actions
-     */
     protected function logAction(string $action, array $details = [])
     {
-        if(auth()->check()) {
+        if (auth()->check()) {
             \App\Models\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,

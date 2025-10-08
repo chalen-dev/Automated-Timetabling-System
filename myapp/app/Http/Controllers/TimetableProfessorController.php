@@ -23,7 +23,6 @@ class TimetableProfessorController extends Controller
                     });
             });
         }
-
         $professors = $query->get();
 
         // Log view action
@@ -92,14 +91,14 @@ class TimetableProfessorController extends Controller
         return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
 
-    public function destroy(Timetable $timetable, TimetableProfessor $timetableProfessor)
+    public function destroy(Timetable $timetable, Professor $professor)
     {
-        $timetable->professors()->detach($timetableProfessor->id);
+        $timetable->professors()->detach($professor->id);
 
         // Log removal
         $this->logAction('removed_professor_from_timetable', [
             'timetable_id' => $timetable->id,
-            'professor_id' => $timetableProfessor->id
+            'professor_id' => $professor->id
         ]);
 
         return redirect()->route('timetables.timetable-professors.index', $timetable);

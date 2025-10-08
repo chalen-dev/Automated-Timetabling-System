@@ -16,8 +16,20 @@ class UserLogController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $logs = UserLog::with('user')->orderBy('created_at', 'desc')->paginate(20);
+        // Paginate first, then group logs by date
+        $logs = UserLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-        return view('admin.user-logs', compact('logs')); // Adjust path if needed
+        // Group the logs on this page by date
+        $groupedLogs = $logs->getCollection()->groupBy(function ($log) {
+            return $log->created_at->format('Y-m-d');
+        });
+
+        // Replace paginator collection with grouped data
+        $logs->setCollection(collect($groupedLogs));
+
+        return view('admin.user-logs', compact('logs'));
     }
+
 }

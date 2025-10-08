@@ -48,7 +48,10 @@ Route::middleware([Authenticate::class])->group(function () {
         [CourseSessionController::class, 'updateTerm']
     )->name('timetables.session-groups.course-sessions.update-term');
 
-    Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store','destroy');
+    Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store');
+        Route::delete('/timetables/{timetable}/timetable-professors/{professor}',
+            [TimetableProfessorController::class, 'destroy'])
+            ->name('timetables.timetable-professors.destroy');
     Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store','destroy');
 
     Route::resource('timetables.generate-timetable', GenerateTimetableController::class);

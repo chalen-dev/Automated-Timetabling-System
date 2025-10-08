@@ -1,41 +1,50 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-
 class UserController extends Controller
 {
-
     public function showRegisterForm(){
         return view('auth.register');
     }
-    public function register(Request $request){
 
-        //Input validation
+    public function register(Request $request){
+        // Input validation (added first_name & last_name)
         $request->validate([
-            'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'], //regex is to disallow the use of certain special characters
-            'email' => ['required', 'string', 'email', 'unique:users'],
+            'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'],
+            'first_name' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z\s\'\-]+$/'],
+            'last_name' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z\s\'\-]+$/'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'unique:users',
+                'regex:/^[a-z]\.[a-z]+\.([0-9]{6})\.tc@umindanao\.edu\.ph$/'
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[A-Z]/'],
         ]);
 
-        //Create user, query to db
+        // Create user, query to db
         try {
             User::create([
                 'name' => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
                 'email' => trim($request->email),
                 'password' => Hash::make($request->password),
-                'role' => 'pending', // <-- Add this
+                'role' => 'pending',
             ]);
-        }
-        catch (\Exception $e) {
-            dd($e->getMessage());
+        } catch (\Exception $e) {
+            // prefer returning an error instead of dd() in production
+            return redirect()->back()->withErrors(['register_error' => $e->getMessage()]);
         }
 
-        //Redirect to login if successful
+        // Redirect to login if successful
         return redirect()->route('login.form')->with('success', 'User registered successfully.');
     }
 
@@ -72,18 +81,11 @@ class UserController extends Controller
         ]);
     }
 
-
     public function logout(Request $request){
-        //Log out user
         Auth::logout();
-
-        // invalidate the session
         $request->session()->invalidate();
-
-        // prevent CSRF attacks
         $request->session()->regenerateToken();
 
         return redirect()->route('home')->with('info', 'User has logged out.');
     }
-
 }
