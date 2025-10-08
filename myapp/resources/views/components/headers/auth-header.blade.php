@@ -1,4 +1,4 @@
-<nav class="relative mb-4 z-2 w-full flex justify-center items-center content-center bg-[#5e0b0b] h-18 shadow-2xl">
+<nav class="fixed mb-4 z-2 w-[97.1%] flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
     <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
         <div class="flex items-center gap-4">
             <!-- HAMBURGER BUTTON -->
