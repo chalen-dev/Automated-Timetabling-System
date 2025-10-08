@@ -9,13 +9,14 @@
 <form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center delete-form">
     @csrf
     @method('DELETE')
+
     <button
-        type="button"
+        type="submit"
         data-item-name="{{ $item_name }}"
-        class="delete-btn text-red-500 bg-transparent border-none flex items-center justify-center rounded cursor-pointer
-               hover:bg-red-100 hover:text-red-700 active:bg-red-200 transition-all duration-150 {{ $class }}"
+        class="delete-btn flex items-center justify-center rounded cursor-pointer transition-all duration-150 {{ $class }}"
     >
-        @if($btnType === 'normal')
+
+    @if($btnType === 'normal')
             <p>Delete</p>
         @elseif($btnType === 'icon')
             <i class="bi bi-trash"></i>
@@ -32,7 +33,7 @@
                 const itemName = button.dataset.itemName;
 
                 Swal.fire({
-                    title: `Are you sure?`,
+                    title: 'Are you sure?',
                     text: `You are about to delete "${itemName}". This action cannot be undone.`,
                     icon: 'warning',
                     showCancelButton: true,
@@ -42,11 +43,10 @@
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        form.submit();
+                        form.requestSubmit(); // ✅ safer than form.submit()
                     }
                 });
             });
         });
     });
 </script>
-

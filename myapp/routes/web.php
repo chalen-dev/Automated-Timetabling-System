@@ -48,7 +48,10 @@ Route::middleware([Authenticate::class])->group(function () {
         [CourseSessionController::class, 'updateTerm']
     )->name('timetables.session-groups.course-sessions.update-term');
 
-    Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store','destroy');
+    Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store');
+        Route::delete('/timetables/{timetable}/timetable-professors/{professor}',
+            [TimetableProfessorController::class, 'destroy'])
+            ->name('timetables.timetable-professors.destroy');
     Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store','destroy');
 
     Route::resource('timetables.generate-timetable', GenerateTimetableController::class);
@@ -74,14 +77,25 @@ Route::middleware([Authenticate::class])->group(function () {
         $path = base_path("scripts/public/exports/timetables/1.xlsx");
         return file_exists($path) ? "Exists" : "Missing: $path";
     });
+
+
+
 });
 
 // Admin-only actions
 Route::middleware(['auth', AdminMiddleware::class])->group(function() {
     Route::get('/admin/users', [AdminController::class,'showPending'])->name('admin.pending_users');
     Route::post('/admin/users/{user}/approve', [AdminController::class,'approve'])->name('admin.approve_user');
+    Route::post('/admin/users/{id}/toggle-authorize', [AdminController::class, 'toggleAuthorize'])
+        ->name('admin.toggle_authorize');
+    Route::delete('/admin/users/{id}/decline', [AdminController::class, 'declineUser'])
+        ->name('admin.decline_user');
 
     // User Logs page
     Route::get('/admin/user-logs', [UserLogController::class, 'index'])
         ->name('admin.user-logs');
+
+    //Test fill with dummy data
+    Route::get('/fill/{table}', [TableFillController::class, 'fill'])
+        ->where('table', '[A-Za-z0-9_-]+'); // allows letters, numbers, underscores, and dashes
 });

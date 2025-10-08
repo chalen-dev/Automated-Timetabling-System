@@ -19,27 +19,26 @@ import os
 # -----------------------------------------------
 # ARGUMENTS FROM LARAVEL
 # -----------------------------------------------
-if len(sys.argv) < 3:
-    print("❌ Missing arguments. Usage: python process_timetable.py <exportDir> <timetableId>")
+if len(sys.argv) < 4:
+    print("Usage: python process_timetable.py <inputDir> <outputDir> <timetableId>")
     sys.exit(1)
 
-base_path = sys.argv[1]       # Path where CSVs are stored
-timetable_id = sys.argv[2]    # Just used for output filename
+input_dir = sys.argv[1]       # Path where CSVs are stored (from Laravel)
+output_dir = sys.argv[2]      # Path where XLSX should be saved
+timetable_id = sys.argv[3]    # Used for output filename
 
-print(f"🔹 Running timetable generation for timetable ID: {timetable_id}")
-print(f"🔹 Using CSV directory: {base_path}")
+print(f"Running timetable generation for timetable ID: {timetable_id}")
+print(f"Using CSV input directory: {input_dir}")
+print(f"XLSX will be saved to: {output_dir}")
 
 # -----------------------------------------------
 # CONFIG / INPUT PATHS
 # -----------------------------------------------
-base_path = "storage/app/timetable_inputs"
+course_sessions_path    = os.path.join(input_dir, "course-sessions.csv")
+session_groups_path     = os.path.join(input_dir, "session-groups.csv")
+timetable_rooms_path    = os.path.join(input_dir, "timetable-rooms.csv")
+timetable_template_path = os.path.join(input_dir, "timetable_template.csv")
 
-course_sessions_path   = f"{base_path}/course-sessions.csv"
-session_groups_path    = f"{base_path}/session-groups.csv"
-timetable_rooms_path   = f"{base_path}/timetable-rooms.csv"
-timetable_template_path = f"{base_path}/timetable_template.csv"
-
-output_path = f"{base_path}/Generated_Timetable_Output.xlsx"
 
 # -----------------------------------------------
 # LOAD DATA
@@ -139,7 +138,6 @@ timetable_term2 = generate_timetable(term2_df, timetable_rooms, timetable_templa
 # -----------------------------------------------
 # CREATE XLSX OUTPUT
 # -----------------------------------------------
-output_path = "/content/Generated_Timetable_Output.xlsx"
 wb = Workbook()
 wb.remove(wb.active)
 
@@ -176,5 +174,8 @@ if not unassigned.empty:
     for r in dataframe_to_rows(unassigned, index=False, header=True):
         ws.append(r)
 
+# Define full XLSX path
+output_path = os.path.join(output_dir, f"{timetable_id}.xlsx")
+
 wb.save(output_path)
-print(f"\n✅ Timetable successfully generated and saved as {output_path}")
+print(f"\n Timetable successfully generated and saved as {output_path}")
