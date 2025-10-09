@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function showRegisterForm(){
-        return view('auth.register');
+        return view('users.register');
     }
 
     public function register(Request $request)
@@ -67,7 +67,7 @@ class UserController extends Controller
 
 
     public function showLoginForm(){
-        return view('auth.login');
+        return view('users.login');
     }
 
     public function login(Request $request)

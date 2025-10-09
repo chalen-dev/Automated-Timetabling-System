@@ -80,7 +80,9 @@ Route::middleware([Authenticate::class])->group(function () {
         return file_exists($path) ? "Exists" : "Missing: $path";
     });
 
-
+    // User Logs page
+    Route::get('/admin/user-logs', [UserLogController::class, 'index'])
+        ->name('admin.user-logs');
 
 });
 
@@ -92,10 +94,6 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function() {
         ->name('admin.toggle_authorize');
     Route::delete('/admin/users/{id}/decline', [AdminController::class, 'declineUser'])
         ->name('admin.decline_user');
-
-    // User Logs page
-    Route::get('/admin/user-logs', [UserLogController::class, 'index'])
-        ->name('admin.user-logs');
 
     //Test fill with dummy data
     Route::get('/fill/{table}', [TableFillController::class, 'fill'])

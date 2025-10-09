@@ -11,11 +11,6 @@ class UserLogController extends Controller
     {
         $user = auth()->user();
 
-        // Only allow admins
-        if (!$user || $user->role !== 'admin') {
-            abort(403, 'Unauthorized');
-        }
-
         // Paginate first, then group logs by date
         $logs = UserLog::with('user')
             ->orderBy('created_at', 'desc')
