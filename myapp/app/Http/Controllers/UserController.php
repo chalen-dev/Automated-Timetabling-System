@@ -13,8 +13,9 @@ class UserController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request){
-        // Input validation (added first_name & last_name)
+    public function register(Request $request)
+    {
+        // Basic validation for everything except password
         $request->validate([
             'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'],
             'first_name' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z\s\'\-]+$/'],
@@ -26,27 +27,44 @@ class UserController extends Controller
                 'unique:users',
                 'regex:/^[a-z]\.[a-z]+\.([0-9]{6})\.tc@umindanao\.edu\.ph$/'
             ],
-            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/[A-Z]/'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // Create user, query to db
+        $password = $request->password;
+        $passwordErrors = [];
+
+        // Custom password format checks
+        if (!preg_match('/[A-Z]/', $password)) {
+            $passwordErrors[] = 'Password must contain at least one uppercase letter.';
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $passwordErrors[] = 'Password must contain at least one number.';
+        }
+        if (!preg_match('/[!@#$%^&*()\-_+=]/', $password)) {
+            $passwordErrors[] = 'Password must contain at least one special character (!@#$%^&*()-_+=).';
+        }
+
+        if (!empty($passwordErrors)) {
+            return redirect()->back()->withErrors(['password' => $passwordErrors])->withInput();
+        }
+
+        // Create user
         try {
             User::create([
                 'name' => $request->name,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => trim($request->email),
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($password),
                 'role' => 'pending',
             ]);
         } catch (\Exception $e) {
-            // prefer returning an error instead of dd() in production
-            return redirect()->back()->withErrors(['register_error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['register_error' => $e->getMessage()])->withInput();
         }
 
-        // Redirect to login if successful
         return redirect()->route('login.form')->with('success', 'User registered successfully.');
     }
+
 
     public function showLoginForm(){
         return view('auth.login');

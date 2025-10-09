@@ -15,8 +15,6 @@ return new class extends Migration
             $table->text('short_description')->nullable();
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
             $table->foreignId('timetable_id')->constrained('timetables')->cascadeOnDelete();
-
-            // ✅ Composite unique key from the start
             $table->unique(['timetable_id', 'academic_program_id', 'year_level', 'session_name'], 'session_groups_unique_combo');
 
             $table->timestamps();
