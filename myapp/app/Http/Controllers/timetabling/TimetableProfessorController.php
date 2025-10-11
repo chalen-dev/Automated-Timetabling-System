@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\timetabling;
 
+use App\Http\Controllers\Controller;
 use App\Models\Professor;
 use App\Models\Timetable;
-use App\Models\TimetableProfessor;
 use App\Models\UserLog;
 use Illuminate\Http\Request;
 

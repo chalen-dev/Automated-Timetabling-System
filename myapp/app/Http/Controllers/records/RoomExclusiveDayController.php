@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\records;
 
+use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\RoomExclusiveDay;
 use Illuminate\Http\Request;

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\timetabling;
 
+use App\Http\Controllers\Controller;
 use App\Models\AcademicProgram;
 use App\Models\SessionGroup;
 use App\Models\Timetable;

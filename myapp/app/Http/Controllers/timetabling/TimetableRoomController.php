@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\timetabling;
 
+use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\Timetable;
 use App\Models\TimetableRoom;

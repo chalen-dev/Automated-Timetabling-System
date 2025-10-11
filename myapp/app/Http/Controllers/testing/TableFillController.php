@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\testing;
 
+use App\Http\Controllers\Controller;
+use App\Models\AcademicProgram;
+use App\Models\Course;
 use App\Models\CourseSession;
+use App\Models\Professor;
+use App\Models\Room;
 use App\Models\RoomExclusiveDay;
-use App\Models\Specialization;
+use App\Models\SessionGroup;
 use App\Models\Timetable;
 use App\Models\TimetableProfessor;
 use App\Models\TimetableRoom;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\AcademicProgram;
-use App\Models\Course;
-use App\Models\Professor;
-use App\Models\Room;
-use App\Models\SessionGroup;
 
 class TableFillController extends Controller
 {
