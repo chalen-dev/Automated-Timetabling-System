@@ -80,30 +80,53 @@ class GenerateTimetableController extends Controller
     {
         $queries = [
             'timetable-professors' => "SELECT tp.id AS timetable_professor_id, t.id AS timetable_id, t.timetable_name,
-                                               p.id AS professor_id, CONCAT(p.first_name, ' ', p.last_name) AS professor_name,
+                                               p.id AS professor_id, (p.first_name || ' ' || p.last_name) AS professor_name,
                                                p.professor_type, p.position, ap.program_name AS academic_program
                                         FROM timetable_professors tp
                                         JOIN timetables t ON t.id = tp.timetable_id
                                         JOIN professors p ON p.id = tp.professor_id
                                         JOIN academic_programs ap ON ap.id = p.academic_program_id
-                                        WHERE t.id = :timetableId",
+                                        WHERE t.id = :timetableId
+                                        "
+            ,
 
             'timetable-rooms' => "SELECT tr.id AS timetable_room_id, t.id AS timetable_id, t.timetable_name, r.id AS room_id,
-                                         r.room_name, r.room_type, r.room_capacity, r.course_type_exclusive_to,
-                                         GROUP_CONCAT(red.exclusive_day ORDER BY FIELD(red.exclusive_day, 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')) AS exclusive_days
-                                  FROM timetable_rooms tr
-                                  JOIN timetables t ON t.id = tr.timetable_id
-                                  JOIN rooms r ON r.id = tr.room_id
-                                  LEFT JOIN room_exclusive_days red ON red.room_id = r.id
-                                  WHERE t.id = :timetableId
-                                  GROUP BY tr.id, t.id, t.timetable_name, r.id, r.room_name, r.room_type, r.room_capacity, r.course_type_exclusive_to",
+                                               r.room_name, r.room_type, r.room_capacity, r.course_type_exclusive_to,
+                                               red.exclusive_days
+                                        FROM timetable_rooms tr
+                                        JOIN timetables t ON t.id = tr.timetable_id
+                                        JOIN rooms r ON r.id = tr.room_id
+                                        LEFT JOIN (
+                                            SELECT room_id,
+                                                   GROUP_CONCAT(exclusive_day) AS exclusive_days
+                                            FROM (
+                                                SELECT room_id, exclusive_day
+                                                FROM room_exclusive_days
+                                                ORDER BY room_id,
+                                                         CASE exclusive_day
+                                                            WHEN 'mon' THEN 1
+                                                            WHEN 'tue' THEN 2
+                                                            WHEN 'wed' THEN 3
+                                                            WHEN 'thu' THEN 4
+                                                            WHEN 'fri' THEN 5
+                                                            WHEN 'sat' THEN 6
+                                                            WHEN 'sun' THEN 7
+                                                            ELSE 8
+                                                         END
+                                            )
+                                            GROUP BY room_id
+                                        ) red ON red.room_id = r.id
+                                        WHERE t.id = :timetableId
+                                    "
+            ,
 
             'session-groups' => "SELECT sg.id AS session_group_id, t.id AS timetable_id, t.timetable_name,
                                         ap.program_name AS academic_program, sg.session_name, sg.year_level
                                  FROM session_groups sg
                                  JOIN academic_programs ap ON ap.id = sg.academic_program_id
                                  JOIN timetables t ON t.id = sg.timetable_id
-                                 WHERE t.id = :timetableId",
+                                 WHERE t.id = :timetableId"
+            ,
 
             'course-sessions' => "SELECT sg.id AS session_group_id, sg.session_name, sg.year_level, ap.program_name AS academic_program,
                                         ap.program_abbreviation, cs.id AS course_session_id, cs.academic_term,
@@ -115,7 +138,8 @@ class GenerateTimetableController extends Controller
                                  JOIN courses c ON c.id = cs.course_id
                                  JOIN timetables t ON t.id = sg.timetable_id
                                  WHERE t.id = :timetableId
-                                 ORDER BY ap.program_name, sg.year_level, sg.session_name, c.course_name",
+                                 ORDER BY ap.program_name, sg.year_level, sg.session_name, c.course_name"
+            ,
         ];
 
         foreach ($queries as $name => $query) {
@@ -133,7 +157,15 @@ class GenerateTimetableController extends Controller
         $rooms = DB::table('timetable_rooms as tr')
             ->join('rooms as r', 'r.id', '=', 'tr.room_id')
             ->where('tr.timetable_id', $timetableId)
-            ->orderByRaw("FIELD(r.room_type, 'lecture', 'comlab', 'gym', 'main')")
+            ->orderByRaw("
+                CASE r.room_type
+                    WHEN 'lecture' THEN 1
+                    WHEN 'comlab' THEN 2
+                    WHEN 'gym' THEN 3
+                    WHEN 'main' THEN 4
+                    ELSE 5
+                END
+            ")
             ->pluck('r.room_name')
             ->toArray();
 

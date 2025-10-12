@@ -38,11 +38,15 @@ class ProfessorController extends Controller
             })
             ->get();
 
+        // Count of academic programs
+        $academicProgramsCount = AcademicProgram::count();
+
         // Log the view
         $this->logAction('viewed_professors_list', ['search' => $search]);
 
-        return view('records.professors.index', compact('professors', 'search'));
+        return view('records.professors.index', compact('professors', 'search', 'academicProgramsCount'));
     }
+
 
     public function create()
     {

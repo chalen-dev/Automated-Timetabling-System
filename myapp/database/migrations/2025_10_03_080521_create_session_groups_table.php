@@ -11,11 +11,22 @@ return new class extends Migration
         Schema::create('session_groups', function (Blueprint $table) {
             $table->id();
             $table->string('session_name');
-            $table->enum('year_level', ['1st', '2nd', '3rd', '4th']);
+
+            // Replace ENUM with string + check
+            $table->string('year_level'); //values ('1st','2nd','3rd','4th')
+
             $table->text('short_description')->nullable();
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
             $table->foreignId('timetable_id')->constrained('timetables')->cascadeOnDelete();
-            $table->unique(['timetable_id', 'academic_program_id', 'year_level', 'session_name'], 'session_groups_unique_combo');
+            $table->unique(
+                [
+                'timetable_id',
+                'academic_program_id',
+                'year_level',
+                'session_name'
+                ],
+                'session_groups_unique_combo'
+            );
 
             $table->timestamps();
         });

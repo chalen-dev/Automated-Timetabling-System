@@ -14,10 +14,14 @@ return new class extends Migration
         Schema::create('room_exclusive_days', function (Blueprint $table) {
             $table->id();
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();
-            $table->enum('exclusive_day', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+
+            // Replace ENUM with string + CHECK constraint
+            $table->string('exclusive_day'); //values ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

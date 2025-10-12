@@ -495,8 +495,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Lowell Jay',
                         'last_name' => 'Orcullo',
-                        'professor_type' => 'Non-Regular',
+                        'professor_type' => 'non-regular',
                         'max_unit_load' => 18,
+                        'gender' => 'male',
                         'professor_age' => 20,
                         'position' => 'Lecturer',
                         'academic_program_id' => $program[1]->id ?? null
@@ -504,8 +505,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Kate',
                         'last_name' => 'Bruno',
-                        'professor_type' => 'Non-Regular',
+                        'professor_type' => 'non-regular',
                         'max_unit_load' => 18,
+                        'gender' => 'female',
                         'professor_age' => 20,
                         'position' => 'Lecturer',
                         'academic_program_id' => $program[1]->id ?? null
@@ -513,8 +515,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Eduardo',
                         'last_name' => 'Catahuran',
-                        'professor_type' => 'Non-Regular',
+                        'professor_type' => 'non-regular',
                         'max_unit_load' => 18,
+                        'gender' => 'male',
                         'professor_age' => 20,
                         'position' => 'Lecturer',
                         'academic_program_id' => $program[1]->id ?? null
@@ -522,8 +525,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Richard Vincent',
                         'last_name' => 'Misa',
-                        'professor_type' => 'Regular',
+                        'professor_type' => 'regular',
                         'max_unit_load' => 24,
+                        'gender' => 'male',
                         'professor_age' => 30,
                         'position' => 'Lecturer',
                         'academic_program_id' => $program[1]->id ?? null
@@ -531,8 +535,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Sir',
                         'last_name' => 'Buddy',
-                        'professor_type' => 'Regular',
+                        'professor_type' => 'regular',
                         'max_unit_load' => 24,
+                        'gender' => 'male',
                         'professor_age' => 30,
                         'position' => 'Program Head',
                         'academic_program_id' => $program[1]->id ?? null
@@ -540,8 +545,9 @@ class TableFillController extends Controller
                     [
                         'first_name' => 'Ma\'am',
                         'last_name' => 'Iris',
-                        'professor_type' => 'Regular',
+                        'professor_type' => 'regular',
                         'max_unit_load' => 24,
+                        'gender' => 'female',
                         'professor_age' => 30,
                         'position' => 'Program Head',
                         'academic_program_id' => $program[0]->id ?? null

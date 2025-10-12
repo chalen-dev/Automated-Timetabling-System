@@ -15,16 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->enum('professor_type', ['regular', 'non-regular', 'none'])->default('regular');
+
+            // Replace ENUM with string + optional check
+            $table->string('professor_type')->default('regular'); //values ('regular', 'non-regular', 'none')
+
+            $table->string('gender'); //values ('male','female','none')
+
             $table->decimal('max_unit_load', 10, 1);
-            $table->enum('gender', ['male', 'female', 'none']);
             $table->integer('professor_age')->nullable();
             $table->string('position')->nullable();
             $table->foreignId('academic_program_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-
         });
     }
+
 
     /**
      * Reverse the migrations.

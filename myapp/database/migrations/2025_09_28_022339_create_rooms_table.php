@@ -14,12 +14,17 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('room_name');
-            $table->enum('room_type', ['lecture', 'comlab', 'gym', 'main']);
-            $table->enum('course_type_exclusive_to', ['none', 'pe', 'nstp', 'others']);
+
+            // Replace ENUM with string + CHECK
+            $table->string('room_type'); //values ('lecture', 'comlab', 'gym', 'main')
+
+            $table->string('course_type_exclusive_to'); //values ('none', 'pe', 'nstp', 'others')
+
             $table->integer('room_capacity')->nullable();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

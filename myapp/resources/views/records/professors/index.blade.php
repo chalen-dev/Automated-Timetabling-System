@@ -12,10 +12,17 @@
                     placeholder="Search by name or course..."
                 />
             </div>
-            <a href="{{ route('professors.create') }}"
-               class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
-                Create
-            </a>
+            @if($academicProgramsCount > 0)
+                <a href="{{ route('professors.create') }}"
+                   class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
+                    Create
+                </a>
+            @else
+                <a href="{{route('academic-programs.index')}}" class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
+                    Create Academic Program
+                </a>
+            @endif
+
         </div>
 
         <table class="w-full text-left border-separate border-spacing-0 bg-white rounded-lg shadow-md overflow-hidden">
@@ -31,10 +38,10 @@
             </tr>
             </thead>
             <tbody class="text-gray-700">
-            @foreach($professors as $professor)
+            @forelse($professors as $professor)
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-3">{{ $professor->first_name }}</td>
-                    <td class="px-6 py-3">{{ $professor->last_name }}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">{{ $professor->first_name }}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">{{ $professor->last_name }}</td>
                     <td class="px-6 py-3">{{ $professor->professor_type }}</td>
                     <td class="px-6 py-3">{{ $professor->academicProgram?->program_abbreviation ?? 'N/A' }}</td>
                     <td class="px-6 py-3">{{ $professor->max_unit_load }}</td>
@@ -72,7 +79,17 @@
                         </div>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-gray-500">
+                        @if($academicProgramsCount == 0)
+                            No academic programs found. Please create an academic program first.
+                        @else
+                            No professors found.
+                        @endif
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

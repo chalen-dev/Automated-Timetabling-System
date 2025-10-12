@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('timetables', function (Blueprint $table) {
             $table->id();
 
-            //User_id Foreign Key on Users table
+            // User_id Foreign Key on Users table
             $table->foreignId('user_id')
-            ->constrained('users')
-            ->onDelete('cascade');
+                ->constrained('users')
+                ->onDelete('cascade');
 
             $table->string('timetable_name');
-            $table->enum('semester', ['1st', '2nd']);
+
+            // Replace ENUM with string + CHECK for SQLite
+            $table->string('semester'); //values ('1st','2nd')
+
             $table->string('academic_year');
             $table->text('timetable_description')->nullable();
             $table->timestamps();

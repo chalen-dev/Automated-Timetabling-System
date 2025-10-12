@@ -11,6 +11,7 @@ class Professor extends Model
         'last_name',
         'professor_type',
         'max_unit_load',
+        'gender',
         'professor_age',
         'position',
         'academic_program_id' //foreign key
