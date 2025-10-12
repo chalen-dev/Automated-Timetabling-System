@@ -36,7 +36,7 @@
             </tr>
             </thead>
             <tbody class="text-gray-700">
-            @foreach($specializations as $specialization)
+            @forelse($specializations as $specialization)
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-3">{{ $specialization->course->course_title }}</td>
                     <td class="px-6 py-3">{{ $specialization->course->course_name }}</td>
@@ -50,7 +50,13 @@
                         />
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="3" class="text-center py-6 text-gray-500">
+                        No specializations found for this professor.
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

@@ -19,10 +19,17 @@
             </div>
             <div class="flex gap-4">
                 <!-- Add button: yellow -->
+                @if($coursesCount > 0)
                 <button type="submit" form="specializationsForm"
                         class="bg-yellow-500 text-[#5e0b0b] px-4 py-2 rounded-lg font-semibold shadow hover:bg-yellow-600 active:bg-yellow-700 transition-all duration-150">
                     Save
                 </button>
+                @else
+                    <a href="{{ route('professors.courses.index', $professor) }}"
+                       class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold shadow hover:bg-gray-300 hover:text-gray-900 active:bg-gray-400 transition-all duration-150">
+                        Add Courses
+                    </a>
+                @endif
 
                 <!-- Back button: gray -->
                 <a href="{{ route('professors.specializations.index', $professor) }}"

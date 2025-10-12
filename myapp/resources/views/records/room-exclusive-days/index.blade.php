@@ -34,7 +34,7 @@
             </tr>
             </thead>
             <tbody class="text-gray-700">
-            @foreach($assignedExclusiveDays as $day)
+            @forelse($assignedExclusiveDays as $day)
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-3">{{ $exclusiveDays[$day->exclusive_day] }}</td>
                     <td class="px-6 py-3 text-center">
@@ -47,7 +47,13 @@
                         />
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="2" class="text-center py-6 text-gray-500">
+                        No exclusive days assigned for this room yet.
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

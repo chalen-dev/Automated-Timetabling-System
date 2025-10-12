@@ -32,7 +32,7 @@
             </tr>
             </thead>
             <tbody class="text-gray-700">
-            @foreach($courses as $course)
+            @forelse($courses as $course)
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-3">{{ $course->course_title }}</td>
                     <td class="px-6 py-3">{{ $course->course_name }}</td>
@@ -64,7 +64,13 @@
                         </div>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center py-6 text-gray-500">
+                        No courses found.
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

@@ -32,7 +32,7 @@
             </tr>
             </thead>
             <tbody class="text-gray-700">
-            @foreach($academicPrograms as $academicProgram)
+            @forelse($academicPrograms as $academicProgram)
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-3">{{ $academicProgram->program_name }}</td>
                     <td class="px-6 py-3">{{ $academicProgram->program_abbreviation }}</td>
@@ -61,7 +61,13 @@
                         </div>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="3" class="text-center py-6 text-gray-500">
+                        No academic programs found.
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

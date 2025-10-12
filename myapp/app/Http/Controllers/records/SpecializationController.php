@@ -50,7 +50,9 @@ class SpecializationController extends Controller
             'professor_name' => $professor->name ?? 'N/A'
         ]);
 
-        return view('records.specializations.create', compact('professor', 'courses'));
+        $coursesCount = $courses->count();
+
+        return view('records.specializations.create', compact('professor', 'courses', 'coursesCount'));
     }
 
     /**
