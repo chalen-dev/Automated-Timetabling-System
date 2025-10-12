@@ -1,0 +1,20 @@
+# Ignore PhpStorm project files
+.idea/
+
+# Ignore environment and sensitive files
+.env
+.env.*
+
+# Laravel specific
+/myapp/vendor/
+/myapp/node_modules/
+/myapp/public/storage/
+/myapp/storage/*.key
+/myapp/storage/pail
+/myapp/public/hot
+/myapp/public/build
+
+# System files
+Thumbs.db
+.DS_Store
+*.log

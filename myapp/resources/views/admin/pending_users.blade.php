@@ -24,6 +24,7 @@
                 <div class="flex flex-col md:flex-row items-center justify-between p-4 mb-3 bg-gray-50 rounded-xl shadow hover:shadow-md transition-all">
                     <div class="flex flex-col md:flex-row md:items-center gap-4">
                         <p class="font-bold text-gray-800">{{ $user->name }}</p>
+                        <p class="text-gray-600 text-sm">({{$user->last_name}}, {{$user->first_name}})</p>
                         <p class="text-gray-600 text-sm">{{ $user->email }}</p>
                         <p class="text-gray-500 text-xs font-semibold capitalize">{{ $user->role }}</p>
                     </div>
@@ -61,6 +62,7 @@
                 <div class="flex flex-col md:flex-row items-center justify-between p-4 mb-3 bg-gray-50 rounded-xl shadow hover:shadow-md transition-all">
                     <div class="flex flex-col md:flex-row md:items-center gap-4">
                         <p class="font-bold text-gray-800">{{ $user->name }}</p>
+                        <p class="text-gray-600 text-sm">({{$user->last_name}}, {{$user->first_name}})</p>
                         <p class="text-gray-600 text-sm">{{ $user->email }}</p>
                         <p class="text-green-600 text-xs font-semibold capitalize">{{ $user->role }}</p>
                     </div>

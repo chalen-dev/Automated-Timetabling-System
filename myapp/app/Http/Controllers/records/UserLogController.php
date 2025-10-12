@@ -24,7 +24,7 @@ class UserLogController extends Controller
         // Replace paginator collection with grouped data
         $logs->setCollection(collect($groupedLogs));
 
-        return view('admin.user-logs', compact('logs'));
+        return view('records.user-logs', compact('logs'));
     }
 
 }
