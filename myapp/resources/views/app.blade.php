@@ -1,18 +1,22 @@
 <!doctype html>
-<html lang="en" x-data>
+<html lang="en"> <!--Removed x-data attribute in html tag-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>@yield('title', 'My Laravel App')</title>
+
+    <!--CSS-->
     @vite('resources/css/app.css')
+
+    <!--AlpineJS-->
     <script src="//unpkg.com/alpinejs" defer></script>
+
+    <!-- Sweet Alert, for confirmation dialogs -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('sidebar', { open: false }) // start hidden
-        })
-    </script>
+
+    <!-- Livewire -->
+    @livewireStyles
 </head>
 <body class="bg-page h-full">
 
@@ -21,28 +25,11 @@
 <div class="p-5">
 
     <!-- HEADER -->
-    <header>
-        @guest
-            @include('components.headers.guest-header')
-        @endguest
-        @auth
-            @if (request()->routeIs('timetables.*.*'))
-                @include('components.headers.timetabling-header')
-            @else
-                @include('components.headers.auth-header')
-            @endif
-        @endauth
-    </header>
-
+    <livewire:header />
     <!-- MAIN AREA -->
     @auth
     <div class="flex pt-24">
-        <!-- Sidebar only for authenticated users -->
-            @if(request()->routeIs('timetables.*.*'))
-                <x-sidebars.timetabling-sidebar :timetable="request()->route('timetable')" />
-            @else
-                <x-sidebars.sidebar />
-            @endif
+        <livewire:left-sidebar />
         <!-- CONTENT for everyone -->
         <main class="flex-1 p-5">
             @yield('content')
@@ -64,7 +51,11 @@
     @include('components.footers.footer')
 @endguest
 
-<!-- SCRIPTS ALWAYS BEFORE </body> TAG -->
+<!-- Livewire -->
+@livewireScripts
+
+<!-- Scripts -->
 @stack('scripts')
+
 </body>
 </html>
