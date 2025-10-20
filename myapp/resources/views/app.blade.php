@@ -6,17 +6,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>@yield('title', 'My Laravel App')</title>
 
-    <!--CSS-->
-    @vite('resources/css/app.css')
-
-    <!--AlpineJS-->
-    <script src="//unpkg.com/alpinejs" defer></script>
-
-    <!-- Sweet Alert, for confirmation dialogs -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <!-- Livewire -->
     @livewireStyles
+
+    <!--CSS-->
+    @vite('resources/css/app.css')
+    @vite(['resources/js/app.js'])
+
+    <!-- Sweet Alert, for confirmation dialogs -->
+    @include('sweetalert2::index')
+
+
 </head>
 <body class="bg-page h-full">
 

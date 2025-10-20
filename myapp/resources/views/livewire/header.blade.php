@@ -1,3 +1,7 @@
+@props([
+    'timetable' => App\Models\Timetable::class
+])
+
 <div>
 
     @guest
@@ -62,7 +66,10 @@
             <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
                 <div class="flex items-center gap-4">
                     <!-- HAMBURGER BUTTON -->
-                    <button class = "text-2xl cursor-pointer" wire:click="toggleSidebar">
+                    <button
+                        wire:click="toggleSidebar"
+                        class="text-2xl cursor-pointer"
+                    >
                         ☰
                     </button>
                     <h2 class="font-bold text-[#5E0B0B]">FaculTime</h2>
@@ -70,7 +77,10 @@
 
                 <div class="flex items-center gap-10 justify-between">
                     <div class="flex items-center gap-2">
-                        <img src="{{ asset('pfp-placeholder.jpg') }}" class="w-8 h-8 rounded-full" alt="User Profile">
+                        <img
+                            src="{{ asset('pfp-placeholder.jpg') }}"
+                            class="w-8 h-8 rounded-full" alt="User Profile"
+                        >
                         <span>{{ auth()->user()?->name ?? 'User' }}</span>
                     </div>
 

@@ -1,4 +1,14 @@
-<div>
+@props([
+    'timetable' => App\Models\Timetable::class
+])
+
+<div
+    @class([
+        'fixed top-0 left-0 h-screen w-64 bg-white shadow transition-transform duration-300 z-50',
+        'translate-x-0' => $open,
+        '-translate-x-full' => ! $open,
+    ])
+>
 
     @auth
         <!-- if current route is under timetables -->
@@ -41,15 +51,7 @@
 
             <!-- 2. Records Section Sidebar (The main, retractable one) -->
             <aside
-                x-data="{open: $wire.entangle('open')}" {{-- Create variable named open, and entangle it with the variable in the controller of the same name.--}}
-                x-show="open" {{-- Show or hide this element based on the value of the 'open' variable --}}
-                x-transition:enter="transition transform duration-300 ease-out"
-                x-transition:enter-start="-translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transition transform duration-300 ease-in"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="-translate-x-full"
-                style="display: none;"
+                style="{{ $open ? '' : 'transform: translateX(-100%);' }}"
                 class="fixed top-0 left-0 h-screen w-64 transition-transform duration-300 z-50 bg-white shadow"
             >
                 <div class="flex justify-end p-4">
@@ -167,12 +169,13 @@
             </aside>
 
             <!-- Overlay -->
-            <div
-                class="fixed inset-0 bg-black/30 z-40"
-                x-show="open"
-                x-transition.opacity
-                @click="$store.sidebar.open = false"
-            ></div>
+            @if($open)
+                <div
+                    class="fixed inset-0 bg-black/30 z-40"
+                    wire:click="toggle"
+                ></div>
+            @endif
+
         @endif
 
 

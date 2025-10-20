@@ -1,3 +1,7 @@
+@php
+    use SweetAlert2\Laravel\Swal;
+@endphp
+
 @props([
     'action',
     'params',
@@ -32,7 +36,7 @@
                 const form = button.closest('form');
                 const itemName = button.dataset.itemName;
 
-                Swal.fire({
+                Swal::fire({
                     title: 'Are you sure?',
                     text: `You are about to delete "${itemName}". This action cannot be undone.`,
                     icon: 'warning',

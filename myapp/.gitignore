@@ -24,3 +24,10 @@ Homestead.yaml
 Thumbs.db
 venv/
 .idea/
+
+# PhpStorm
+*.iml
+*.iws
+workspace.xml
+tasks.xml
+php.xml

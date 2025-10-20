@@ -2,16 +2,14 @@
 
 namespace App\Livewire;
 
-use App\Models\Timetable;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class LeftSidebar extends Component
 {
     public bool $open = false;
-    public Timetable $timetable;
 
-    public function mount(Timetable $timetable){
-        $this->timetable = $timetable;
+    public function mount(){
         $this->open = false;
     }
 

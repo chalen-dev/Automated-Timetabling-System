@@ -18,3 +18,10 @@
 Thumbs.db
 .DS_Store
 *.log
+
+# PhpStorm
+*.iml
+*.iws
+workspace.xml
+tasks.xml
+php.xml
