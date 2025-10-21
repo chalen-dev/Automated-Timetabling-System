@@ -21,9 +21,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //THIS CODE ALWAYS COMPACTS THE TIMETABLES COLLECTION TO THE VIEW, SINCE MY TIMETABLES INDEX PAGE IS ACTS AS THE LANDING PAGE/DASHBOARD
-        View::composer('records.timetables.index', function ($view) {
-            $view->with('timetables', Timetable::all());
+        //THIS CODE ALWAYS COMPACTS THE TIMETABLES COLLEC
+        View::composer('*', function ($view) {
+            $route = request()->route();
+            $timetable = null;
+
+            if ($route) {
+                $param = $route->parameter('timetable');
+                if ($param instanceof Timetable) {
+                    $timetable = $param;
+                } elseif (is_numeric($param)) {
+                    $timetable = Timetable::find($param);
+                }
+            }
+
+            $view->with('timetable', $timetable);
         });
+
     }
 }

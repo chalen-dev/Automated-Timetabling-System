@@ -11,7 +11,7 @@
 
     <!--CSS-->
     @vite('resources/css/app.css')
-    @vite(['resources/js/app.js'])
+    @vite('resources/js/app.js')
 
     <!-- Sweet Alert, for confirmation dialogs -->
     @include('sweetalert2::index')
@@ -25,25 +25,19 @@
 <div class="p-5">
 
     <!-- HEADER -->
-    <livewire:header />
+    <livewire:header/>
     <!-- MAIN AREA -->
     @auth
     <div class="flex pt-24">
-        <livewire:left-sidebar />
+        <livewire:left-sidebar/>
+    </div>
+    @endauth
+    <div class="flex">
         <!-- CONTENT for everyone -->
         <main class="flex-1 p-5">
             @yield('content')
         </main>
     </div>
-    @endauth
-    @guest
-        <div class="flex pt-18">
-            <!-- CONTENT for everyone -->
-            <main class="flex-1 p-5">
-                @yield('content')
-            </main>
-        </div>
-    @endguest
 </div>
 
 <!-- FOOTER for guests only -->

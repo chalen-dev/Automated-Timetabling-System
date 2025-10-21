@@ -1,19 +1,15 @@
-@props([
-    'timetable' => App\Models\Timetable::class
-])
+@php use Illuminate\Support\Str; @endphp
 
 <div
     @class([
-        'fixed top-0 left-0 h-screen w-64 bg-white shadow transition-transform duration-300 z-50',
+        'fixed top-0 left-0 h-screen shadow transition-transform duration-300 z-50',
         'translate-x-0' => $open,
         '-translate-x-full' => ! $open,
     ])
 >
-
     @auth
         <!-- if current route is under timetables -->
-        @if(request()->routeIs('timetables.*.*'))
-
+        @if(Str::is('timetables.*.*', $currentRouteName))
             <!-- 1. Timetabling Section Left Sidebar -->
             <aside class="flex flex-col left-0 top-29 pl-5 fixed h-3/4 w-37">
                 <div class="flex flex-col flex-1 justify-between text-center bg-white p-4 rounded-2xl shadow-2xl">

@@ -1,7 +1,3 @@
-@props([
-    'timetable' => App\Models\Timetable::class
-])
-
 <div>
 
     @guest
@@ -37,7 +33,7 @@
 
     @auth
         <!--If request is from the timetabling routes (timetables/{nested resource}/{more nested resoucrce, etc.}-->
-        @if(request()->routeIs('timetables.*.*'))
+        @if(Str::is('timetables.*.*', $currentRouteName))
 
             <!-- 2. Auth Header (Timetabling Section) -->
             <nav class="fixed mb-4 w-[97.1%] z-2 flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
@@ -61,36 +57,36 @@
 
         @else <!-- Else, use the default header for the records section -->
 
-        <!-- 3. Auth Header (Records Section) -->
-        <nav class="fixed mb-4 z-2 w-[97.1%] flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
-            <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
-                <div class="flex items-center gap-4">
-                    <!-- HAMBURGER BUTTON -->
-                    <button
-                        wire:click="toggleSidebar"
-                        class="text-2xl cursor-pointer"
-                    >
-                        ☰
-                    </button>
-                    <h2 class="font-bold text-[#5E0B0B]">FaculTime</h2>
-                </div>
-
-                <div class="flex items-center gap-10 justify-between">
-                    <div class="flex items-center gap-2">
-                        <img
-                            src="{{ asset('pfp-placeholder.jpg') }}"
-                            class="w-8 h-8 rounded-full" alt="User Profile"
+            <!-- 3. Auth Header (Records Section) -->
+            <nav class="fixed mb-4 z-2 w-[97.1%] flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
+                <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
+                    <div class="flex items-center gap-4">
+                        <!-- HAMBURGER BUTTON -->
+                        <button
+                            wire:click="toggleSidebar"
+                            class="text-2xl cursor-pointer"
                         >
-                        <span>{{ auth()->user()?->name ?? 'User' }}</span>
+                            ☰
+                        </button>
+                        <h2 class="font-bold text-[#5E0B0B]">FaculTime</h2>
                     </div>
 
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="cursor-pointer p-3 rounded-[12px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500">Logout</button>
-                    </form>
+                    <div class="flex items-center gap-10 justify-between">
+                        <div class="flex items-center gap-2">
+                            <img
+                                src="{{ asset('pfp-placeholder.jpg') }}"
+                                class="w-8 h-8 rounded-full" alt="User Profile"
+                            >
+                            <span>{{ auth()->user()?->name ?? 'User' }}</span>
+                        </div>
+
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="cursor-pointer p-3 rounded-[12px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500">Logout</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
 
         @endif

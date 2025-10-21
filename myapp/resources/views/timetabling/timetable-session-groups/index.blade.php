@@ -2,6 +2,11 @@
 
 @section('title', $timetable->timetable_name . ' Class Sessions')
 
+@php
+    $sessionGroupTopSpacingValue = 1; // Spacing for the top part per session group/class session
+    $programTypeBottomSpacingValue = 3; // Spacing for the bottom part
+@endphp
+
 @section('content')
     <div class="w-full pl-39 p-4">
         <div class="flex flex-row mb-7 justify-between items-center">
@@ -23,8 +28,14 @@
 
 
             @foreach($groups as $sessionGroup)
-                <div class="flex justify-between mb-5 w-full">
-                </div>
+
+                {{-- Spacing  --}}
+                @for($i = 0; $i < $sessionGroupTopSpacingValue; $i++)
+                    <div class="flex justify-between mb-5 w-full">
+                        {{-- Spacing --}}
+                    </div>
+                @endfor
+
                 <div class="pt-4 flex flex-row justify-between w-full bg-gray-100 rounded-tl-[12px] rounded-tr-[12px]">
                     <div class="pl-6 pb-1">
                         <p class="font-bold"> {{ $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown' }} {{$sessionGroup->session_name }} {{ $sessionGroup->year_level }} Year</p>
@@ -115,6 +126,13 @@
                 </table>
 
             @endforeach
+
+            {{-- Spacing --}}
+            @for($i = 0; $i < $programTypeBottomSpacingValue; $i++)
+                <div class="flex justify-between mb-5 w-full">
+                    {{-- Spacing --}}
+                </div>
+            @endfor
         @endforeach
     </div>
 
