@@ -58,12 +58,12 @@
         @else <!-- Else, use the default header for the records section -->
 
             <!-- 3. Auth Header (Records Section) -->
-            <nav class="fixed mb-4 z-2 w-[97.1%] flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
+            <nav x-data class="fixed mb-4 z-2 w-[97.1%] flex justify-center items-center content-center h-18 shadow-2xl rounded-2xl">
                 <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
                     <div class="flex items-center gap-4">
                         <!-- HAMBURGER BUTTON -->
                         <button
-                            wire:click="toggleSidebar"
+                            @click="$dispatch('toggle-sidebar')" {{-- Alpine Implementation --}}
                             class="text-2xl cursor-pointer"
                         >
                             ☰

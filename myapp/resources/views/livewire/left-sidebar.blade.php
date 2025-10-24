@@ -1,11 +1,8 @@
 @php use Illuminate\Support\Str; @endphp
 
 <div
-    @class([
-        'fixed top-0 left-0 h-screen shadow transition-transform duration-300 z-50',
-        'translate-x-0' => $open,
-        '-translate-x-full' => ! $open,
-    ])
+    x-data="{open: false}"
+
 >
     @auth
         <!-- if current route is under timetables -->
@@ -47,13 +44,24 @@
 
             <!-- 2. Records Section Sidebar (The main, retractable one) -->
             <aside
-                style="{{ $open ? '' : 'transform: translateX(-100%);' }}"
-                class="fixed top-0 left-0 h-screen w-64 transition-transform duration-300 z-50 bg-white shadow"
+                x-cloak
+                @toggle-sidebar.window="open = !open"
+                x-transition:enter="transform transition ease-out duration-300"
+                x-transition:enter-start="-translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transform transition ease-in duration-300"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="-translate-x-full"
+                class="fixed top-0 left-0 h-screen w-64 bg-white shadow-lg z-50"
+                :class="open
+                    ? 'fixed top-0 left-0 h-screen w-64 transition-transform duration-300 z-50 bg-white shadow translate-x-0'
+                    : 'fixed top-0 left-0 h-screen w-64 transition-transform duration-300 z-50 bg-white shadow -translate-x-full'"
             >
                 <div class="flex justify-end p-4">
                     <!-- CLOSE BUTTON -->
                     <button
-                        wire:click="toggle"
+                        @click="open = false"
+                        x-transition
                         class="cursor-pointer p-1 px-2 rounded-[6px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500"
                     >
                         ✕
@@ -165,12 +173,12 @@
             </aside>
 
             <!-- Overlay -->
-            @if($open)
-                <div
-                    class="fixed inset-0 bg-black/30 z-40"
-                    wire:click="toggle"
-                ></div>
-            @endif
+            <div
+                class="fixed inset-0 bg-black/30 z-40"
+                @click="open = false"
+                x-show="open"
+                x-transition.opacity
+            ></div>
 
         @endif
 

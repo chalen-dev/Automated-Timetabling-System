@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //THIS CODE ALWAYS COMPACTS THE TIMETABLES COLLEC
+        //THIS CODE ALWAYS COMPACTS THE CURRENT TIMETABLE INSTANCE EVERYWHERE, SO THAT IT WON'T RESULT TO THESE STUPID AHH ANNOYING NULLS
         View::composer('*', function ($view) {
             $route = request()->route();
             $timetable = null;

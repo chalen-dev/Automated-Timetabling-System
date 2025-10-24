@@ -16,6 +16,10 @@
     <!-- Sweet Alert, for confirmation dialogs -->
     @include('sweetalert2::index')
 
+    <style>
+        /*  For x-cloak in alpine js  */
+        [x-cloak] { display: none !important; }
+    </style>
 
 </head>
 <body class="bg-page h-full">
