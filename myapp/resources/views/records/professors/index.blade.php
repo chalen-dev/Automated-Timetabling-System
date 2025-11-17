@@ -69,7 +69,7 @@
                             </a>
 
                             <!-- Delete Button -->
-                            <x-buttons.delete
+                            <livewire:buttons.delete
                                 action="professors.destroy"
                                 :params="$professor"
                                 item_name="professor"

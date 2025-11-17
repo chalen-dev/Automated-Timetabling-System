@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\timetabling;
 
+use App\Models\records\Course;
 use Illuminate\Database\Eloquent\Model;
 
 class CourseSession extends Model

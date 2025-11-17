@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\timetabling;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
-use App\Models\CourseSession;
-use App\Models\SessionGroup;
-use App\Models\Timetable;
+use App\Models\records\Course;
+use App\Models\records\Timetable;
+use App\Models\timetabling\CourseSession;
+use App\Models\timetabling\SessionGroup;
 use Illuminate\Http\Request;
 
 class CourseSessionController extends Controller
@@ -141,7 +141,7 @@ class CourseSessionController extends Controller
     protected function logAction(string $action, array $details = [])
     {
         if(auth()->check()) {
-            \App\Models\UserLog::create([
+            \App\Models\records\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => json_encode($details),

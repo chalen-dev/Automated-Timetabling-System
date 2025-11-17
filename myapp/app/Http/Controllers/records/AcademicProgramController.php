@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\AcademicProgram;
-use App\Models\UserLog;
+use App\Models\records\AcademicProgram;
+use App\Models\records\UserLog;
 use Illuminate\Http\Request;
 
 class AcademicProgramController extends Controller

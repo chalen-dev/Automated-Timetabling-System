@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\records;
 
+use App\Models\timetabling\SessionGroup;
 use Illuminate\Database\Eloquent\Model;
 
 class AcademicProgram extends Model

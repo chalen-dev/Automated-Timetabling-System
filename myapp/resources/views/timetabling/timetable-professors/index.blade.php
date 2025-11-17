@@ -42,7 +42,7 @@
                     <td class="px-6 py-3">0/{{ $professor->max_unit_load }}</td>
                     <td class="px-6 py-3">{{ $professor->specializations->pluck('course.course_title')->implode(', ') ?: 'empty' }}</td>
                     <td class="px-6 py-3 text-center">
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             action="timetables.timetable-professors.destroy"
                             :params="[$timetable, $professor]"
                             item_name="professor"

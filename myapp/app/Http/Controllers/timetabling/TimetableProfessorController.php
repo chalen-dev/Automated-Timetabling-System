@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\timetabling;
 
 use App\Http\Controllers\Controller;
-use App\Models\Professor;
-use App\Models\Timetable;
-use App\Models\UserLog;
+use App\Models\records\Professor;
+use App\Models\records\Timetable;
+use App\Models\records\UserLog;
 use Illuminate\Http\Request;
 
 class TimetableProfessorController extends Controller

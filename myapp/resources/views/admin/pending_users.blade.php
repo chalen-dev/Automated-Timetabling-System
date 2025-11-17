@@ -40,7 +40,7 @@
                         </form>
 
                         <!-- Decline Button -->
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             :action="'admin.decline_user'"
                             :params="$user->id"
                             :item_name="$user->name"
@@ -78,7 +78,7 @@
                         </form>
 
                         <!-- Decline Button -->
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             :action="'admin.decline_user'"
                             :params="$user->id"
                             :item_name="$user->name"

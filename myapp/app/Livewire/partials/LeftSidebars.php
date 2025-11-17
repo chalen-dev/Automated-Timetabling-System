@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\partials;
 
-use App\Models\Timetable;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 use Livewire\Component;
-use Livewire\Attributes\On;
 
-class LeftSidebar extends Component
+class LeftSidebars extends Component
 {
     public string $currentRouteName;
 
@@ -16,7 +13,7 @@ class LeftSidebar extends Component
     public function render()
     {
         $this->currentRouteName = Route::currentRouteName();
-        return view('livewire.left-sidebar');
+        return view('livewire.partials.left-sidebars');
     }
 
 

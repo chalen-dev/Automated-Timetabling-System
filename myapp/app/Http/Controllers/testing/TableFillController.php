@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\testing;
 
 use App\Http\Controllers\Controller;
-use App\Models\AcademicProgram;
-use App\Models\Course;
-use App\Models\CourseSession;
-use App\Models\Professor;
-use App\Models\Room;
-use App\Models\RoomExclusiveDay;
-use App\Models\SessionGroup;
-use App\Models\Timetable;
-use App\Models\TimetableProfessor;
-use App\Models\TimetableRoom;
+use App\Models\records\AcademicProgram;
+use App\Models\records\Course;
+use App\Models\records\Professor;
+use App\Models\records\Room;
+use App\Models\records\RoomExclusiveDay;
+use App\Models\records\Timetable;
+use App\Models\timetabling\CourseSession;
+use App\Models\timetabling\SessionGroup;
+use App\Models\timetabling\TimetableProfessor;
+use App\Models\timetabling\TimetableRoom;
 
 class TableFillController extends Controller
 {
@@ -685,8 +685,8 @@ class TableFillController extends Controller
                 break;
 
             case 'specializations':
-                $professors = \App\Models\Professor::all();
-                $courses = \App\Models\Course::where('course_type', 'major')->get();
+                $professors = \App\Models\records\Professor::all();
+                $courses = \App\Models\records\Course::where('course_type', 'major')->get();
 
                 if ($professors->isEmpty() || $courses->isEmpty()) {
                     return back()->with('error', 'Please fill professors and courses tables first.');
@@ -759,7 +759,7 @@ class TableFillController extends Controller
                     return !is_null($row['professor_id']) && !is_null($row['course_id']);
                 });
 
-                \App\Models\Specialization::insertOrIgnore($data);
+                \App\Models\records\Specialization::insertOrIgnore($data);
                 break;
 
             case 'timetables':

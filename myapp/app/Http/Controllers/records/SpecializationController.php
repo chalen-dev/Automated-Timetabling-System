@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
-use App\Models\Professor;
-use App\Models\Specialization;
-use App\Models\UserLog;
+use App\Models\records\Course;
+use App\Models\records\Professor;
+use App\Models\records\Specialization;
+use App\Models\records\UserLog;
 use Illuminate\Http\Request;
 
 class SpecializationController extends Controller

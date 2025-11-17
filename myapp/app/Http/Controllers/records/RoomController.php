@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\Room;
+use App\Models\records\Room;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -132,7 +132,7 @@ class RoomController extends Controller
     protected function logAction(string $action, array $details = [])
     {
         if(auth()->check()) {
-            \App\Models\UserLog::create([
+            \App\Models\records\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => json_encode($details),

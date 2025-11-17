@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserLog;
+use App\Models\records\UserLog;
 
 class UserLogController extends Controller
 {

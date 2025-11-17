@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\records;
 
+use App\Models\users\User;
 use Illuminate\Database\Eloquent\Model;
 
 class UserLog extends Model

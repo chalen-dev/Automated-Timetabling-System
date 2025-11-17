@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\Timetable;
-use App\Models\UserLog;
+use App\Models\records\Timetable;
+use App\Models\records\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

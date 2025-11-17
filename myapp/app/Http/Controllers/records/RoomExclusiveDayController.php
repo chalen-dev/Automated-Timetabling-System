@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\records;
 
 use App\Http\Controllers\Controller;
-use App\Models\Room;
-use App\Models\RoomExclusiveDay;
+use App\Models\records\Room;
+use App\Models\records\RoomExclusiveDay;
 use Illuminate\Http\Request;
 
 class RoomExclusiveDayController extends Controller
@@ -124,7 +124,7 @@ class RoomExclusiveDayController extends Controller
     protected function logAction(string $action, array $details = [])
     {
         if (auth()->check()) {
-            \App\Models\UserLog::create([
+            \App\Models\records\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => json_encode($details),

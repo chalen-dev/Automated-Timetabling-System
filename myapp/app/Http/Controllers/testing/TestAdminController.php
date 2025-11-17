@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\testing;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\users\User;
 
 class TestAdminController extends Controller
 {

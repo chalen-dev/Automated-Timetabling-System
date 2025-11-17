@@ -54,7 +54,7 @@
                             </a>
 
                             <!-- Delete Button -->
-                            <x-buttons.delete
+                            <livewire:buttons.delete
                                 action="courses.destroy"
                                 :params="$course"
                                 item_name="course"

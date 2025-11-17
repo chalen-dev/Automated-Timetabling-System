@@ -2,7 +2,7 @@
 @section('title', $timetable->timetable_name)
 
 @section('content')
-    <div class="flex flex-col w-full p-4 pt-23 pl-39 text-gray-800">
+    <div class="flex flex-col w-full p-4 pl-39 text-gray-800">
 
         @php
             $prevSheet = $sheetIndex > 0 ? $sheetIndex - 1 : null;
@@ -10,7 +10,8 @@
         @endphp
 
             <!-- Sheet Navigation -->
-        <div class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
+        <div
+            class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
                     Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
@@ -29,7 +30,8 @@
                         <span class="text-lg">←</span> Previous
                     </a>
                 @else
-                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                    <button
+                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         <span class="text-lg">←</span> Previous
                     </button>
                 @endif
@@ -41,7 +43,8 @@
                         Next <span class="text-lg">→</span>
                     </a>
                 @else
-                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                    <button
+                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         Next <span class="text-lg">→</span>
                     </button>
                 @endif
@@ -49,7 +52,7 @@
         </div>
 
 
-    @if (!empty($tableData) && isset($tableData[0]))
+        @if (!empty($tableData) && isset($tableData[0]))
             <div class="overflow-x-auto bg-white rounded-lg shadow-md">
                 <table class="min-w-full border-collapse table-auto text-xs md:text-sm">
                     <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
@@ -69,7 +72,9 @@
                     <tbody class="text-gray-700">
                     @php $cellColors = []; @endphp
                     @foreach ($tableData as $rowIndex => $row)
-                        @if ($rowIndex === 0) @continue @endif
+                        @if ($rowIndex === 0)
+                            @continue
+                        @endif
                         <tr class="{{ $rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100 transition-colors">
                             @foreach ($row as $colIndex => $cell)
                                 @php
@@ -102,8 +107,8 @@
                                         $parts = explode('_', $cell);
                                         if (count($parts) === 4) {
                                             [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
-                                            $sessionGroup = \App\Models\SessionGroup::find($sessionGroupId);
-                                            $courseSession = \App\Models\CourseSession::find($courseSessionId);
+                                            $sessionGroup = \App\Models\timetabling\SessionGroup::find($sessionGroupId);
+                                            $courseSession = \App\Models\timetabling\CourseSession::find($courseSessionId);
                                             $courseTitle = $courseSession->course->course_title ?? '';
                                             $displayName = ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr) . ' ' .
                                                            ($sessionGroup->session_name ?? $sessionName) . ' ' .

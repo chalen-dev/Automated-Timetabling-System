@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\timetabling;
 
 use App\Http\Controllers\Controller;
-use App\Models\Timetable;
+use App\Models\records\Timetable;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -131,7 +131,7 @@ class TimetableEditingPaneController extends Controller
     protected function logAction(string $action, array $details = [])
     {
         if (auth()->check()) {
-            \App\Models\UserLog::create([
+            \App\Models\records\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => json_encode($details),

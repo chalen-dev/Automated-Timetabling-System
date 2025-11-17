@@ -41,7 +41,7 @@
                     <td class="px-6 py-3">{{ $specialization->course->course_title }}</td>
                     <td class="px-6 py-3">{{ $specialization->course->course_name }}</td>
                     <td class="px-6 py-3 text-center">
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             action="professors.specializations.destroy"
                             :params="[$professor, $specialization]"
                             item_name="specialization"

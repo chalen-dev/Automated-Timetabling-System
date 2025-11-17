@@ -31,6 +31,12 @@
     outline: 1px solid black;
 }
 
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;               /* Chrome, Safari, Edge (WebKit) */
+}
+
+
 body.bg-page {
     position: relative;
     /*overflow-y: hidden; /*walai ni ngano pugngan man sa pagscroll */

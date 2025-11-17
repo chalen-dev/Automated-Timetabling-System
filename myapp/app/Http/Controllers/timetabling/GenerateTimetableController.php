@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\timetabling;
 
 use App\Http\Controllers\Controller;
-use App\Models\Timetable;
+use App\Models\records\Timetable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

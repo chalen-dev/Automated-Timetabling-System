@@ -13,9 +13,6 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 
-    <!-- Sweet Alert, for confirmation dialogs -->
-    @include('sweetalert2::index')
-
     <style>
         /*  For x-cloak in alpine js  */
         [x-cloak] { display: none !important; }
@@ -29,11 +26,11 @@
 <div class="p-5">
 
     <!-- HEADER -->
-    <livewire:header/>
+    <livewire:partials.headers/>
     <!-- MAIN AREA -->
     @auth
     <div class="flex pt-24">
-        <livewire:left-sidebar/>
+        <livewire:partials.left-sidebars/>
     </div>
     @endauth
     <div class="flex">
@@ -46,11 +43,14 @@
 
 <!-- FOOTER for guests only -->
 @guest
-    @include('components.footers.footer')
+    <livewire:partials.footer/>
 @endguest
 
 <!-- Livewire -->
 @livewireScripts
+
+<!-- Sweet Alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Scripts -->
 @stack('scripts')

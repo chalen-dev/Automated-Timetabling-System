@@ -38,7 +38,7 @@
                 <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-3">{{ $exclusiveDays[$day->exclusive_day] }}</td>
                     <td class="px-6 py-3 text-center">
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             action="rooms.room-exclusive-days.destroy"
                             :params="[$room, $day]"
                             item_name="day"

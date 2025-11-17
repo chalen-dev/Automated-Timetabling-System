@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Models\UserLog;
+use App\Models\records\UserLog;
 
 class Logger
 {

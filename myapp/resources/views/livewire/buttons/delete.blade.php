@@ -1,15 +1,3 @@
-@php
-    use SweetAlert2\Laravel\Swal;
-@endphp
-
-@props([
-    'action',
-    'params',
-    'item_name',
-    'btnType' => 'normal',
-    'class' => '',
-])
-
 <form action="{{ route($action, $params) }}" method="POST" class="flex items-center justify-center delete-form">
     @csrf
     @method('DELETE')
@@ -20,7 +8,7 @@
         class="delete-btn flex flex-col items-center justify-center rounded cursor-pointer transition-all duration-150 {{ $class }}"
     >
 
-    @if($btnType === 'normal')
+        @if($btnType === 'normal')
             <p>Delete</p>
         @elseif($btnType === 'icon')
             <i class="bi bi-trash"></i>
@@ -41,7 +29,7 @@
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: `You are about to delete "${itemName}". This action cannot be undone.`,
+                    text: `You are about to delete the ${itemName}. This action cannot be undone.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',

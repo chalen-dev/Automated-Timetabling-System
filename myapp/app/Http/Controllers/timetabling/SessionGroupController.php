@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\timetabling;
 
 use App\Http\Controllers\Controller;
-use App\Models\AcademicProgram;
-use App\Models\SessionGroup;
-use App\Models\Timetable;
-use App\Models\UserLog;
+use App\Models\records\AcademicProgram;
+use App\Models\records\Timetable;
+use App\Models\records\UserLog;
+use App\Models\timetabling\SessionGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

@@ -62,7 +62,7 @@
                             </a>
 
                             <!-- Delete Button -->
-                            <x-buttons.delete
+                            <livewire:buttons.delete
                                 action="timetables.session-groups.destroy"
                                 :params="[$timetable, $sessionGroup]"
                                 item_name="session"
@@ -113,7 +113,7 @@
                                 </form>
                             </td>
                             <td class="px-6 py-3 text-center">
-                                <x-buttons.delete
+                                <livewire:buttons.delete
                                     action="timetables.session-groups.course-sessions.destroy"
                                     :params="[$timetable, $sessionGroup, $courseSession]"
                                     item_name="course session"

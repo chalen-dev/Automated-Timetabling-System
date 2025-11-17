@@ -42,7 +42,7 @@
                     <td class="px-6 py-3">{{ $room->room_capacity ?? 'N/A' }}</td>
                     <td class="px-6 py-3">{{ $room->roomExclusiveDays?->pluck('exclusive_day')->map(fn($day) => ucfirst($day))->implode(', ') ?: 'N/A' }}</td>
                     <td class="px-6 py-3 text-center">
-                        <x-buttons.delete
+                        <livewire:buttons.delete
                             action="timetables.timetable-rooms.destroy"
                             :params="[$timetable, $room]"
                             item_name="room"

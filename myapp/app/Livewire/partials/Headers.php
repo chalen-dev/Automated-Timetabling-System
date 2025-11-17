@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\partials;
 
-use App\Models\Timetable;
 use Illuminate\Support\Facades\Route;
 use Livewire\Component;
 
 
-class Header extends Component
+class Headers extends Component
 {
     public string $currentRouteName;
     public function render()
     {
         $this->currentRouteName = Route::currentRouteName();
-        return view('livewire.header');
+        return view('livewire.partials.headers');
     }
 
 }
