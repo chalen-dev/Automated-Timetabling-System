@@ -23,6 +23,7 @@ class AcademicProgramController extends Controller
             })
             ->get();
 
+        //Log
         Logger::log('index', 'academic program', null);
 
         return view('records.academic-programs.index', compact('academicPrograms'));
@@ -33,6 +34,7 @@ class AcademicProgramController extends Controller
      */
     public function create()
     {
+        //Log
         Logger::log('create', 'academic program', null);
         return view('records.academic-programs.create');
     }
@@ -50,6 +52,7 @@ class AcademicProgramController extends Controller
 
         $academicProgram = AcademicProgram::create($validatedData);
 
+        //Log
         Logger::log('store', 'academic program', [
             'program_name' => $academicProgram->program_name,
             'program_abbreviation' => $academicProgram->program_abbreviation,
@@ -65,7 +68,11 @@ class AcademicProgramController extends Controller
      */
     public function show(AcademicProgram $academicProgram)
     {
-        Logger::log('show', 'academic program', $academicProgram);
+        //Log
+        Logger::log('show', 'academic program', [
+            'program_id' => $academicProgram->id,
+            'program_name' => $academicProgram->program_name,
+        ]);
         return view('records.academic-programs.show', compact('academicProgram'));
     }
 
@@ -74,7 +81,11 @@ class AcademicProgramController extends Controller
      */
     public function edit(AcademicProgram $academicProgram)
     {
-        Logger::log('edit', 'academic program', $academicProgram);
+        //Log
+        Logger::log('edit', 'academic program', [
+            'program_id' => $academicProgram->id,
+            'program_name' => $academicProgram->program_name,
+        ]);
         return view('records.academic-programs.edit', compact('academicProgram'));
     }
 
@@ -91,6 +102,7 @@ class AcademicProgramController extends Controller
 
         $academicProgram->update($validatedData);
 
+        //Log
         Logger::log('update', 'academic program', $validatedData);
 
         return redirect()->route('academic-programs.index')
@@ -109,14 +121,12 @@ class AcademicProgramController extends Controller
 
         $academicProgram->delete();
 
+        //Log
         Logger::log('delete', 'academic program', $programData);
 
         return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program deleted successfully');
     }
 
-    /**
-     * Log user actions.
-     */
 
 }

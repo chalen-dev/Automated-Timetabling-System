@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Course;
 use Illuminate\Http\Request;
@@ -35,16 +36,18 @@ class CourseController extends Controller
                 ->orWhere('course_type', 'like', "%{$search}%");
         })->get();
 
-        // Optional: log view action
-        $this->logAction('viewed_courses', ['search' => $search]);
+        Logger::log('index', 'course', null);
 
         return view('records.courses.index', compact('courses', 'search'));
     }
 
     public function show(Course $course){
-        $this->logAction('viewed_course', [
+
+        //Log
+        Logger::log('show', 'course', [
             'course_id' => $course->id,
-            'course_title' => $course->course_title
+            'course_title' => $course->course_title,
+            'course_name' => $course->course_name,
         ]);
         return view('records.courses.show', compact('course'));
     }
@@ -53,7 +56,8 @@ class CourseController extends Controller
         $courseTypeOptions = $this->courseTypeOptions;
         $durationTypeOptions = $this->durationTypeOptions;
 
-        $this->logAction('accessed_create_course_form');
+        //Log
+        Logger::log('create', 'course', null);
 
         return view('records.courses.create', compact('courseTypeOptions', 'durationTypeOptions'));
     }
@@ -78,9 +82,17 @@ class CourseController extends Controller
 
         $course = Course::create($validatedData);
 
-        $this->logAction('create_course', [
+        //Log
+        Logger::log('store', 'course', [
             'course_id' => $course->id,
-            'course_title' => $course->course_title
+            'course_title' => $course->course_title,
+            'course_name' => $course->course_name,
+            'course_type' => $course->course_type,
+            'class_hours' => $course->class_hours,
+            'total_lecture_class_days' => $course->total_lecture_class_days,
+            'total_laboratory_class_days' => $course->total_laboratory_class_days,
+            'unit_load' => $course->unit_load,
+            'duration_type' => $course->duration_type,
         ]);
 
         return redirect()->route('courses.index')
@@ -91,9 +103,11 @@ class CourseController extends Controller
         $courseTypeOptions = $this->courseTypeOptions;
         $durationTypeOptions = $this->durationTypeOptions;
 
-        $this->logAction('accessed_edit_course_form', [
+        //Log
+        Logger::log('edit', 'course', [
             'course_id' => $course->id,
-            'course_title' => $course->course_title
+            'course_title' => $course->course_title,
+            'course_name' => $course->course_name,
         ]);
 
         return view('records.courses.edit', compact('course', 'courseTypeOptions', 'durationTypeOptions'));
@@ -119,10 +133,8 @@ class CourseController extends Controller
 
         $course->update($validatedData);
 
-        $this->logAction('update_course', [
-            'course_id' => $course->id,
-            'course_title' => $course->course_title
-        ]);
+        //Log
+        Logger::log('update', 'course', $validatedData);
 
         return redirect()->route('courses.index')
             ->with('success', 'Course updated successfully');
@@ -136,22 +148,10 @@ class CourseController extends Controller
 
         $course->delete();
 
-        $this->logAction('delete_course', $courseData);
+        //Log
+        Logger::log('delete', 'course', $courseData);
 
         return redirect()->route('courses.index')
             ->with('success', 'Course deleted successfully');
-    }
-
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
     }
 }

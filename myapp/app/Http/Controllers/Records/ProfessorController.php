@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\AcademicProgram;
 use App\Models\Records\Course;
@@ -41,8 +42,8 @@ class ProfessorController extends Controller
         // Count of academic programs
         $academicProgramsCount = AcademicProgram::count();
 
-        // Log the view
-        $this->logAction('viewed_professors_list', ['search' => $search]);
+        // Log
+        Logger::log('index', 'professor', null);
 
         return view('records.professors.index', compact('professors', 'search', 'academicProgramsCount'));
     }
@@ -55,7 +56,7 @@ class ProfessorController extends Controller
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
 
         // Log access to create form
-        $this->logAction('accessed_create_professor_form');
+        Logger::log('create', 'professor', null);
 
         return view('records.professors.create', compact('academic_program_options', 'genderOptions', 'professorTypeOptions'));
     }
@@ -76,9 +77,15 @@ class ProfessorController extends Controller
         $professor = Professor::create($validatedData);
 
         // Log creation
-        $this->logAction('create_professor', [
+        Logger::log('store', 'professor', [
             'professor_id' => $professor->id,
-            'professor_name' => $professor->first_name . ' ' . $professor->last_name
+            'professor_name' => $professor->first_name . ' ' . $professor->last_name,
+            'professor_type' => $professor->professor_type,
+            'max_unit_load' => $professor->max_unit_load,
+            'gender' => $professor->gender,
+            'professor_age' => $professor->professor_age,
+            'position' => $professor->position,
+            'academic_program_id' => $professor->academic_program_id
         ]);
 
         return redirect()->route('professors.index')
@@ -90,9 +97,10 @@ class ProfessorController extends Controller
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
 
         // Log view
-        $this->logAction('viewed_professor', [
+        Logger::log('show', 'professor', [
             'professor_id' => $professor->id,
-            'professor_name' => $professor->first_name . ' ' . $professor->last_name
+            'professor_name' => $professor->first_name . ' ' . $professor->last_name,
+            'academic_program_id' => $professor->academic_program_id
         ]);
 
         return view('records.professors.show', compact('professor', 'academic_program_options'));
@@ -106,9 +114,10 @@ class ProfessorController extends Controller
         $professorTypeOptions = $this->professorTypeOptions;
 
         // Log access to edit form
-        $this->logAction('accessed_edit_professor_form', [
+        Logger::log('edit', 'professor', [
             'professor_id' => $professor->id,
-            'professor_name' => $professor->first_name . ' ' . $professor->last_name
+            'professor_name' => $professor->first_name . ' ' . $professor->last_name,
+            'academic_program_id' => $professor->academic_program_id
         ]);
 
         return view('records.professors.edit', compact('professor', 'academic_program_options', 'genderOptions', 'professorTypeOptions', 'courses'));
@@ -130,10 +139,7 @@ class ProfessorController extends Controller
         $professor->update($validatedData);
 
         // Log update
-        $this->logAction('update_professor', [
-            'professor_id' => $professor->id,
-            'professor_name' => $professor->first_name . ' ' . $professor->last_name
-        ]);
+        Logger::log('update', 'professor', $validatedData);
 
         return redirect()->route('professors.index')
             ->with('success', 'Professor updated successfully.');
@@ -149,25 +155,10 @@ class ProfessorController extends Controller
         $professor->delete();
 
         // Log deletion
-        $this->logAction('delete_professor', $professorData);
+        Logger::log('delete', 'professor', $professorData);
 
         return redirect()->route('professors.index')
             ->with('success', 'Professor deleted successfully.');
     }
 
-    /**
-     * Logs user actions to user_logs table
-     */
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 }

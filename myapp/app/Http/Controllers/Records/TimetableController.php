@@ -20,6 +20,7 @@ class TimetableController extends Controller
     {
         $timetables = Timetable::all();
 
+        //Log
         Logger::log('index', 'timetable', null);
 
         return view('records.timetables.index', compact('timetables'));
@@ -29,6 +30,7 @@ class TimetableController extends Controller
     {
         $semesterOptions = $this->semesterOptions;
 
+        //Log
         Logger::log('create', 'timetable', null);
 
         return view('records.timetables.create', compact('semesterOptions'));
@@ -47,6 +49,7 @@ class TimetableController extends Controller
 
         $timetable = Timetable::create($validatedData);
 
+        //Log
         Logger::log('store', 'timetable', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -61,6 +64,7 @@ class TimetableController extends Controller
 
     public function show(Timetable $timetable)
     {
+        //Log
         Logger::log('show', 'timetable', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -73,6 +77,7 @@ class TimetableController extends Controller
     {
         $semesterOptions = $this->semesterOptions;
 
+        //Log
         Logger::log('edit', 'timetable', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -94,6 +99,7 @@ class TimetableController extends Controller
 
         $timetable->update($validatedData);
 
+        //Log
         Logger::log('update', 'timetable', $validatedData);
 
         return redirect()->route('timetables.index')
@@ -116,6 +122,7 @@ class TimetableController extends Controller
             Storage::delete($filePath);
         }
 
+        //Log
         Logger::log('delete', 'timetable', $timetableData);
 
         return redirect()->route('timetables.index')
