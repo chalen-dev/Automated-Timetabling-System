@@ -4,24 +4,26 @@ namespace App\Livewire\Input;
 
 use Livewire\Component;
 
-class Text extends Component
+class TextArea extends Component
 {
     public $label;
     public $name;
-
     public $value;
-    public $class;
 
-    public function mount($label, $name, $value = '', $class = '')
+    public $default;
+    public $rows;
+
+    public function mount($label, $name, $default = '', $value = '',  $rows = 4)
     {
         $this->label = $label;
         $this->name = $name;
+        $this->default = $default;
 
         $this->value = $value;
-        $this->class = $class;
+        $this->rows = $rows;
     }
     public function render()
     {
-        return view('livewire.input.text');
+        return view('livewire.input.text-area');
     }
 }

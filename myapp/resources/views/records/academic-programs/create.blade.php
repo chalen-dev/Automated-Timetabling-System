@@ -25,7 +25,7 @@
 
             <!-- Text area below -->
             <div class="flex justify-center w-full">
-                <x-input.text-area
+                <livewire:input.text-area
                     label="Description"
                     name="program_description"
                     rows="4"

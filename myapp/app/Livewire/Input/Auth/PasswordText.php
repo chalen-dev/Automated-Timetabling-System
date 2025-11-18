@@ -11,6 +11,7 @@ class PasswordText extends Component
     public $elementId;
     public $placeholder;
     public $name;
+
     public $value;
     public $toggleId;
 
@@ -20,6 +21,7 @@ class PasswordText extends Component
         $this->elementId = $elementId;
         $this->placeholder = $placeholder;
         $this->name = $name;
+
         $this->value = $value;
         $this->toggleId = $toggleId;
     }

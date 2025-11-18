@@ -1,4 +1,3 @@
-@props(['label', 'name', 'value' => '', 'default', 'rows' => null])
 
 <div class="mb-3 flex flex-col gap-2">
     @if($label ?? false)
@@ -9,9 +8,11 @@
     <textarea
         name="{{ $name }}"
         id="{{ $name }}"
-        rows="{{ $rows ?? 4 }}"
+        rows="{{ $rows }}"
         class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-black focus:outline-none resize-none"
-    >{{ $value ?: old($name, $default ?? '') }}</textarea>
+    >
+        {{ $value ?: old($name, $default) }}
+    </textarea>
 
     @error($name)
     <p class="!text-red-500">{{ $message }}</p>

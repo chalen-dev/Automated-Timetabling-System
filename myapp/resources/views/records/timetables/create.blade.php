@@ -27,7 +27,7 @@
                     />
                 </div>
                 <div>
-                    <x-input.text-area
+                    <livewire:input.text-area
                         label="Description"
                         name="timetable_description"
                         rows="4"

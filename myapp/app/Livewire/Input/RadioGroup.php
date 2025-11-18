@@ -6,15 +6,17 @@ use Livewire\Component;
 
 class RadioGroup extends Component
 {
-    public $label;
     public $name;
+
+    public $label;
     public $options;
     public $value;
 
-    public function mount($label = null, $name, $options = [], $value = null)
+    public function mount($name, $label = null, $options = [], $value = null)
     {
-        $this->label = $label;
         $this->name = $name;
+
+        $this->label = $label;
         $this->options = $options;
         $this->value = $value;
 

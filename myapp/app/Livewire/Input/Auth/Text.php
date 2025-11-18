@@ -10,6 +10,7 @@ class Text extends Component
     public $type;
     public $placeholder;
     public $name;
+
     public $value;
 
     public function mount($label, $type, $placeholder, $name, $value = ''){
@@ -17,6 +18,7 @@ class Text extends Component
         $this->type = $type;
         $this->placeholder = $placeholder;
         $this->name = $name;
+
         $this->value = $value;
     }
     public function render()

@@ -32,7 +32,7 @@
             </div>
 
             <!-- Text area -->
-            <x-input.text-area
+            <livewire:input.text-area
                 label="Short Description"
                 name="short_description"
                 rows="3"
