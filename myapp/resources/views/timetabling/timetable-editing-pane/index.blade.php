@@ -9,9 +9,9 @@
             $nextSheet = ($sheetIndex < $totalSheets - 1 && $sheetIndex < 11) ? $sheetIndex + 1 : null;
         @endphp
 
-            <!-- Sheet Navigation -->
+                <!-- Sheet Navigation -->
         <div
-            class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
+                class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
                     Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
@@ -31,7 +31,7 @@
                     </a>
                 @else
                     <button
-                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                            class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         <span class="text-lg">←</span> Previous
                     </button>
                 @endif
@@ -44,7 +44,7 @@
                     </a>
                 @else
                     <button
-                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                            class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         Next <span class="text-lg">→</span>
                     </button>
                 @endif
@@ -107,8 +107,8 @@
                                         $parts = explode('_', $cell);
                                         if (count($parts) === 4) {
                                             [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
-                                            $sessionGroup = \App\Models\timetabling\SessionGroup::find($sessionGroupId);
-                                            $courseSession = \App\Models\timetabling\CourseSession::find($courseSessionId);
+                                            $sessionGroup = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                            $courseSession = \App\Models\Timetabling\CourseSession::find($courseSessionId);
                                             $courseTitle = $courseSession->course->course_title ?? '';
                                             $displayName = ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr) . ' ' .
                                                            ($sessionGroup->session_name ?? $sessionName) . ' ' .

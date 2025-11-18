@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\records\Timetable;
+use App\Models\Records\Timetable;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 

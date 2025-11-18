@@ -8,7 +8,7 @@
         <form action="{{ url('login') }}" method="POST" class="flex flex-col w-90 content-between rounded-xl items-center p-5 gap-3 bg-white shadow-2xl">
             @csrf
             <h1 class="font-bold p-1">Login to FaculTime</h1>
-            <x-input.auth-text
+            <livewire:input.auth.text
                 label="USERNAME or EMAIL"
                 type="text"
                 name="login"
@@ -17,7 +17,7 @@
                 :value="old('login')"
             />
 
-            <x-input.password-text
+            <livewire:input.auth.password-text
                 label="PASSWORD"
                 elementId="login_password"
                 type="password"

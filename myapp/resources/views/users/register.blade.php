@@ -10,7 +10,7 @@
 
             <h1 class="font-bold p-3">Sign Up to Facultime</h1>
 
-            <x-input.auth-text
+            <livewire:input.auth.text
                 label="USERNAME"
                 type="text"
                 name="name"
@@ -19,7 +19,7 @@
             />
 
             <!--YET TO BE ADDED IN DATABASE-->
-            <x-input.auth-text
+            <livewire:input.auth.text
                 label="FIRST NAME"
                 type="text"
                 name="first_name"
@@ -28,7 +28,7 @@
             />
 
             <!--YET TO BE ADDED IN DATABASE-->
-            <x-input.auth-text
+            <livewire:input.auth.text
                 label="LAST NAME"
                 type="text"
                 name="last_name"
@@ -36,7 +36,7 @@
                 :value="old('last_name')"
             />
 
-            <x-input.auth-text
+            <livewire:input.auth.text
                 label="EMAIL"
                 type="email"
                 name="email"
@@ -44,7 +44,7 @@
                 :value="old('email')"
             />
 
-            <x-input.password-text
+            <livewire:input.auth.password-text
                 label="PASSWORD"
                 elementId="register_password"
                 type="password"
@@ -53,7 +53,7 @@
                 :value="old('password')"
             />
 
-            <x-input.password-text
+            <livewire:input.auth.password-text
                 label="CONFIRM PASSWORD"
                 elementId="password_confirmation"
                 toggleId="togglePasswordConfirmation"

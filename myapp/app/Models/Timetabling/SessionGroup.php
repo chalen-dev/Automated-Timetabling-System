@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models\Timetabling;
+
+use App\Models\Records\AcademicProgram;
+use App\Models\Records\Timetable;
+use Illuminate\Database\Eloquent\Model;
+
+class SessionGroup extends Model
+{
+    protected $fillable = [
+        'session_name',
+        'year_level',
+        'academic_program_id',
+        'timetable_id',
+        'short_description'
+    ];
+
+    public function academicProgram()
+    {
+        return $this->belongsTo(AcademicProgram::class);
+    }
+
+    public function timetable()
+    {
+        return $this->belongsTo(Timetable::class);
+    }
+
+    public function courseSessions(){
+        return $this->hasMany(CourseSession::class, 'session_group_id');
+    }
+}
