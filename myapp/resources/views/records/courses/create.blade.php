@@ -71,7 +71,7 @@
                         :step="0.1"
                     />
 
-                    <x-input.radio-group
+                    <livewire:input.radio-group
                         label="Course Duration"
                         name="duration_type"
                         :options="$durationTypeOptions"

@@ -53,14 +53,14 @@
 
                 <!-- Right Column -->
                 <div class="flex flex-col justify-center items-stretch gap-5">
-                    <x-input.radio-group
+                    <livewire:input.radio-group
                         label="Professor Type"
                         name="professor_type"
                         :options="$professorTypeOptions"
                         :value="old('professor_type', $professor->professor_type)"
                     />
 
-                    <x-input.radio-group
+                    <livewire:input.radio-group
                         label="Gender"
                         name="gender"
                         :options="$genderOptions"

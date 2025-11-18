@@ -17,7 +17,7 @@ class Delete extends Component
     {
         $this->action = $action;
         $this->params = $params;
-        $this->itemName = $item_name;
+        $this->item_name = $item_name;
         $this->btnType = $btnType;
         $this->class = $class;
     }

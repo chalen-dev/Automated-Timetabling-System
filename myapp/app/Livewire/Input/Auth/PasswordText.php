@@ -14,7 +14,7 @@ class PasswordText extends Component
     public $value;
     public $toggleId;
 
-    public function mount($label, $type, $elementId, $placeholder, $name, $value = '', $toggleId = 'toggleBtn'){
+    public function mount($label, $type, $elementId, $placeholder, $name, $value = 'value', $toggleId = 'toggleBtn'){
         $this->label = $label;
         $this->type = $type;
         $this->elementId = $elementId;

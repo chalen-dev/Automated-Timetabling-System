@@ -79,7 +79,7 @@
                         :value="old('unit_load', $course->unit_load)"
                     />
 
-                    <x-input.radio-group
+                    <livewire:input.radio-group
                         label="Course Duration"
                         name="duration_type"
                         :options="$durationTypeOptions"

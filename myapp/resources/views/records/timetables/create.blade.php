@@ -14,7 +14,7 @@
                         name="timetable_name"
                     />
 
-                    <x-input.radio-group
+                    <livewire:input.radio-group
                         label="Semester"
                         name="semester"
                         :options="$semesterOptions"
