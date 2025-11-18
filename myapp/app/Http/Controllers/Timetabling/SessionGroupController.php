@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Timetabling;
 use App\Http\Controllers\Controller;
 use App\Models\Records\AcademicProgram;
 use App\Models\Records\Timetable;
-use App\Models\Records\UserLog;
 use App\Models\Timetabling\SessionGroup;
+use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

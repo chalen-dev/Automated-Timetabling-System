@@ -12,8 +12,16 @@ class TextArea extends Component
 
     public $default;
     public $rows;
+    public $isRequired;
 
-    public function mount($label, $name, $default = '', $value = '',  $rows = 4)
+    public function mount(
+        $label,
+        $name,
+        $default = '',
+        $value = '',
+        $rows = 4,
+        $isRequired = false
+    )
     {
         $this->label = $label;
         $this->name = $name;
@@ -21,6 +29,7 @@ class TextArea extends Component
 
         $this->value = $value;
         $this->rows = $rows;
+        $this->isRequired = $isRequired;
     }
     public function render()
     {

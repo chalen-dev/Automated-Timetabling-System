@@ -12,14 +12,24 @@ class Text extends Component
     public $name;
 
     public $value;
+    public $isRequired;
 
-    public function mount($label, $type, $placeholder, $name, $value = ''){
+    public function mount(
+        $label,
+        $type,
+        $placeholder,
+        $name,
+        $value = '',
+        $isRequired = false
+    )
+    {
         $this->label = $label;
         $this->type = $type;
         $this->placeholder = $placeholder;
         $this->name = $name;
 
         $this->value = $value;
+        $this->isRequired = $isRequired;
     }
     public function render()
     {

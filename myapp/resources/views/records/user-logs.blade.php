@@ -10,44 +10,59 @@
             <h1 class="text-xl font-bold mb-0 text-white">User Logs</h1>
         </div>
 
-        <!-- Grouped Logs by Date -->
         @forelse ($logs as $date => $dailyLogs)
             <div class="mb-6 bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="bg-gray-200 px-4 py-2 font-semibold text-gray-700">
                     {{ \Carbon\Carbon::parse($date)->format('F d, Y') }}
                 </div>
 
-                <table class="w-full table-auto text-left border-separate border-spacing-0 break-words">
-                    <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">ID</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">User</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">Action</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">Description</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">IP</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">User Agent</th>
-                            <th class="px-3 py-2 font-semibold border-b border-gray-200">Time</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                         </tr>
-                    </thead>
-                    <tbody class="text-gray-700 text-sm">
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
                         @foreach ($dailyLogs as $log)
-                            <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td class="px-3 py-2 align-top">{{ $log->id }}</td>
-                                <td class="px-3 py-2 align-top">{{ $log->user->name ?? 'N/A' }}</td>
-                                <td class="px-3 py-2 align-top">{{ $log->action }}</td>
-                                <td class="px-3 py-2 align-top break-words">{{ $log->description }}</td>
-                                <td class="px-3 py-2 align-top">{{ $log->ip_address }}</td>
-                                <td class="px-3 py-2 align-top break-words text-xs">{{ $log->user_agent }}</td>
-                                <td class="px-3 py-2 align-top whitespace-nowrap text-xs">
-                                    {{ $log->created_at->format('H:i:s') }}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 text-sm text-gray-900">
+                                    {{ $log->user->name ?? 'Someone' }}
+                                </td>
+                                <td class="px-4 py-2 text-sm text-gray-900">
+                                    {{ friendly_action($log->action, $log->model_type) }}
+                                </td>
+                                <td class="px-4 py-2 text-sm text-gray-600">
+                                    @if ($log->details !== null && trim($log->details) !== '')
+                                        @php $details = json_decode($log->details, true); @endphp
+
+                                        @if (is_array($details))
+                                            <ul class="ml-4 list-disc">
+                                                @foreach($details as $key => $value)
+                                                    <li><strong>{{ ucfirst($key) }}:</strong> {{ $value }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            {{ $log->details }}
+                                        @endif
+                                    @else
+                                        <span class="text-gray-400 italic">none</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-2 text-sm text-gray-400">
+                                    {{ $log->created_at->format('h:i A') }}
                                 </td>
                             </tr>
                         @endforeach
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         @empty
-            <div class="text-center text-gray-200">No logs found.</div>
+            <div class="text-center text-gray-300">No logs found.</div>
         @endforelse
 
         <!-- Pagination Buttons -->

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Records\Course;
 use App\Models\Records\Professor;
 use App\Models\Records\Specialization;
-use App\Models\Records\UserLog;
+use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
 
 class SpecializationController extends Controller

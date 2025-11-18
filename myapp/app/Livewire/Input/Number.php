@@ -14,8 +14,18 @@ class Number extends Component
 
     public $label;
     public $value;
+    public $isRequired;
 
-    public function mount($name, $default, $min, $max, $step, $label = '', $value = '')
+    public function mount(
+        $name,
+        $default,
+        $min,
+        $max,
+        $step,
+        $label = '',
+        $value = '',
+        $isRequired = false
+    )
     {
         $this->name = $name;
         $this->default = $default;
@@ -25,6 +35,7 @@ class Number extends Component
 
         $this->label = $label;
         $this->value = $value;
+        $this->isRequired = $isRequired;
     }
 
     public function render()

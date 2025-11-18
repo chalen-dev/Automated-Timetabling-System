@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Records;
+namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\Records\UserLog;
+use App\Models\Users\UserLog;
 
 class UserLogController extends Controller
 {

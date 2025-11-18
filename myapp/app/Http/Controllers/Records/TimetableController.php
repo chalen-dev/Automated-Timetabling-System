@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
-use App\Models\Records\UserLog;
+use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +20,7 @@ class TimetableController extends Controller
     {
         $timetables = Timetable::all();
 
-        $this->logAction('viewed_timetables_list');
+        Logger::log('index', 'timetable', null);
 
         return view('records.timetables.index', compact('timetables'));
     }
@@ -28,7 +29,7 @@ class TimetableController extends Controller
     {
         $semesterOptions = $this->semesterOptions;
 
-        $this->logAction('accessed_create_timetable_form');
+        Logger::log('create', 'timetable', null);
 
         return view('records.timetables.create', compact('semesterOptions'));
     }
@@ -46,9 +47,12 @@ class TimetableController extends Controller
 
         $timetable = Timetable::create($validatedData);
 
-        $this->logAction('create_timetable', [
+        Logger::log('store', 'timetable', [
             'timetable_id' => $timetable->id,
-            'timetable_name' => $timetable->timetable_name
+            'timetable_name' => $timetable->timetable_name,
+            'semester' => $timetable->semester,
+            'academic_year' => $timetable->academic_year,
+            'timetable_description' => $timetable->timetable_description,
         ]);
 
         return redirect()->route('timetables.index')
@@ -57,9 +61,9 @@ class TimetableController extends Controller
 
     public function show(Timetable $timetable)
     {
-        $this->logAction('viewed_timetable', [
+        Logger::log('show', 'timetable', [
             'timetable_id' => $timetable->id,
-            'timetable_name' => $timetable->timetable_name
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('records.timetables.show', compact('timetable'));
@@ -69,9 +73,9 @@ class TimetableController extends Controller
     {
         $semesterOptions = $this->semesterOptions;
 
-        $this->logAction('accessed_edit_timetable_form', [
+        Logger::log('edit', 'timetable', [
             'timetable_id' => $timetable->id,
-            'timetable_name' => $timetable->timetable_name
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('records.timetables.edit', compact('timetable', 'semesterOptions'));
@@ -90,10 +94,7 @@ class TimetableController extends Controller
 
         $timetable->update($validatedData);
 
-        $this->logAction('update_timetable', [
-            'timetable_id' => $timetable->id,
-            'timetable_name' => $timetable->timetable_name
-        ]);
+        Logger::log('update', 'timetable', $validatedData);
 
         return redirect()->route('timetables.index')
             ->with('success', 'Timetable updated successfully.');
@@ -115,25 +116,10 @@ class TimetableController extends Controller
             Storage::delete($filePath);
         }
 
-        $this->logAction('delete_timetable', $timetableData);
+        Logger::log('delete', 'timetable', $timetableData);
 
         return redirect()->route('timetables.index')
             ->with('success', 'Timetable deleted successfully.');
     }
 
-    /**
-     * Log user actions.
-     */
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 }

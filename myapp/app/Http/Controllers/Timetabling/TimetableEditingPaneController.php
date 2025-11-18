@@ -131,7 +131,7 @@ class TimetableEditingPaneController extends Controller
     protected function logAction(string $action, array $details = [])
     {
         if (auth()->check()) {
-            \App\Models\Records\UserLog::create([
+            \App\Models\Users\UserLog::create([
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'description' => json_encode($details),

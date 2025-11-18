@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\AcademicProgram;
-use App\Models\Records\UserLog;
 use Illuminate\Http\Request;
 
 class AcademicProgramController extends Controller
@@ -23,8 +23,7 @@ class AcademicProgramController extends Controller
             })
             ->get();
 
-        // Log the view action
-        $this->logAction('viewed academic programs list', ['search' => $search]);
+        Logger::log('index', 'academic program', null);
 
         return view('records.academic-programs.index', compact('academicPrograms'));
     }
@@ -34,8 +33,7 @@ class AcademicProgramController extends Controller
      */
     public function create()
     {
-        $this->logAction('accessed academic program creation form');
-
+        Logger::log('create', 'academic program', null);
         return view('records.academic-programs.create');
     }
 
@@ -52,9 +50,10 @@ class AcademicProgramController extends Controller
 
         $academicProgram = AcademicProgram::create($validatedData);
 
-        $this->logAction('created academic program', [
-            'program_id' => $academicProgram->id,
-            'program_name' => $academicProgram->program_name
+        Logger::log('store', 'academic program', [
+            'program_name' => $academicProgram->program_name,
+            'program_abbreviation' => $academicProgram->program_abbreviation,
+            'program_description' => $academicProgram->program_description,
         ]);
 
         return redirect()->route('academic-programs.index')
@@ -66,11 +65,7 @@ class AcademicProgramController extends Controller
      */
     public function show(AcademicProgram $academicProgram)
     {
-        $this->logAction('viewed academic program', [
-            'program_id' => $academicProgram->id,
-            'program_name' => $academicProgram->program_name
-        ]);
-
+        Logger::log('show', 'academic program', $academicProgram);
         return view('records.academic-programs.show', compact('academicProgram'));
     }
 
@@ -79,11 +74,7 @@ class AcademicProgramController extends Controller
      */
     public function edit(AcademicProgram $academicProgram)
     {
-        $this->logAction('accessed academic program edit form', [
-            'program_id' => $academicProgram->id,
-            'program_name' => $academicProgram->program_name
-        ]);
-
+        Logger::log('edit', 'academic program', $academicProgram);
         return view('records.academic-programs.edit', compact('academicProgram'));
     }
 
@@ -100,10 +91,7 @@ class AcademicProgramController extends Controller
 
         $academicProgram->update($validatedData);
 
-        $this->logAction('updated academic program', [
-            'program_id' => $academicProgram->id,
-            'program_name' => $academicProgram->program_name
-        ]);
+        Logger::log('update', 'academic program', $validatedData);
 
         return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program updated successfully');
@@ -121,7 +109,7 @@ class AcademicProgramController extends Controller
 
         $academicProgram->delete();
 
-        $this->logAction('deleted academic program', $programData);
+        Logger::log('delete', 'academic program', $programData);
 
         return redirect()->route('academic-programs.index')
             ->with('success', 'Academic Program deleted successfully');
@@ -130,16 +118,5 @@ class AcademicProgramController extends Controller
     /**
      * Log user actions.
      */
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
+
 }

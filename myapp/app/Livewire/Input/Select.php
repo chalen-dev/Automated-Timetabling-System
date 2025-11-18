@@ -15,6 +15,7 @@ class Select extends Component
     public $default;
     public $disabled;
     public $class;
+    public $isRequired;
 
     public function mount(
         $name,
@@ -23,7 +24,8 @@ class Select extends Component
         $options = [],
         $default = null,
         $disabled = false,
-        $class = ''
+        $class = '',
+        $isRequired = false
     ): void
     {
         $this->name = $name;
@@ -33,6 +35,7 @@ class Select extends Component
         $this->default = $default;
         $this->disabled = $disabled;
         $this->class = $class;
+        $this->isRequired = $isRequired;
     }
 
     public function render(): View
