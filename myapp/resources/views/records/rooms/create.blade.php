@@ -10,7 +10,7 @@
             @csrf
 
             <div class="flex justify-center gap-7 w-full">
-                <x-input.text
+                <livewire:input.text
                     label="Room Name"
                     name="room_name"
                 />

@@ -11,13 +11,13 @@
 
             <div class="flex justify-center gap-7">
                 <div class="flex flex-col justify-between items-stretch gap-5">
-                    <x-input.text
+                    <livewire:input.text
                         label="Course Title"
                         name="course_title"
                         :value="old('course_title', $course->course_title)"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Course Name"
                         name="course_name"
                         :value="old('course_name', $course->course_name)"

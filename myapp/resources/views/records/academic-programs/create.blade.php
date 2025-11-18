@@ -10,13 +10,13 @@
 
             <!-- Horizontal layout for text inputs -->
             <div class="flex gap-7 justify-center w-full">
-                <x-input.text
+                <livewire:input.text
                     label="Program Name"
                     name="program_name"
                     class="flex-1"
                 />
 
-                <x-input.text
+                <livewire:input.text
                     label="Program Abbreviation"
                     name="program_abbreviation"
                     class="flex-1"

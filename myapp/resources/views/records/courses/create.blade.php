@@ -10,12 +10,12 @@
 
             <div class="flex justify-center align-top gap-7">
                 <div class="flex flex-col justify-between items-stretch">
-                    <x-input.text
+                    <livewire:input.text
                         label="Course Title"
                         name="course_title"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Course Name"
                         name="course_name"
                     />

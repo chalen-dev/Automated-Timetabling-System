@@ -13,13 +13,13 @@
             <div class="flex justify-center gap-7 w-full">
                 <!-- Left Column -->
                 <div class="flex flex-col justify-center items-stretch gap-5">
-                    <x-input.text
+                    <livewire:input.text
                         label="First Name"
                         name="first_name"
                         :value="old('first_name', $professor->first_name)"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Last Name"
                         name="last_name"
                         :value="old('last_name', $professor->last_name)"
@@ -67,7 +67,7 @@
                         :value="old('gender', $professor->gender)"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Position"
                         name="position"
                         :value="old('position', $professor->position)"

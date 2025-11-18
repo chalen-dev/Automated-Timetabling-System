@@ -12,12 +12,12 @@
             <div class="flex justify-center gap-7 w-full">
                 <!-- Left Column -->
                 <div class="flex flex-col justify-center items-stretch gap-5">
-                    <x-input.text
+                    <livewire:input.text
                         label="First Name"
                         name="first_name"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Last Name"
                         name="last_name"
                     />
@@ -61,7 +61,7 @@
                         :options="$genderOptions"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Position"
                         name="position"
                     />

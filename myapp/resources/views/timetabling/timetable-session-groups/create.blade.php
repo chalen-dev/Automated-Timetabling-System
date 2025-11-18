@@ -10,7 +10,7 @@
 
             <!-- Horizontal row for main fields -->
             <div class="flex gap-5 w-full">
-                <x-input.text
+                <livewire:input.text
                     label="Session Letter"
                     name="session_name"
                     class="flex-1"

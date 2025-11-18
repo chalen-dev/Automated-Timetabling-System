@@ -9,7 +9,7 @@
             <h1 class="font-bold text-[18px]">Create Timetable</h1>
             <div class="flex flex-col">
                 <div class="flex gap-7">
-                    <x-input.text
+                    <livewire:input.text
                         label="Name of Timetable"
                         name="timetable_name"
                     />
@@ -21,7 +21,7 @@
                         default=""
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Academic Year"
                         name="academic_year"
                     />

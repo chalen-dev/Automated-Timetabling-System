@@ -12,7 +12,7 @@
             <div class="flex justify-center gap-7 w-full">
                 <div class="flex flex-col justify-center items-stretch gap-5 w-full">
                     <div class="flex flex-row gap-5 w-full">
-                        <x-input.text
+                        <livewire:input.text
                             label="Room Name"
                             name="room_name"
                             :value="old('room_name', $room->room_name)"

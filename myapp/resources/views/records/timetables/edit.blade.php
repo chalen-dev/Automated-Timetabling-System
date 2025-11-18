@@ -10,7 +10,7 @@
             <h1 class="font-bold text-[18px]">Edit Timetable</h1>
             <div class="flex flex-col">
                 <div class="flex gap-7 w-full">
-                    <x-input.text
+                    <livewire:input.text
                         label="Name of Timetable"
                         name="timetable_name"
                         :value="old('timetable_name', $timetable->timetable_name)"
@@ -24,7 +24,7 @@
                         :value="old('semester', $timetable->semester)"
                     />
 
-                    <x-input.text
+                    <livewire:input.text
                         label="Academic Year"
                         name="academic_year"
                         :value="old('academic_year', $timetable->academic_year)"
