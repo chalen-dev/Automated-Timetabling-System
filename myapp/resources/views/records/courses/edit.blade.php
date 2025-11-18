@@ -33,7 +33,7 @@
                         :value="old('course_type', $course->course_type)"
                     />
 
-                    <x-input.number
+                    <livewire:input.number
                         label="Class Hours"
                         name="class_hours"
                         :default="1"
@@ -44,7 +44,7 @@
                     />
                 </div>
                     <div class="flex flex-col justify-between gap-5">
-                        <x-input.number
+                        <livewire:input.number
                             label="Total Lecture Class Days per Week"
                             name="total_lecture_class_days"
                             :default="0"
@@ -54,7 +54,7 @@
                             :value="old('total_lecture_class_days', $course->total_lecture_class_days)"
                         />
 
-                        <x-input.number
+                        <livewire:input.number
                             label="Total Laboratory Class Days per Week"
                             name="total_laboratory_class_days"
                             :default="0"
@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="flex justify-between flex-col items-center gap-[20px]">
-                    <x-input.number
+                    <livewire:input.number
                         label="Number of Units"
                         name="unit_load"
                         :default="0.0"

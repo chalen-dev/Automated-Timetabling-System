@@ -29,7 +29,7 @@
                         default=""
                     />
 
-                    <x-input.number
+                    <livewire:input.number
                         label="Max Unit Load"
                         name="max_unit_load"
                         :default="0"
@@ -37,7 +37,7 @@
                         :step="0.1"
                     />
 
-                    <x-input.number
+                    <livewire:input.number
                         label="Professor Age"
                         name="professor_age"
                         :default="0"

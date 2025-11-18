@@ -33,7 +33,7 @@
                         :value="old('academic_program_id', $professor->academic_program_id)"
                     />
 
-                    <x-input.number
+                    <livewire:input.number
                         label="Max Unit Load"
                         name="max_unit_load"
                         :value="old('max_unit_load', $professor->max_unit_load)"
@@ -41,7 +41,7 @@
                         :step="0.1"
                     />
 
-                    <x-input.number
+                    <livewire:input.number
                         label="Professor Age"
                         name="professor_age"
                         :value="old('professor_age', $professor->professor_age)"

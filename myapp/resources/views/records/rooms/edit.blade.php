@@ -36,7 +36,7 @@
                             class="flex-1"
                         />
 
-                        <x-input.number
+                        <livewire:input.number
                             label="Room Capacity"
                             name="room_capacity"
                             :default="0"
