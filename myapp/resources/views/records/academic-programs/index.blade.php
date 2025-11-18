@@ -9,7 +9,7 @@
         <div class="flex justify-between items-center mb-6">
             <div class="flex gap-20 items-center justify-between">
                 <h1 class="text-xl font-bold mb-0 text-white">Academic Programs</h1>
-                <x-search-bar.search-bar
+                <livewire:input.search-bar
                     :action="route('academic-programs.index')"
                     placeholder="Search by program name or abbreviation..."
                     name="search"

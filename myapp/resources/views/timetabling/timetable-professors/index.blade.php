@@ -9,7 +9,7 @@
         <div class="flex justify-between items-center mb-6">
             <div class="flex gap-20 items-center justify-between">
                 <h1 class="text-xl font-bold mb-0 text-white">Assigned Professors</h1>
-                <x-search-bar.search-bar
+                <livewire:input.search-bar
                     :action="route('timetables.timetable-professors.index', $timetable)"
                     placeholder="Search professors..."
                 />

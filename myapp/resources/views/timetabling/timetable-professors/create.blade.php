@@ -15,11 +15,11 @@
             <h1 class="text-xl font-bold text-white">Choose Professors</h1>
 
             <!-- Search bar with preserved selections -->
-            <x-search-bar.search-bar :action="route('timetables.timetable-professors.create', $timetable)">
+            <livewire:input.search-bar :action="route('timetables.timetable-professors.create', $timetable)">
                 @foreach($selected as $id)
                     <input type="hidden" name="professors[]" value="{{ $id }}">
                 @endforeach
-            </x-search-bar.search-bar>
+            </livewire:input.search-bar>
         </div>
 
         <!-- Form -->

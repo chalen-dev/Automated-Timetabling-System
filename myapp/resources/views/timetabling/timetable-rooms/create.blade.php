@@ -14,11 +14,11 @@
         <div class="flex justify-between items-center mb-6 ">
             <h1 class="text-xl font-bold text-white">Choose Rooms</h1>
 
-            <x-search-bar.search-bar :action="route('timetables.timetable-rooms.create', $timetable)" placeholder="Search rooms...">
+            <livewire:input.search-bar :action="route('timetables.timetable-rooms.create', $timetable)" placeholder="Search rooms...">
                 @foreach($selected as $id)
                     <input type="hidden" name="rooms[]" value="{{ $id }}">
                 @endforeach
-            </x-search-bar.search-bar>
+            </livewire:input.search-bar>
         </div>
 
         <!-- Form -->

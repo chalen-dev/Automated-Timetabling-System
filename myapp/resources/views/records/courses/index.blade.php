@@ -9,7 +9,7 @@
         <div class="flex justify-between items-center mb-6">
             <div class="flex gap-20 items-center justify-between">
                 <h1 class="text-xl font-bold mb-4 text-white">List of Courses</h1>
-                <x-search-bar.search-bar
+                <livewire:input.search-bar
                     :action="route('courses.index')"
                     placeholder="Search by course title, course name, or course type..."
                 />

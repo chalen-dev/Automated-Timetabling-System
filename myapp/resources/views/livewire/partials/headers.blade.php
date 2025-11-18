@@ -80,10 +80,7 @@
                             <span>{{ auth()->user()?->name ?? 'User' }}</span>
                         </div>
 
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="cursor-pointer p-3 rounded-[12px] hover:bg-[#5e0b0b] hover:text-[#ffffff] transition-transform duration-500">Logout</button>
-                        </form>
+                        <livewire:buttons.log-out/>
                     </div>
                 </div>
             </nav>

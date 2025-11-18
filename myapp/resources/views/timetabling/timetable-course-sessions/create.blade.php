@@ -8,12 +8,12 @@
         <h1 class="text-[18px] text-white">Choose Courses for {{ $sessionGroup->session_name }}</h1>
 
         {{-- Search bar for Courses --}}
-        <x-search-bar.search-bar :action="route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup])">
+        <livewire:input.search-bar :action="route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup])">
             {{-- Keep selected courses when searching --}}
             @foreach(old('courses', $selected ?? []) as $selectedCourseId)
                 <input type="hidden" name="courses[]" value="{{ $selectedCourseId }}">
             @endforeach
-        </x-search-bar.search-bar>
+        </livewire:input.search-bar>
     </div>
 
 

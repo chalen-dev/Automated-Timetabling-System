@@ -34,6 +34,8 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [UserController::class, 'login'])->name('login');
+
+    //Add dummy admin, MUST DELETE BEFORE DEPLOYMENT
     Route::get('/create-admin', [TestAdminController::class, 'createAdmin']);
 });
 
@@ -95,7 +97,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function() {
     Route::delete('/admin/users/{id}/decline', [AdminController::class, 'declineUser'])
         ->name('admin.decline_user');
 
-    //Test fill with dummy data
+    //Test fill with dummy data, MUST BE REMOVED BEFORE DEPLOYMENT
     Route::get('/fill/{table}', [TableFillController::class, 'fill'])
         ->where('table', '[A-Za-z0-9_-]+'); // allows letters, numbers, underscores, and dashes
 });

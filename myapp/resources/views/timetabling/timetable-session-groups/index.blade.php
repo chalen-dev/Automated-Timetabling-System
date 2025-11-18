@@ -13,7 +13,7 @@
             {{-- Search bar for Session Groups --}}
             <div class="flex flex-col text-[#5e0b0b]">
                 <h1 class="text-[18px] text-white">{{ $timetable->timetable_name }} Class Sessions</h1>
-                <x-search-bar.search-bar :action="route('timetables.session-groups.index', $timetable)" />
+                <livewire:input.search-bar :action="route('timetables.session-groups.index', $timetable)" />
             </div>
 
             <a href="{{ route('timetables.session-groups.create', $timetable) }}" class="flex align-center box-border pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-yellow-500 text-[#5e0b0b] cursor-pointer shadow-2xl font-[600]">

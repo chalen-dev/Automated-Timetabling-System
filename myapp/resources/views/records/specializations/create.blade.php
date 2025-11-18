@@ -11,7 +11,7 @@
                 <h1 class="text-xl font-bold mb-0 text-white">
                     Assign Courses to {{ $professor->last_name }}, {{ $professor->first_name }}
                 </h1>
-                <x-search-bar.search-bar
+                <livewire:input.search-bar
                     :action="route('professors.specializations.create', $professor)"
                     placeholder="Search courses by title or name..."
                     name="search"
@@ -25,9 +25,9 @@
                     Save
                 </button>
                 @else
-                    <a href="{{ route('professors.courses.index', $professor) }}"
+                    <a href="{{ route('courses.index', $courses) }}"
                        class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold shadow hover:bg-gray-300 hover:text-gray-900 active:bg-gray-400 transition-all duration-150">
-                        Add Courses
+                        Add New Course
                     </a>
                 @endif
 

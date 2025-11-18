@@ -21,8 +21,6 @@
 </head>
 <body class="bg-page h-full">
 
-@include('includes.notif.flash-message')
-
 <div class="p-5">
 
     <!-- HEADER -->
@@ -51,6 +49,8 @@
 
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<x-notifications/>
 
 <!-- Scripts -->
 @stack('scripts')
