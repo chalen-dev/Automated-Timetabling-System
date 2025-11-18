@@ -22,7 +22,7 @@
                         name="last_name"
                     />
 
-                    <x-input.select
+                    <livewire:input.select
                         label="Academic Program"
                         name="academic_program_id"
                         :options="$academic_program_options"

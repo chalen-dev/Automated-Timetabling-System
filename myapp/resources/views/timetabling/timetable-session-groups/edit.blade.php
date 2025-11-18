@@ -18,7 +18,7 @@
                     class="flex-1"
                 />
 
-                <x-input.select
+                <livewire:input.select
                     label="Academic Program"
                     name="academic_program_id"
                     :options="$academic_program_options"
@@ -26,7 +26,7 @@
                     class="flex-1"
                 />
 
-                <x-input.select
+                <livewire:input.select
                     label="Year Level"
                     name="year_level"
                     :options="$year_level_options"

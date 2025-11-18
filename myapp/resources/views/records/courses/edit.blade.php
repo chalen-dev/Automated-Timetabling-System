@@ -25,7 +25,8 @@
                 </div>
 
                 <div class="flex flex-col justify-between gap-5">
-                    <x-input.select
+
+                    <livewire:input.select
                         label="Course Type"
                         name="course_type"
                         :options="$courseTypeOptions"
@@ -42,6 +43,7 @@
                         :step="1"
                         :value="old('class_hours', $course->class_hours)"
                     />
+
                 </div>
                     <div class="flex flex-col justify-between gap-5">
                         <livewire:input.number

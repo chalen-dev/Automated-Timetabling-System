@@ -15,14 +15,14 @@
                     name="room_name"
                 />
 
-                <x-input.select
+                <livewire:input.select
                     label="Room Type"
                     name="room_type"
                     :options="$roomTypeOptions"
                     default=""
                 />
 
-                <x-input.select
+                <livewire:input.select
                     label="Course Type Exclusive To"
                     name="course_type_exclusive_to"
                     :options="$courseTypeExclusiveToOptions"

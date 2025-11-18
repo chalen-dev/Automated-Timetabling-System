@@ -19,7 +19,7 @@
                             class="flex-1"
                         />
 
-                        <x-input.select
+                        <livewire:input.select
                             label="Room Type"
                             name="room_type"
                             :options="$roomTypeOptions"
@@ -28,7 +28,7 @@
                             class="flex-1"
                         />
 
-                        <x-input.select
+                        <livewire:input.select
                             label="Course Type Exclusive To"
                             name="course_type_exclusive_to"
                             :options="$courseTypeExclusiveToOptions"
