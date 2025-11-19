@@ -19,7 +19,6 @@
                 isRequired
             />
 
-            <!--YET TO BE ADDED IN DATABASE-->
             <livewire:input.auth.text
                 label="FIRST NAME"
                 type="text"
@@ -29,7 +28,6 @@
                 isRequired
             />
 
-            <!--YET TO BE ADDED IN DATABASE-->
             <livewire:input.auth.text
                 label="LAST NAME"
                 type="text"

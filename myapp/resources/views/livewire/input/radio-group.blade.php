@@ -1,8 +1,6 @@
 
 <div class="mb-3 flex flex-col gap-2">
-    @if($label)
-        <label class="font-medium text-gray-700">{{ $label }}</label>
-    @endif
+    <livewire:text.label :name="$name" :label="$label" :is_required="$isRequired" />
 
     <div class="flex flex-col gap-2">
         @foreach($options as $optionValue => $optionLabel)

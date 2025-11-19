@@ -1,5 +1,5 @@
 <div class="mb-3 flex flex-col gap-2">
-    <label>{{ $label }}:</label>
+    <livewire:text.label :name="$name" :label="$label" :is_required="$isRequired" />
     <input
         class = "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-black focus:border-transparent transition {{ $class }}"
         type="text"

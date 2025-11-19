@@ -1,7 +1,5 @@
 <div class="mb-3 flex flex-col gap-2">
-    @if($label)
-        <label for="{{ $name }}" >{{ $label }}:</label>
-    @endif
+    <livewire:text.label :name="$name" :label="$label" :is_required="$isRequired" />
 
     <select
         name="{{ $name }}"

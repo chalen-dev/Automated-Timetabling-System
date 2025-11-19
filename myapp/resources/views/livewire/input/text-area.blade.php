@@ -1,8 +1,6 @@
 
 <div class="mb-3 flex flex-col gap-2">
-    @if($label ?? false)
-        <label for="{{ $name }}" class="font-medium text-gray-700">{{ $label }}</label>
-    @endif
+    <livewire:text.label :name="$name" :label="$label" :is_required="$isRequired" />
 
     <!--This is a non-resizeable text area-->
     <textarea

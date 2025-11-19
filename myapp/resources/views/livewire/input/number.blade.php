@@ -1,8 +1,6 @@
 <div class="mb-3 flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-        @if($label ?? false)
-            <label for="{{ $name }}" class="form-label">{{ $label }}</label>
-        @endif
+        <livewire:text.label :name="$name" :label="$label" :is_required="$isRequired" />
         <input
             type="number"
             name="{{ $name }}"

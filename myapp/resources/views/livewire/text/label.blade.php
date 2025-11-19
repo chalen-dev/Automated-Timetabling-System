@@ -3,6 +3,8 @@
 >
     @if($is_required)
         {{$label}} <span class="text-red-500">*</span>
+    @else
+        {{$label}}
     @endif
-    {{$label}}
+
 </label>
