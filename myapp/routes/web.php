@@ -16,6 +16,7 @@ use App\Http\Controllers\Timetabling\SessionGroupController;
 use App\Http\Controllers\Timetabling\TimetableEditingPaneController;
 use App\Http\Controllers\Timetabling\TimetableProfessorController;
 use App\Http\Controllers\Timetabling\TimetableRoomController;
+use App\Http\Controllers\Users\ProfileController;
 use App\Http\Controllers\Users\UserController;
 use App\Http\Controllers\Users\UserLogController;
 use App\Http\Controllers\Users\WelcomeController;
@@ -75,6 +76,12 @@ Route::middleware([Authenticate::class])->group(function () {
     // Rooms
     Route::resource('rooms', RoomController::class);
     Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)->only('index','create','store','destroy');
+
+    //User Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Test route (Tinker)
     Route::get('/test-file', function() {

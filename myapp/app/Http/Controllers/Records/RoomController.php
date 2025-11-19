@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Room;
 use Illuminate\Http\Request;
@@ -36,7 +37,8 @@ class RoomController extends Controller
             })
             ->get();
 
-        $this->logAction('viewed_rooms_list', ['search' => $search]);
+        //Log
+        Logger::log('index', 'professor', null);
 
         return view('records.rooms.index', compact('rooms', 'search'));
     }
@@ -46,7 +48,8 @@ class RoomController extends Controller
         $roomTypeOptions = $this->roomTypeOptions;
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
 
-        $this->logAction('accessed_create_room_form');
+        //Log
+        Logger::log('create', 'professor', null);
 
         return view('records.rooms.create', compact('roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
@@ -62,10 +65,7 @@ class RoomController extends Controller
 
         $room = Room::create($validatedData);
 
-        $this->logAction('create_room', [
-            'room_id' => $room->id,
-            'room_name' => $room->room_name
-        ]);
+        Logger::log('store', 'professor', $validatedData);
 
         return redirect()->route('rooms.index')
             ->with('success', 'Room created successfully.');
@@ -73,7 +73,7 @@ class RoomController extends Controller
 
     public function show(Room $room)
     {
-        $this->logAction('viewed_room', [
+        Logger::log('show', 'professor', [
             'room_id' => $room->id,
             'room_name' => $room->room_name
         ]);
@@ -86,7 +86,7 @@ class RoomController extends Controller
         $roomTypeOptions = $this->roomTypeOptions;
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
 
-        $this->logAction('accessed_edit_room_form', [
+        Logger::log('edit', 'professor', [
             'room_id' => $room->id,
             'room_name' => $room->room_name
         ]);
@@ -105,10 +105,7 @@ class RoomController extends Controller
 
         $room->update($validatedData);
 
-        $this->logAction('update_room', [
-            'room_id' => $room->id,
-            'room_name' => $room->room_name
-        ]);
+        Logger::log('update', 'professor', $validatedData);
 
         return redirect()->route('rooms.index')
             ->with('success', 'Room updated successfully.');
@@ -123,22 +120,10 @@ class RoomController extends Controller
 
         $room->delete();
 
-        $this->logAction('delete_room', $roomData);
+        Logger::log('delete', 'professor', $roomData);
 
         return redirect()->route('rooms.index')
             ->with('success', 'Room deleted successfully.');
     }
 
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 }
