@@ -1,11 +1,5 @@
 <div class="w-full gap-1 mb-3">
-    <label>
-        @if($isRequired)
-            {{$label}} *
-        @endif
-        {{$label}}
-
-    </label>
+    <livewire:text.label :label="$label" :is_required="$isRequired" />
     <div class="flex items-center rounded-lg border border-gray-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition">
         <input class ="flex-4 px-4 py-2 text-sm w-full focus:outline-none" id = "{{$elementId}}" type="{{$type}}" name="{{$name}}" placeholder="{{$placeholder}}" value="{{old($name, $value)}}">
         <button class = 'flex-0.1 ml-2 bg-white text-gray-700 px-4 py-1 rounded' type="button" id="{{ $toggleId }}">
