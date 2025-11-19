@@ -41,7 +41,14 @@
                                             @if(is_array($details))
                                                 <ul class="ml-4 list-disc">
                                                     @foreach($details as $key => $value)
-                                                        <li><strong>{{ ucfirst($key) }}:</strong> {{ $value }}</li>
+                                                        <li>
+                                                            <strong>{{ ucfirst($key) }}:</strong>
+                                                            @if (is_array($value))
+                                                                {{ implode(', ', $value) }}
+                                                            @else
+                                                                {{ $value }}
+                                                            @endif
+                                                        </li>
                                                     @endforeach
                                                 </ul>
                                             @else

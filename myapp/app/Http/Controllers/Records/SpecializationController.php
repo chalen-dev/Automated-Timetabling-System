@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Records;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Course;
 use App\Models\Records\Professor;
@@ -14,15 +15,16 @@ class SpecializationController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Professor $professor)
     {
         $courses = Course::all();
         $specializations = $professor->specializations()->with('course')->get();
 
-        $this->logAction('viewed_specializations', [
-            'professor_id' => $professor->id,
-            'professor_name' => $professor->name ?? 'N/A'
-        ]);
+       Logger::log('index', 'specializations', [
+           'professor_id' => $professor->id,
+           'professor_name' => $professor->full_name,
+       ]);
 
         return view('records.specializations.index', compact('specializations', 'professor', 'courses'));
     }
@@ -45,9 +47,9 @@ class SpecializationController extends Controller
 
         $courses = $query->get();
 
-        $this->logAction('accessed_create_specialization_form', [
+        Logger::log('create', 'specializations', [
             'professor_id' => $professor->id,
-            'professor_name' => $professor->name ?? 'N/A'
+            'professor_name' => $professor->full_name,
         ]);
 
         $coursesCount = $courses->count();
@@ -73,19 +75,24 @@ class SpecializationController extends Controller
             ]);
         }
 
+        $addedCourses = [];
+
         foreach ($validatedData['courses'] as $courseId) {
             $specialization = $professor->specializations()->create([
                 'course_id' => $courseId,
             ]);
 
-            // Log each course added
-            $this->logAction('create_specialization', [
-                'professor_id' => $professor->id,
-                'professor_name' => $professor->name ?? 'N/A',
-                'course_id' => $courseId,
-                'specialization_id' => $specialization->id
-            ]);
+            //Add course titles to be logged
+            $course = Course::find($courseId);
+            $addedCourses[] = $course->course_title ?? 'Unknown';
         }
+
+        // Log each course added
+        Logger::log('store', 'specializations', [
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->full_name,
+            'added_courses' => $addedCourses,
+        ]);
 
         return redirect()->route('professors.specializations.index', $professor)
             ->with('success', 'Specializations added successfully.');
@@ -98,32 +105,23 @@ class SpecializationController extends Controller
     {
         $specializationData = [
             'professor_id' => $professor->id,
-            'professor_name' => $professor->name ?? 'N/A',
+            'professor_name' => $professor->full_name,
             'course_id' => $specialization->course_id,
             'specialization_id' => $specialization->id
         ];
 
+        $courseTitle = $specialization->course->course_name ?? 'Unknown';
+
+
         $specialization->delete();
 
-        $this->logAction('delete_specialization', $specializationData);
+        Logger::log('delete', 'specializations', [
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->full_name,
+            'course_title' => $courseTitle,
+        ]);
 
         return redirect()->route('professors.specializations.index', $professor)
             ->with('success', 'Specialization deleted successfully.');
-    }
-
-    /**
-     * Log user actions.
-     */
-    protected function logAction(string $action, array $details = [])
-    {
-        if (auth()->check()) {
-            UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
     }
 }

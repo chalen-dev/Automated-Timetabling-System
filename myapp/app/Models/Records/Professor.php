@@ -19,6 +19,12 @@ class Professor extends Model
         //Add suffixes (jr, sr, etc.) soon
     ];
 
+    public function getFullNameAttribute()
+    {
+        $fullName = trim("{$this->first_name} {$this->last_name}");
+        return $fullName ?: 'N/A';
+    }
+
     //A professor can belong to a single academic program (many to one)
     public function academicProgram(){
         return $this->belongsTo(AcademicProgram::class);

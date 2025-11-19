@@ -6,14 +6,14 @@ if (!function_exists('friendly_action')) {
         $output = match ($action) {
             'login' => 'logged in',
             'logout' => 'logged out',
-            'update_profile' => 'updated their profile',
-            'create' => 'visited ' . $modelType . ' creation page.',
-            'store' => 'created new ' . $modelType,
-            'index' => 'visited ' . $modelType . ' list.',
-            'show' => 'visited ' . $modelType . ' details.',
-            'edit' => 'visited ' . $modelType . ' edit page.',
-            'delete' => 'deleted ' . $modelType . '.',
-            'update' => 'updated ' . $modelType . '.',
+            'update_profile' => 'Updated their profile',
+            'create' => 'Visited ' . $modelType . ' creation page.',
+            'store' => 'Created new ' . $modelType,
+            'index' => 'Visited ' . $modelType . ' list.',
+            'show' => 'Visited ' . $modelType . ' details.',
+            'edit' => 'Visited ' . $modelType . ' edit page.',
+            'delete' => 'Deleted ' . $modelType . '.',
+            'update' => 'Updated ' . $modelType . '.',
             default => $action,
         };
         return $output;

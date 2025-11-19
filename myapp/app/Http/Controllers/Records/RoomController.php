@@ -21,6 +21,8 @@ class RoomController extends Controller
         'others' => 'Others',
     ];
 
+
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -38,7 +40,7 @@ class RoomController extends Controller
             ->get();
 
         //Log
-        Logger::log('index', 'professor', null);
+        Logger::log('index', 'room', null);
 
         return view('records.rooms.index', compact('rooms', 'search'));
     }
@@ -49,7 +51,7 @@ class RoomController extends Controller
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
 
         //Log
-        Logger::log('create', 'professor', null);
+        Logger::log('create', 'room', null);
 
         return view('records.rooms.create', compact('roomTypeOptions', 'courseTypeExclusiveToOptions'));
     }
@@ -65,7 +67,7 @@ class RoomController extends Controller
 
         $room = Room::create($validatedData);
 
-        Logger::log('store', 'professor', $validatedData);
+        Logger::log('store', 'room', $validatedData);
 
         return redirect()->route('rooms.index')
             ->with('success', 'Room created successfully.');
@@ -86,7 +88,7 @@ class RoomController extends Controller
         $roomTypeOptions = $this->roomTypeOptions;
         $courseTypeExclusiveToOptions = $this->courseTypeExclusiveToOptions;
 
-        Logger::log('edit', 'professor', [
+        Logger::log('edit', 'room', [
             'room_id' => $room->id,
             'room_name' => $room->room_name
         ]);
@@ -105,7 +107,7 @@ class RoomController extends Controller
 
         $room->update($validatedData);
 
-        Logger::log('update', 'professor', $validatedData);
+        Logger::log('update', 'room', $validatedData);
 
         return redirect()->route('rooms.index')
             ->with('success', 'Room updated successfully.');
