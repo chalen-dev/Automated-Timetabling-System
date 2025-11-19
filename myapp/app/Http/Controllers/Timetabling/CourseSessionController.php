@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Timetabling;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Course;
 use App\Models\Records\Timetable;
@@ -38,9 +39,9 @@ class CourseSessionController extends Controller
         $courses = $query->get();
         $selected = $request->input('courses', []);
 
-        $this->logAction('accessed_create_course_session_form', [
+        Logger::log('create', 'course sessions', [
             'timetable_id' => $timetable->id,
-            'session_group_id' => $sessionGroup->id
+            'session_group_id' => $sessionGroup->id,
         ]);
 
         return view(
@@ -71,20 +72,24 @@ class CourseSessionController extends Controller
             ]);
         }
 
+        $addedCourses = [];
+
         foreach ($validatedData['courses'] as $courseId) {
             if (!$sessionGroup->courseSessions()->where('course_id', $courseId)->exists()) {
                 $courseSession = $sessionGroup->courseSessions()->create([
                     'course_id' => $courseId,
                 ]);
 
-                $this->logAction('create_course_session', [
-                    'timetable_id' => $timetable->id,
-                    'session_group_id' => $sessionGroup->id,
-                    'course_id' => $courseId,
-                    'course_session_id' => $courseSession->id
-                ]);
+                $course = Course::find($courseId);
+                $addedCourses[] = $course->course_title;
             }
         }
+
+        Logger::log('store', 'course sessions', [
+            'timetable_id' => $timetable->id,
+            'session_group_id' => $sessionGroup->id,
+            'added_courses' => $addedCourses,
+        ]);
 
         return redirect()
             ->route('timetables.session-groups.index', $timetable)
@@ -102,11 +107,11 @@ class CourseSessionController extends Controller
             'academic_term' => $validated['academic_term'][$courseSession->id],
         ]);
 
-        $this->logAction('update_course_session_term', [
+        Logger::log('update_academic_term', 'course sessions', [
             'timetable_id' => $timetable->id,
             'session_group_id' => $sessionGroup->id,
             'course_session_id' => $courseSession->id,
-            'academic_term' => $validated['academic_term'][$courseSession->id]
+            'academic_term' => $validated['academic_term'][$courseSession->id],
         ]);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
@@ -135,19 +140,4 @@ class CourseSessionController extends Controller
             ->with('success', 'Course session deleted successfully!');
     }
 
-    /**
-     * Log user actions.
-     */
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 }

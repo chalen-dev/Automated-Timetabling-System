@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Timetabling;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Room;
 use App\Models\Records\Timetable;
@@ -28,10 +29,8 @@ class TimetableRoomController extends Controller
 
         $rooms = $query->get();
 
-        // Log viewing timetable rooms
-        $this->logAction('viewed_timetable_rooms', [
+        Logger::log('index', 'timetable rooms', [
             'timetable_id' => $timetable->id,
-            'search' => $search
         ]);
 
         return view('timetabling.timetable-rooms.index', compact('timetable', 'rooms'));
@@ -57,8 +56,8 @@ class TimetableRoomController extends Controller
         $rooms = $query->get();
         $selected = $request->input('rooms', []);
 
-        $this->logAction('accessed_assign_rooms_form', [
-            'timetable_id' => $timetable->id
+        Logger::log('create', 'timetable rooms', [
+            'timetable_id' => $timetable->id,
         ]);
 
         return view('timetabling.timetable-rooms.create', compact('timetable', 'rooms', 'selected'));
@@ -85,16 +84,20 @@ class TimetableRoomController extends Controller
             ]);
         }
 
+        $addedRooms = [];
+
         foreach($validatedData['rooms'] as $roomId) {
             $timetable->rooms()->attach($roomId);
 
             $room = Room::find($roomId);
-            $this->logAction('assigned_room_to_timetable', [
-                'timetable_id' => $timetable->id,
-                'room_id' => $room->id,
-                'room_name' => $room->room_name
-            ]);
+            $addedRooms[] = $room->room_name;
         }
+
+        Logger::log('store', 'timetable rooms', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+            'added_rooms' => $addedRooms,
+        ]);
 
         return redirect()->route('timetables.timetable-rooms.index', $timetable);
     }
@@ -108,28 +111,13 @@ class TimetableRoomController extends Controller
 
         $timetable->rooms()->detach($timetableRoom->id);
 
-        $this->logAction('removed_room_from_timetable', [
-            'timetable_id' => $timetable->id,
-            'room_id' => $room->id,
-            'room_name' => $room->room_name
-        ]);
+      Logger::log('delete', 'timetable rooms', [
+          'timetable_id' => $timetable->id,
+          'timetable_name' => $timetable->timetable_name,
+          'room_id' => $room->id,
+          'room_name' => $room->room_name,
+      ]);
 
         return redirect()->route('timetables.timetable-rooms.index', $timetable);
-    }
-
-    /**
-     * Log user actions.
-     */
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
     }
 }

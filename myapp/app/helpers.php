@@ -15,6 +15,7 @@ if (!function_exists('friendly_action')) {
             'delete' => 'Deleted ' . $modelType . '.',
             'update' => 'Updated ' . $modelType . '.',
             'timetable_edit' => 'Visited timetabling editing window.',
+            'update_academic_term' => 'Updated academic term for ' . $modelType . '.',
             default => $action,
         };
         return $output;
