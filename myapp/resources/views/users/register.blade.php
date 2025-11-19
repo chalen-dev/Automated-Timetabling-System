@@ -16,6 +16,7 @@
                 name="name"
                 placeholder="Choose a username"
                 :value="old('name')"
+                isRequired
             />
 
             <!--YET TO BE ADDED IN DATABASE-->
@@ -25,6 +26,7 @@
                 name="first_name"
                 placeholder=""
                 :value="old('first_name')"
+                isRequired
             />
 
             <!--YET TO BE ADDED IN DATABASE-->
