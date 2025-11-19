@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Timetabling;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use Illuminate\Http\Request;
@@ -115,11 +116,9 @@ class TimetableEditingPaneController extends Controller
 
         $cellColors = [];
 
-        $this->logAction('viewed_timetable', [
+        Logger::log('timetable_edit', 'timetable editing pane', [
             'timetable_id' => $timetable->id,
-            'file_exists' => file_exists($xlsxPath),
-            'sheet_index' => $sheetIndex,
-            'error' => $error,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('timetabling.timetable-editing-pane.index', compact(
@@ -128,16 +127,4 @@ class TimetableEditingPaneController extends Controller
         ));
     }
 
-    protected function logAction(string $action, array $details = [])
-    {
-        if (auth()->check()) {
-            \App\Models\Users\UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 }

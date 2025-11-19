@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Timetabling;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Professor;
 use App\Models\Records\Timetable;
@@ -25,11 +26,11 @@ class TimetableProfessorController extends Controller
         }
         $professors = $query->get();
 
-        // Log view action
-        $this->logAction('viewed_timetable_professors', [
+        Logger::log('index', 'timetable professor', [
             'timetable_id' => $timetable->id,
-            'professors_count' => $professors->count()
+            'timetable_name' => $timetable->timetable_name,
         ]);
+
 
         return view('timetabling.timetable-professors.index', compact('timetable', 'professors'));
     }
@@ -52,9 +53,9 @@ class TimetableProfessorController extends Controller
         $professors = $query->get();
         $selected = $request->input('professors', []);
 
-        // Log access to create form
-        $this->logAction('accessed_timetable_professor_create_form', [
-            'timetable_id' => $timetable->id
+        Logger::log('create', 'timetable professor', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('timetabling.timetable-professors.create', compact('timetable', 'professors', 'selected'));
@@ -78,15 +79,20 @@ class TimetableProfessorController extends Controller
             ]);
         }
 
+        $addedProfessors = [];
+
         foreach($validatedData['professors'] as $professorId){
             $timetable->professors()->attach($professorId);
 
-            // Log each professor assignment
-            $this->logAction('assigned_professor_to_timetable', [
-                'timetable_id' => $timetable->id,
-                'professor_id' => $professorId
-            ]);
+            $professor = Professor::find($professorId);
+            $addedProfessors[] = $professor->full_name;
         }
+
+        Logger::log('store', 'timetable professor', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+            'added_professors' => $addedProfessors,
+        ]);
 
         return redirect()->route('timetables.timetable-professors.index', $timetable);
     }
@@ -95,25 +101,13 @@ class TimetableProfessorController extends Controller
     {
         $timetable->professors()->detach($professor->id);
 
-        // Log removal
-        $this->logAction('removed_professor_from_timetable', [
+        Logger::log('delete', 'timetable professor', [
             'timetable_id' => $timetable->id,
-            'professor_id' => $professor->id
+            'timetable_name' => $timetable->timetable_name,
+            'professor_id' => $professor->id,
+            'professor_name' => $professor->full_name,
         ]);
 
         return redirect()->route('timetables.timetable-professors.index', $timetable);
-    }
-
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
     }
 }

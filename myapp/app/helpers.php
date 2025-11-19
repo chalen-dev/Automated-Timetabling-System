@@ -14,6 +14,7 @@ if (!function_exists('friendly_action')) {
             'edit' => 'Visited ' . $modelType . ' edit page.',
             'delete' => 'Deleted ' . $modelType . '.',
             'update' => 'Updated ' . $modelType . '.',
+            'timetable_edit' => 'Visited timetabling editing window.',
             default => $action,
         };
         return $output;

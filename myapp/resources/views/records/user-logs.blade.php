@@ -33,27 +33,30 @@
                                 <td class="px-4 py-2 text-sm text-gray-900">{{ $log->user->name ?? 'Someone' }}</td>
                                 <td class="px-4 py-2 text-sm text-gray-900">{{ friendly_action($log->action, $log->model_type) }}</td>
 
-                                <!-- User-friendly details (collapsed) -->
+                                <!-- User-friendly details (collapsible) -->
                                 <td class="px-4 py-2 text-sm text-gray-600">
                                     @if ($log->details !== null && trim($log->details) !== '')
                                         @php $details = json_decode($log->details, true); @endphp
-                                        <div class="details-content max-h-16 overflow-hidden transition-all duration-300">
-                                            @if(is_array($details))
-                                                <ul class="ml-4 list-disc">
-                                                    @foreach($details as $key => $value)
-                                                        <li>
-                                                            <strong>{{ ucfirst($key) }}:</strong>
-                                                            @if (is_array($value))
-                                                                {{ implode(', ', $value) }}
-                                                            @else
-                                                                {{ $value }}
-                                                            @endif
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            @else
-                                                {{ $log->details }}
-                                            @endif
+                                        <div class="details-wrapper">
+                                            <div class="details-content max-h-16 overflow-hidden transition-all duration-300">
+                                                @if(is_array($details))
+                                                    <ul class="ml-4 list-disc">
+                                                        @foreach($details as $key => $value)
+                                                            <li>
+                                                                <strong>{{ ucfirst($key) }}:</strong>
+                                                                @if (is_array($value))
+                                                                    {{ implode(', ', $value) }}
+                                                                @else
+                                                                    {{ $value }}
+                                                                @endif
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    {{ $log->details }}
+                                                @endif
+                                            </div>
+                                            <button class="show-more-btn text-blue-600 text-xs mt-1 hidden">Show More</button>
                                         </div>
                                     @else
                                         <span class="text-gray-400 italic">none</span>
@@ -65,7 +68,7 @@
                                 <!-- Technical Details button -->
                                 <td class="px-2 py-2 text-center">
                                     <button
-                                        class="show-technical-details px-3 py-1 bg-blue-600 text-white rounded text-xs"
+                                        class="show-technical-details px-3 py-1 bg-gray-600 text-white rounded text-xs"
                                         data-ip="{{ $log->ip_address }}"
                                         data-agent="{{ $log->user_agent }}"
                                         data-details='@json($log->details)'
@@ -88,7 +91,7 @@
 
     <!-- Technical Details Modal -->
     <div id="technicalModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-11/12 max-w-lg p-6 relative">
+        <div class="bg-white rounded-lg w-11/12 max-w-lg p-6 relative">
             <button id="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
             <h2 class="text-lg font-bold mb-4">Technical Details</h2>
             <div id="modalContent" class="text-sm text-gray-700 space-y-2"></div>
@@ -98,6 +101,7 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Technical details modal
             const modal = document.getElementById('technicalModal');
             const modalContent = document.getElementById('modalContent');
             const closeModal = document.getElementById('closeModal');
@@ -112,9 +116,9 @@
                     try { parsedDetails = JSON.parse(details); } catch { parsedDetails = details; }
 
                     modalContent.innerHTML = `
-                <p><strong>IP Address:</strong> ${ip}</p>
-                <p><strong>User Agent:</strong> ${agent}</p>
-            `;
+                        <p><strong>IP Address:</strong> ${ip}</p>
+                        <p><strong>User Agent:</strong> ${agent}</p>
+                    `;
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -131,6 +135,27 @@
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
                 }
+            });
+
+            // Show More / Show Less for details
+            document.querySelectorAll('.details-wrapper').forEach(wrapper => {
+                const content = wrapper.querySelector('.details-content');
+                const btn = wrapper.querySelector('.show-more-btn');
+
+                // Show button only if content overflows
+                if(content.scrollHeight > content.clientHeight){
+                    btn.classList.remove('hidden');
+                }
+
+                btn.addEventListener('click', () => {
+                    if(content.classList.contains('max-h-16')){
+                        content.classList.remove('max-h-16');
+                        btn.textContent = 'Show Less';
+                    } else {
+                        content.classList.add('max-h-16');
+                        btn.textContent = 'Show More';
+                    }
+                });
             });
         });
     </script>

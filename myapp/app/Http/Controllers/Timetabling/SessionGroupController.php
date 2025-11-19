@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Timetabling;
 
+use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\AcademicProgram;
 use App\Models\Records\Timetable;
@@ -25,21 +26,7 @@ class SessionGroupController extends Controller
         'semestral' => 'Semestral'
     ];
 
-    // ---------- LOGGING FUNCTION ----------
-    protected function logAction(string $action, array $details = [])
-    {
-        if(auth()->check()) {
-            UserLog::create([
-                'user_id' => auth()->id(),
-                'action' => $action,
-                'description' => json_encode($details),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-        }
-    }
 
-    // ---------- INDEX ----------
     public function index(Timetable $timetable, Request $request, SessionGroup $sessionGroup)
     {
         $query = $timetable->sessionGroups()->with(['academicProgram', 'courseSessions.course']);
@@ -71,7 +58,10 @@ class SessionGroupController extends Controller
             return [$sessionGroup->id => $sorted];
         });
 
-        $this->logAction('viewed_session_groups', ['timetable_id' => $timetable->id, 'search' => $request->input('search')]);
+        Logger::log('index', 'session groups', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+        ]);
 
         return view(
             'timetabling.timetable-session-groups.index',
@@ -79,18 +69,19 @@ class SessionGroupController extends Controller
         );
     }
 
-    // ---------- CREATE ----------
     public function create(Timetable $timetable)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $year_level_options = $this->year_level_options;
 
-        $this->logAction('accessed_create_session_group_form', ['timetable_id' => $timetable->id]);
+        Logger::log('create', 'session groups', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+        ]);
 
         return view('timetabling.timetable-session-groups.create', compact('timetable', 'academic_program_options', 'year_level_options'));
     }
 
-    // ---------- STORE ----------
     public function store(Request $request, Timetable $timetable)
     {
         $validatedData = $request->validate([
@@ -113,10 +104,11 @@ class SessionGroupController extends Controller
 
         $sessionGroup = SessionGroup::create($validatedData);
 
-        $this->logAction('create_session_group', [
+        Logger::log('store', 'session groups', [
             'session_group_id' => $sessionGroup->id,
             'session_name' => $sessionGroup->session_name,
-            'timetable_id' => $timetable->id
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
@@ -124,20 +116,19 @@ class SessionGroupController extends Controller
     }
 
 
-    // ---------- EDIT ----------
     public function edit(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $year_level_options = $this->year_level_options;
 
-        $this->logAction('accessed_edit_session_group_form', [
-            'session_group_id' => $sessionGroup->id
+        Logger::log('edit', 'session groups', [
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('timetabling.timetable-session-groups.edit', compact('sessionGroup', 'timetable', 'academic_program_options', 'year_level_options'));
     }
 
-    // ---------- UPDATE ----------
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $validatedData = $request->validate([
@@ -160,17 +151,17 @@ class SessionGroupController extends Controller
 
         $sessionGroup->update($validatedData);
 
-        $this->logAction('update_session_group', [
+        Logger::log('update', 'session groups', [
             'session_group_id' => $sessionGroup->id,
-            'session_name' => $sessionGroup->session_name
+            'session_name' => $sessionGroup->session_name,
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session updated successfully.');
     }
 
-
-    // ---------- SHOW ----------
     public function show(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $sessionGroup->load(['academicProgram', 'courseSessions.course']);
@@ -182,9 +173,11 @@ class SessionGroupController extends Controller
             $sessionGroup->year_level
         ));
 
-        $this->logAction('viewed_session_group', [
+        Logger::log('show', 'session groups', [
             'session_group_id' => $sessionGroup->id,
-            'session_fullname' => $sessionFullName
+            'session_name' => $sessionGroup->session_name,
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('timetabling.timetable-session-groups.show', compact('timetable', 'sessionGroup', 'sessionFullName'));
@@ -198,9 +191,11 @@ class SessionGroupController extends Controller
 
         $sessionGroup->delete();
 
-        $this->logAction('delete_session_group', [
+        Logger::log('delete', 'session groups', [
             'session_group_id' => $sessionGroupId,
-            'session_name' => $sessionGroupName
+            'session_name' => $sessionGroupName,
+            'timetable_id' => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
         ]);
 
         return redirect()->route('timetables.session-groups.index', $timetable)
