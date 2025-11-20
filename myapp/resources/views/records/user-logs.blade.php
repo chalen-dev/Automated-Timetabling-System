@@ -31,7 +31,7 @@
                         @foreach ($dailyLogs as $log)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 text-sm text-gray-900">{{ $log->user->name ?? 'Someone' }}</td>
-                                <td class="px-4 py-2 text-sm text-gray-900">{{ friendly_action($log->action, $log->model_type) }}</td>
+                                <td class="px-4 py-2 text-sm text-gray-900">{{ \App\Helpers\FormatHelper::logDetails($log->action, $log->model_type) }}</td>
 
                                 <!-- User-friendly details (collapsible) -->
                                 <td class="px-4 py-2 text-sm text-gray-600">

@@ -34,6 +34,7 @@
                 name="last_name"
                 placeholder=""
                 :value="old('last_name')"
+                isRequired
             />
 
             <livewire:input.auth.text
@@ -42,6 +43,7 @@
                 name="email"
                 placeholder="example.@umindanao.edu.ph"
                 :value="old('email')"
+                isRequired
             />
 
             <livewire:input.auth.password-text
@@ -51,6 +53,7 @@
                 name="password"
                 placeholder="At least 8 characters"
                 :value="old('password')"
+                isRequired
             />
 
             <livewire:input.auth.password-text
@@ -60,6 +63,8 @@
                 type="password"
                 name="password_confirmation"
                 placeholder=""
+                :value="old('password_confirmation')"
+                isRequired
             />
 
             <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full hover:cursor-pointer">Register ➝</button>
