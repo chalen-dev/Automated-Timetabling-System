@@ -35,15 +35,8 @@
 
             <!-- Buttons with breathing room -->
             <div class="flex w-full justify-between items-center mt-[20px]">
-                <a href="{{ route('academic-programs.index') }}">
-                    <button type="button" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
-                        Back
-                    </button>
-                </a>
-
-                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]">
-                    Create
-                </button>
+                <livewire:buttons.back :route="'academic-programs.index'"/>
+                <livewire:buttons.create submit />
             </div>
         </form>
     </div>
