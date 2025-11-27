@@ -14,6 +14,7 @@ use App\Http\Controllers\Timetabling\CourseSessionController;
 use App\Http\Controllers\Timetabling\GenerateTimetableController;
 use App\Http\Controllers\Timetabling\SessionGroupController;
 use App\Http\Controllers\Timetabling\TimetableEditingPaneController;
+use App\Http\Controllers\Timetabling\TimetableEditorController;
 use App\Http\Controllers\Timetabling\TimetableProfessorController;
 use App\Http\Controllers\Timetabling\TimetableRoomController;
 use App\Http\Controllers\Users\ProfileController;
@@ -47,6 +48,8 @@ Route::middleware([Authenticate::class])->group(function () {
     // Timetables & related resources (same for admin and normal users)
     Route::resource('timetables', TimetableController::class);
     Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
+    Route::get('/timetables/{timetable}/editor', [TimetableEditingPaneController::class, 'editor'])
+        ->name('timetables.timetable-editing-pane.editor');
     Route::resource('timetables.session-groups', SessionGroupController::class);
     Route::resource('timetables.session-groups.course-sessions', CourseSessionController::class);
     Route::patch(
@@ -82,6 +85,8 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
 
     // Test route (Tinker)
     Route::get('/test-file', function() {

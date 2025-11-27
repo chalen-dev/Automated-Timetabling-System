@@ -6,7 +6,10 @@
 >
     @auth
         <!-- if current route is under timetables -->
-        @if(Str::is('timetables.*.*', $currentRouteName))
+        @if(
+            Str::is('timetables.*.*', $currentRouteName)
+            && !request()->routeIs('timetables.timetable-editing-pane.editor')
+        )
             <!-- 1. Timetabling Section Left Sidebar -->
             <aside class="flex flex-col left-0 top-29 pl-5 fixed h-3/4 w-37">
                 <div class="flex flex-col flex-1 justify-between text-center bg-white p-4 rounded-2xl shadow-2xl">

@@ -9,9 +9,9 @@
             $nextSheet = ($sheetIndex < $totalSheets - 1 && $sheetIndex < 11) ? $sheetIndex + 1 : null;
         @endphp
 
-                <!-- Sheet Navigation -->
+            <!-- Sheet Navigation -->
         <div
-                class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
+            class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
                     Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
@@ -23,6 +23,12 @@
             </div>
 
             <div class="flex gap-2">
+                {{-- Edit Timetable button --}}
+                <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
+                   class="flex items-center gap-1 px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition duration-150">
+                    Edit Timetable
+                </a>
+
                 @if ($prevSheet !== null)
                     <a id="prevBtn"
                        href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $prevSheet]) }}"
@@ -31,7 +37,7 @@
                     </a>
                 @else
                     <button
-                            class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         <span class="text-lg">←</span> Previous
                     </button>
                 @endif
@@ -44,7 +50,7 @@
                     </a>
                 @else
                     <button
-                            class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         Next <span class="text-lg">→</span>
                     </button>
                 @endif

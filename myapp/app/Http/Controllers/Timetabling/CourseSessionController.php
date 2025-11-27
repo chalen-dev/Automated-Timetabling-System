@@ -129,7 +129,7 @@ class CourseSessionController extends Controller
 
         $courseSession->delete();
 
-        $this->logAction('delete_course_session', [
+        Logger::log('delete', 'course sessions', [
             'timetable_id' => $timetable->id,
             'session_group_id' => $sessionGroup->id,
             'course_session_id' => $courseSession->id

@@ -18,6 +18,9 @@
         [x-cloak] { display: none !important; }
     </style>
 
+    {{-- PAGE-SPECIFIC CSS --}}
+    @stack('styles')
+
 </head>
 <body class="bg-page h-full">
 

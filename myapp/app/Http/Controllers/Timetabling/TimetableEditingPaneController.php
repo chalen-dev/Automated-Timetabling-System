@@ -69,12 +69,11 @@ class TimetableEditingPaneController extends Controller
                 $sheet = $spreadsheet->getSheet($sheetIndex);
                 $sheetName = $sheet->getTitle();
 
-                // ===== Equivalent mapping for readable sheet names =====
                 $termMapping = [
                     '1st' => '1st Term',
                     '2nd' => '2nd Term',
                     '3rd' => '3rd Term',
-                    '4th' => '4th Term', // optional future term
+                    '4th' => '4th Term',
                 ];
 
                 $weekdayMapping = [
@@ -94,10 +93,8 @@ class TimetableEditingPaneController extends Controller
                     $dayName = $weekdayMapping[$dayPart] ?? $dayPart;
                     $sheetDisplayName = "{$dayName} {$termName}";
                 } else {
-                    // fallback: replace underscores with spaces
                     $sheetDisplayName = str_replace('_', ' ', $sheetName);
                 }
-                // ===== End mapping =====
 
                 $tableData = $sheet->toArray(null, true, true, false);
             } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
@@ -117,7 +114,7 @@ class TimetableEditingPaneController extends Controller
         $cellColors = [];
 
         Logger::log('timetable_edit', 'timetable editing pane', [
-            'timetable_id' => $timetable->id,
+            'timetable_id'   => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
         ]);
 
@@ -127,4 +124,18 @@ class TimetableEditingPaneController extends Controller
         ));
     }
 
+    /**
+     * JS-based interactive editor (prototype UI)
+     */
+    public function editor(Timetable $timetable)
+    {
+        Logger::log('timetable_editor_open', 'timetable prototype editor opened', [
+            'timetable_id'   => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+        ]);
+
+        return view('timetabling.timetable-editing-pane.editor', [
+            'timetable' => $timetable,
+        ]);
+    }
 }
