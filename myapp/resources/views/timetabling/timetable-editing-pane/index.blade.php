@@ -10,8 +10,7 @@
         @endphp
 
             <!-- Sheet Navigation -->
-        <div
-            class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
+        <div class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
                     Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
@@ -23,12 +22,14 @@
             </div>
 
             <div class="flex gap-2">
-                {{-- Edit Timetable button --}}
+
+                {{-- Edit Timetable --}}
                 <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
                    class="flex items-center gap-1 px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition duration-150">
                     Edit Timetable
                 </a>
 
+                {{-- Prev --}}
                 @if ($prevSheet !== null)
                     <a id="prevBtn"
                        href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $prevSheet]) }}"
@@ -36,12 +37,12 @@
                         <span class="text-lg">←</span> Previous
                     </a>
                 @else
-                    <button
-                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         <span class="text-lg">←</span> Previous
                     </button>
                 @endif
 
+                {{-- Next --}}
                 @if ($nextSheet !== null)
                     <a id="nextBtn"
                        href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $nextSheet]) }}"
@@ -49,14 +50,12 @@
                         Next <span class="text-lg">→</span>
                     </a>
                 @else
-                    <button
-                        class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
+                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
                         Next <span class="text-lg">→</span>
                     </button>
                 @endif
             </div>
         </div>
-
 
         @if (!empty($tableData) && isset($tableData[0]))
             <div class="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -76,49 +75,82 @@
                     </thead>
 
                     <tbody class="text-gray-700">
+
                     @php $cellColors = []; @endphp
+
                     @foreach ($tableData as $rowIndex => $row)
-                        @if ($rowIndex === 0)
-                            @continue
-                        @endif
+                        @if ($rowIndex === 0) @continue @endif
+
                         <tr class="{{ $rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100 transition-colors">
+
                             @foreach ($row as $colIndex => $cell)
+
                                 @php
+                                    // THIS MUST BE HERE — this is what your file was missing
                                     $span = $rowspanData[$colIndex][$rowIndex] ?? 1;
-                                    $cellColor = null;
                                 @endphp
 
                                 @if ($colIndex === 0)
+                                    {{-- Time column --}}
                                     <td class="border border-gray-200 px-3 py-2 text-center text-sm">
                                         {{ $cell }}
                                     </td>
+
                                 @else
+
                                     @php
+                                        $cellColor   = $cellColors[$rowIndex][$colIndex] ?? null;
+                                        $displayName = $cell;
+                                        $courseTitle = '';
+
                                         if ($span > 0 && strtolower(trim($cell)) !== 'vacant') {
-                                            $availableColors = $colors;
-                                            if (isset($cellColors[$rowIndex - 1][$colIndex])) {
-                                                $availableColors = array_diff($availableColors, [$cellColors[$rowIndex - 1][$colIndex]]);
+
+                                            $parts = explode('_', $cell);
+
+                                            if (count($parts) === 4) {
+                                                [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
+
+                                                // Load DB models
+                                                $sessionGroup  = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                                $courseSession = \App\Models\Timetabling\CourseSession::find($courseSessionId);
+
+                                                // Build display name
+                                                if ($sessionGroup) {
+                                                    $displayName =
+                                                        ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr) . ' ' .
+                                                        $sessionGroup->session_name . ' ' .
+                                                        $sessionGroup->year_level . ' Year';
+
+                                                    // *** MAIN FEATURE: use DB session_color ***
+                                                    if (!empty($sessionGroup->session_color)) {
+                                                        $cellColor = $sessionGroup->session_color;
+                                                    }
+                                                }
+
+                                                // Course title line
+                                                if ($courseSession && $courseSession->course) {
+                                                    $courseTitle = $courseSession->course->course_title ?? '';
+                                                }
                                             }
-                                            if (isset($cellColors[$rowIndex][$colIndex - 1])) {
-                                                $availableColors = array_diff($availableColors, [$cellColors[$rowIndex][$colIndex - 1]]);
+
+                                            // Fallback color
+                                            if ($cellColor === null) {
+                                                $availableColors = $colors;
+
+                                                if (isset($cellColors[$rowIndex - 1][$colIndex])) {
+                                                    $availableColors = array_diff($availableColors, [$cellColors[$rowIndex - 1][$colIndex]]);
+                                                }
+                                                if (isset($cellColors[$rowIndex][$colIndex - 1])) {
+                                                    $availableColors = array_diff($availableColors, [$cellColors[$rowIndex][$colIndex - 1]]);
+                                                }
+
+                                                $cellColor = $availableColors[array_rand($availableColors)] ?? $colors[0];
                                             }
-                                            $cellColor = $availableColors[array_rand($availableColors)] ?? $colors[0];
+
+                                            // Propagate color down merged cells
                                             for ($r = $rowIndex; $r < $rowIndex + $span; $r++) {
                                                 $cellColors[$r][$colIndex] = $cellColor;
                                             }
-                                        }
-
-                                        $displayName = $cell;
-                                        $courseTitle = '';
-                                        $parts = explode('_', $cell);
-                                        if (count($parts) === 4) {
-                                            [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
-                                            $sessionGroup = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
-                                            $courseSession = \App\Models\Timetabling\CourseSession::find($courseSessionId);
-                                            $courseTitle = $courseSession->course->course_title ?? '';
-                                            $displayName = ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr) . ' ' .
-                                                           ($sessionGroup->session_name ?? $sessionName) . ' ' .
-                                                           ($sessionGroup->year_level ?? $parts[1]) . ' Year';
                                         }
                                     @endphp
 
@@ -126,20 +158,25 @@
                                         <td class="border border-gray-200 px-3 py-2 text-center text-sm"
                                             rowspan="{{ $span }}"
                                             @if($cellColor) style="background-color: {{ $cellColor }};" @endif>
+
                                             @if (strtolower(trim($cell)) === 'vacant')
                                                 <span class="text-gray-400 italic">Vacant</span>
                                             @else
                                                 <div class="font-semibold">{{ $displayName }}</div>
+
                                                 @if (!empty($courseTitle))
                                                     <div class="text-xs italic mt-1">{{ $courseTitle }}</div>
                                                 @endif
                                             @endif
                                         </td>
                                     @endif
+
                                 @endif
+
                             @endforeach
                         </tr>
                     @endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -148,7 +185,6 @@
         @endif
     </div>
 
-    <!-- Keyboard navigation script -->
     <script>
         document.addEventListener('keydown', function (e) {
             const prevBtn = document.getElementById('prevBtn');

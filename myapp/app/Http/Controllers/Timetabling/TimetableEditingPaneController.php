@@ -116,16 +116,31 @@ class TimetableEditingPaneController extends Controller
 
         $cellColors = [];
 
+        // NEW: map of session_group_id => session_color
+        $sessionColorsByGroupId = SessionGroup::where('timetable_id', $timetable->id)
+            ->pluck('session_color', 'id')
+            ->toArray();
+
         Logger::log('timetable_edit', 'timetable editing pane', [
             'timetable_id'   => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
         ]);
 
         return view('timetabling.timetable-editing-pane.index', compact(
-            'timetable', 'tableData', 'rowspanData', 'error',
-            'colors', 'cellColors', 'sheetIndex', 'totalSheets', 'sheetName', 'sheetDisplayName'
+            'timetable',
+            'tableData',
+            'rowspanData',
+            'error',
+            'colors',
+            'cellColors',
+            'sheetIndex',
+            'totalSheets',
+            'sheetName',
+            'sheetDisplayName',
+            'sessionColorsByGroupId' // <-- pass to Blade
         ));
     }
+
 
     /**
      * JS-based interactive editor (prototype UI)
