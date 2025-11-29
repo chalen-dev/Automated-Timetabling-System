@@ -1,6 +1,6 @@
 <div class="timetable-editor">
     @if ($rooms->isNotEmpty())
-        <div class="relative z-20 overflow-x-auto rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div class="relative overflow-x-auto rounded-lg shadow-md flex flex-col justify-center items-center">
 
             <div class="flex flex-col bg-white w-[1400px] rounded-t-lg shadow-sm">
 

@@ -1,9 +1,9 @@
-<div class="z-60">
+<div class="relative z-60">
 
     @guest
 
         <!-- 1. Guest Header -->
-        <nav class="z-2 padding-12 w-full">
+        <nav class="padding-12 w-full">
             <div class="flex gap-4 justify-between pl-20 pr-20 ">
                 @if (request()->routeIs('home') || request()->routeIs('login.form'))
                     <div class="flex flex-row gap-4 items-center">

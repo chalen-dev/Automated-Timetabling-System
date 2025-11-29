@@ -102,12 +102,13 @@
                                         class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:ring-2 focus:ring-maroon-600 focus:outline-none"
                                     >
                                         @if($courseSession->course->duration_type === 'semestral')
+                                            {{-- Semestral subjects: fixed & disabled --}}
                                             <option value="semestral" selected>semestral</option>
                                         @else
+                                            {{-- Term subjects: only 1st and 2nd --}}
                                             <option value="" {{ is_null($courseSession->academic_term) ? 'selected' : '' }}>-- Select Term --</option>
                                             <option value="1st" {{ $courseSession->academic_term == '1st' ? 'selected' : '' }}>1st</option>
                                             <option value="2nd" {{ $courseSession->academic_term == '2nd' ? 'selected' : '' }}>2nd</option>
-                                            <option value="semestral" {{ $courseSession->academic_term == 'semestral' ? 'selected' : '' }}>semestral</option>
                                         @endif
                                     </select>
                                 </form>
