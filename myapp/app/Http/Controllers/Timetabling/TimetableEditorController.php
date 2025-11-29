@@ -12,9 +12,13 @@ class TimetableEditorController extends Controller
 {
     public function editor(Timetable $timetable)
     {
-        // 3) Return your exact view (as requested)
+        $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
+            ->with('courseSessions')
+            ->get();
+
         return view('timetabling.timetable-editing-pane.editor', [
             'timetable' => $timetable,
+            'sessionGroups' => $sessionGroups,
         ]);
     }
 }

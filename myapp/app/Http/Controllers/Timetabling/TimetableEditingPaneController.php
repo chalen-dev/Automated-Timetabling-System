@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Timetabling;
 use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
+use App\Models\Timetabling\SessionGroup;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -134,8 +135,13 @@ class TimetableEditingPaneController extends Controller
             'timetable_name' => $timetable->timetable_name,
         ]);
 
+        $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
+            ->with('courseSessions')
+            ->get();
+
         return view('timetabling.timetable-editing-pane.editor', [
             'timetable' => $timetable,
+            'sessionGroups' => $sessionGroups,
         ]);
     }
 }
