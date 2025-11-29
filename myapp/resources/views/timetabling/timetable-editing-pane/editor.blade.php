@@ -42,7 +42,7 @@
         position: absolute;
         top: 2px;
         left: 2px;
-        font-size: 11px;
+        font-size: 20px;
         color: #f59e0b; /* amber */
         pointer-events: none;
     }
@@ -154,6 +154,229 @@
 <script>
     (function () {
         const sessionGroups = window.sessionGroupsData || [];
+
+        // ----- SESSION GROUP COLOR PICKER (same palette as session-group index) -----
+
+        const GROUP_COLOR_PRESETS = [
+            "#ffe0e0", "#ffc4c4", "#ffb3b3", "#ffd0c8", "#ffebe0",
+            "#ffe8cc", "#ffdcb3", "#ffcf99", "#ffe6b8", "#ffefcc",
+            "#fff6cc", "#fff2b3", "#fff0a6", "#fff9cc", "#fff7b8",
+            "#e0ffe0", "#ccf5d5", "#bff0cc", "#d6ffe6", "#c8ffd9",
+            "#e0fff7", "#ccf5f0", "#b8efe8", "#ccfffb", "#d6fffa",
+            "#e0eaff", "#ccdfff", "#b8d4ff", "#d6e8ff", "#c3ddff",
+            "#e3e0ff", "#d5d0ff", "#c6c0ff", "#d9d4ff", "#cbc9ff",
+            "#f0e0ff", "#ebd0ff", "#e6c2ff", "#f2ddff", "#f5e6ff",
+            "#ffe0f0", "#ffcce8", "#ffb8e0", "#ffd6f0", "#ffe6f5",
+            "#e6ffea", "#e0ffe8", "#f0ffea", "#e8ffe0", "#f2ffe6"
+        ];
+
+        const CSRF_TOKEN = @json(csrf_token());
+
+        let colorOverlay = null;
+        let colorOverlayGrid = null;
+        let colorActiveWrapper = null;
+
+        function createColorOverlay() {
+            colorOverlay = document.createElement('div');
+            colorOverlay.style.position = 'fixed';
+            colorOverlay.style.inset = '0';
+            colorOverlay.style.background = 'rgba(0, 0, 0, 0.35)';
+            colorOverlay.style.display = 'none';
+            colorOverlay.style.alignItems = 'center';
+            colorOverlay.style.justifyContent = 'center';
+            colorOverlay.style.zIndex = '9999';
+
+            const modal = document.createElement('div');
+            modal.style.background = '#ffffff';
+            modal.style.borderRadius = '0.5rem';
+            modal.style.padding = '1rem';
+            modal.style.maxWidth = '420px';
+            modal.style.width = '100%';
+            modal.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.justifyContent = 'space-between';
+            header.style.marginBottom = '0.75rem';
+
+            const title = document.createElement('div');
+            title.textContent = 'Choose session group color';
+            title.style.fontSize = '0.875rem';
+            title.style.fontWeight = '600';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.textContent = 'Close';
+            closeBtn.style.fontSize = '0.75rem';
+            closeBtn.style.padding = '0.25rem 0.5rem';
+            closeBtn.style.borderRadius = '0.25rem';
+            closeBtn.style.border = '1px solid #e5e7eb';
+            closeBtn.style.background = '#f3f4f6';
+            closeBtn.addEventListener('click', hideColorOverlay);
+
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+
+            colorOverlayGrid = document.createElement('div');
+            colorOverlayGrid.style.display = 'grid';
+            colorOverlayGrid.style.gridTemplateColumns = 'repeat(8, minmax(0, 1fr))';
+            colorOverlayGrid.style.gap = '0.25rem';
+
+            modal.appendChild(header);
+            modal.appendChild(colorOverlayGrid);
+            colorOverlay.appendChild(modal);
+
+            colorOverlay.addEventListener('click', function (e) {
+                if (e.target === colorOverlay) {
+                    hideColorOverlay();
+                }
+            });
+
+            document.body.appendChild(colorOverlay);
+        }
+
+        function ensureColorOverlay() {
+            if (!colorOverlay) {
+                createColorOverlay();
+            }
+            return colorOverlay;
+        }
+
+        function hideColorOverlay() {
+            if (!colorOverlay) return;
+            colorOverlay.style.display = 'none';
+            colorActiveWrapper = null;
+        }
+
+        function showColorOverlay() {
+            ensureColorOverlay();
+            colorOverlay.style.display = 'flex';
+        }
+
+        function setGroupColorOnWrapper(wrapperEl, hex) {
+            wrapperEl.dataset.currentColor = hex;
+
+            const preview = wrapperEl.querySelector('.sg-color-display');
+            if (preview) {
+                preview.style.backgroundColor = hex;
+            }
+        }
+
+        function applyGroupColor(groupIndex, hex) {
+            // update in-memory sessionGroups
+            const group = sessionGroups[groupIndex];
+            if (group) {
+                group.session_color = hex;
+            }
+
+            // update courseMetaById colors for this group
+            Object.keys(courseMetaById).forEach(function (id) {
+                const meta = courseMetaById[id];
+                if (meta && meta.groupIndex === groupIndex) {
+                    meta.color = hex;
+                }
+            });
+
+            // rebuild tray + repaint canvas with new colors
+            buildTray();
+            renderCanvas();
+        }
+
+        function saveGroupColor(wrapperEl, hex) {
+            const updateUrl = wrapperEl.dataset.updateUrl;
+            const groupIndex = parseInt(wrapperEl.dataset.groupIndex, 10);
+
+            if (!updateUrl || Number.isNaN(groupIndex)) {
+                console.error('Missing updateUrl or groupIndex on wrapperEl');
+                return;
+            }
+            if (!CSRF_TOKEN) {
+                console.error('Missing CSRF token meta tag');
+                return;
+            }
+
+            // Laravel-friendly form payload
+            const formData = new URLSearchParams();
+            formData.append('_token', CSRF_TOKEN);
+            formData.append('_method', 'PATCH');
+            formData.append('session_color', hex);
+
+            fetch(updateUrl, {
+                method: 'POST', // use POST + _method=PATCH for Laravel
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: formData.toString(),
+                credentials: 'same-origin'
+            })
+                .then(function (res) {
+                    if (!res.ok) {
+                        console.error('Failed to save session_color, status:', res.status);
+                    }
+                    return res.json().catch(function () { return null; });
+                })
+                .then(function (data) {
+                    // Backend confirmed; update UI + in-memory structures
+                    const newColor = (data && data.session_color) ? data.session_color : hex;
+                    setGroupColorOnWrapper(wrapperEl, newColor);
+                    applyGroupColor(groupIndex, newColor);
+                })
+                .catch(function (err) {
+                    console.error('Error saving session_color', err);
+                });
+        }
+
+
+
+        function openGroupColorPicker(wrapperEl) {
+            colorActiveWrapper = wrapperEl;
+            ensureColorOverlay();
+            colorOverlayGrid.innerHTML = '';
+
+            const currentColor = (wrapperEl.dataset.currentColor || '').toLowerCase();
+
+            GROUP_COLOR_PRESETS.forEach(function (hex) {
+                const swatch = document.createElement('button');
+                swatch.type = 'button';
+                swatch.style.width = '1.5rem';
+                swatch.style.height = '1.5rem';
+                swatch.style.borderRadius = '0.25rem';
+                swatch.style.border = '1px solid #d1d5db';
+                swatch.style.backgroundColor = hex;
+                swatch.style.cursor = 'pointer';
+
+                if (currentColor && currentColor === hex.toLowerCase()) {
+                    swatch.style.outline = '2px solid #111827';
+                    swatch.style.outlineOffset = '1px';
+                }
+
+                swatch.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    // let backend confirm, then UI is updated in saveGroupColor()
+                    saveGroupColor(wrapperEl, hex);
+                    hideColorOverlay();
+                });
+
+                colorOverlayGrid.appendChild(swatch);
+            });
+
+            showColorOverlay();
+        }
+
+        function attachColorPickerToWrapper(wrapperEl) {
+            const btn = wrapperEl.querySelector('.sg-color-btn');
+            if (!btn) return;
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openGroupColorPicker(wrapperEl);
+            });
+        }
+
 
         // meta for each CourseSession
         const courseMetaById = {}; // sessionId -> { label, blocks, groupIndex }
@@ -352,6 +575,12 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'border rounded-lg shadow-sm bg-gray-50 tray-group';
 
+                // identify session group + current color (for color picker)
+                wrapper.dataset.sessionGroupId = group.id;
+                wrapper.dataset.groupIndex = groupIndex;
+                wrapper.dataset.currentColor = group.session_color || '';
+                wrapper.dataset.updateUrl = group.update_color_url || '';
+
                 // header: PROGRAM_ABBR SESSION_NAME YEAR Year
                 const header = document.createElement('div');
                 header.className = 'tray-group-header flex items-center justify-between px-4 py-2 bg-gray-100 border-b';
@@ -383,7 +612,8 @@
                 controls.className = 'group-color-controls flex items-center space-x-2';
 
                 const colorDisplay = document.createElement('div');
-                colorDisplay.className = 'group-color-display w-4 h-4 rounded border border-gray-400';
+                colorDisplay.className = 'group-color-display sg-color-display w-4 h-4 rounded border border-gray-400';
+
 
                 if (groupColor) {
                     colorDisplay.style.backgroundColor = groupColor;
@@ -393,8 +623,9 @@
 
                 const colorBtn = document.createElement('button');
                 colorBtn.type = 'button';
-                colorBtn.className = 'group-color-open-btn text-xs px-2 py-1 rounded border border-gray-300 bg-white';
+                colorBtn.className = 'group-color-open-btn sg-color-btn text-xs px-2 py-1 rounded border border-gray-300 bg-white';
                 colorBtn.textContent = 'Color';
+
                 controls.appendChild(colorBtn);
 
                 header.appendChild(controls);
@@ -591,6 +822,7 @@
                 tbl.appendChild(tbody);
                 scrollWrapper.appendChild(tbl);
                 wrapper.appendChild(scrollWrapper);
+                attachColorPickerToWrapper(wrapper);
                 container.appendChild(wrapper);
             });
         }

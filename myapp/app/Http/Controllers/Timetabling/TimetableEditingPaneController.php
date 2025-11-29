@@ -147,10 +147,6 @@ class TimetableEditingPaneController extends Controller
      */
     public function editor(Timetable $timetable)
     {
-        Logger::log('timetable_editor_open', 'timetable prototype editor opened', [
-            'timetable_id'   => $timetable->id,
-            'timetable_name' => $timetable->timetable_name,
-        ]);
 
         $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
             ->with([
@@ -159,11 +155,25 @@ class TimetableEditingPaneController extends Controller
             ])
             ->get();
 
+        // Attach per-group color update URL (same route used in index page)
+        $sessionGroups->each(function ($group) use ($timetable) {
+            $group->update_color_url = route(
+                'timetables.session-groups.update-color',
+                [$timetable, $group]
+            );
+        });
+
+        Logger::log('timetable_editor_open', 'timetable prototype editor opened', [
+            'timetable_id'   => $timetable->id,
+            'timetable_name' => $timetable->timetable_name,
+        ]);
+
         return view('timetabling.timetable-editing-pane.editor', [
             'timetable'      => $timetable,
             'sessionGroups'  => $sessionGroups,
         ]);
     }
+
 
 
 }
