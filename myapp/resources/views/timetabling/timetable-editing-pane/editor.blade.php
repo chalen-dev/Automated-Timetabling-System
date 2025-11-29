@@ -29,6 +29,26 @@
         position: relative;
     }
 
+    /* Draw a full rectangular border inside the merged course cell */
+    .timetable-editor td.course-cell::after {
+        content: "";
+        position: absolute;
+        inset: 0; /* top:0; right:0; bottom:0; left:0 */
+        border: 1px solid #4b5563; /* darker gray */
+        pointer-events: none;      /* don't block clicks/drags */
+    }
+    /* conflict icon */
+    .timetable-editor td .conflict-warning-icon {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        font-size: 11px;
+        color: #f59e0b; /* amber */
+        pointer-events: none;
+    }
+
+
+
     /* Blue band = valid placement (tray -> canvas, slide) */
     .timetable-editor td.preview-place {
         box-shadow: inset 0 0 0 2px rgba(0, 123, 255, 0.6);
@@ -86,6 +106,13 @@
         background-color: rgba(0, 123, 255, 0.06);
     }
 
+    /* Tray cells that are "used" in the current term/day view */
+    #coursesTray td.tray-used {
+        background-color: #e5e7eb; /* gray-200 */
+        color: #9ca3af;            /* gray-400-ish text */
+    }
+
+
     #timetableContextMenu {
         position: fixed;
         z-index: 9999;
@@ -130,10 +157,21 @@
 
         // meta for each CourseSession
         const courseMetaById = {}; // sessionId -> { label, blocks, groupIndex }
-        // placements on the canvas: sessionId -> { col, topRow, blocks }
-        const placements = {};
-        // locked courses (by CourseSession id)
+
+        // placements per (term, day) view:
+        // key = `${termIndex}-${dayIndex}` -> { sessionId -> { col, topRow, blocks } }
+        const placementsByView = {};
+        let placements = {}; // points to placementsByView for the active view
+
+        // locked courses (by CourseSession id) - global across all views
         const lockedSessions = new Set();
+
+        // sessions that are in conflict in the current view (same group, same timeframe)
+        let conflictSessionIds = new Set();
+
+        // active term/day (term: 0 = 1st, 1 = 2nd; day: 0..5 = Mon..Sat)
+        let activeTermIndex = 0;
+        let activeDayIndex  = 0;
 
         // canvas dimensions & references
         let canvasRows = 0;
@@ -147,11 +185,160 @@
         let contextMenuEl = null;
         let contextTarget = null; // { sessionId, from: 'tray'|'canvas' }
 
+        // ---------- TERM/DAY VIEW HELPERS ----------
+
+        function getCurrentViewKey() {
+            return activeTermIndex + '-' + activeDayIndex;
+        }
+
+        function ensureCurrentViewPlacements() {
+            const key = getCurrentViewKey();
+            if (!placementsByView[key]) {
+                placementsByView[key] = {};
+            }
+            placements = placementsByView[key];
+        }
+
+        function updateTermButtonsUI() {
+            const termButtons = document.querySelectorAll('.timetable-editor .term-button');
+            termButtons.forEach(btn => {
+                const termIdx = parseInt(btn.dataset.termIndex, 10);
+                if (Number.isNaN(termIdx)) return;
+
+                const isActive = termIdx === activeTermIndex;
+
+                // remove color-specific classes only
+                btn.classList.remove('bg-red-700', 'text-white', 'hover:bg-red-800');
+                btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+
+                if (isActive) {
+                    btn.classList.add('bg-red-700', 'text-white', 'hover:bg-red-800');
+                } else {
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                }
+            });
+        }
+
+        function updateDayButtonsUI() {
+            const dayButtons = document.querySelectorAll('.timetable-editor .day-button');
+            dayButtons.forEach(btn => {
+                const dayIdx = parseInt(btn.dataset.dayIndex, 10);
+                if (Number.isNaN(dayIdx)) return;
+
+                const isActive = dayIdx === activeDayIndex;
+
+                // only toggle base bg/text colors; keep hover/shadow classes as-is
+                btn.classList.remove('bg-red-700', 'text-white');
+                btn.classList.remove('bg-gray-200', 'text-gray-700');
+
+                if (isActive) {
+                    btn.classList.add('bg-red-700', 'text-white');
+                } else {
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                }
+            });
+        }
+
+        function switchToView(termIndex, dayIndex) {
+            activeTermIndex = termIndex;
+            activeDayIndex  = dayIndex;
+
+            ensureCurrentViewPlacements();
+            updateTermButtonsUI();
+            updateDayButtonsUI();
+
+            // tray grey-out state depends on the active (term, day)
+            buildTray();
+
+            clearCanvasPreviews();
+            renderCanvas();
+        }
+
+
+
+        function initTermDayControls() {
+            // term buttons
+            const termButtons = document.querySelectorAll('.timetable-editor .term-button');
+            termButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(btn.dataset.termIndex, 10);
+                    if (Number.isNaN(idx)) return;
+                    if (idx === activeTermIndex) return;
+                    switchToView(idx, activeDayIndex);
+                });
+            });
+
+            // day buttons
+            const dayButtons = document.querySelectorAll('.timetable-editor .day-button');
+            dayButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(btn.dataset.dayIndex, 10);
+                    if (Number.isNaN(idx)) return;
+                    if (idx === activeDayIndex) return;
+                    switchToView(activeTermIndex, idx);
+                });
+            });
+
+            // initial visual state
+            updateTermButtonsUI();
+            updateDayButtonsUI();
+        }
+
+        // ---------- CONFLICT COMPUTATION ----------
+
+        function recomputeConflicts() {
+            conflictSessionIds = new Set();
+
+            const rowsCount = canvasRows;
+            if (!rowsCount || !placements) return;
+
+            // For each row (timeframe), see if any session group appears in more than one room
+            for (let r = 0; r < rowsCount; r++) {
+                const groupToSessions = new Map(); // groupIndex -> Set(sessionId)
+
+                for (const sessionId of Object.keys(placements)) {
+                    const p = placements[sessionId];
+                    const meta = courseMetaById[sessionId];
+                    if (!p || !meta) continue;
+
+                    const g = meta.groupIndex;
+                    if (g === undefined || g === null) continue;
+
+                    if (r < p.topRow || r >= p.topRow + p.blocks) continue;
+
+                    let set = groupToSessions.get(g);
+                    if (!set) {
+                        set = new Set();
+                        groupToSessions.set(g, set);
+                    }
+                    set.add(sessionId);
+                }
+
+                // any group with more than 1 session in this row = conflict
+                for (const set of groupToSessions.values()) {
+                    if (set.size > 1) {
+                        set.forEach(id => conflictSessionIds.add(id));
+                    }
+                }
+            }
+        }
+
+
         document.addEventListener('DOMContentLoaded', function () {
             buildTray();
             initCanvas();
-            renderCanvas();
+
+            // make sure the placements object for the current view exists
+            ensureCurrentViewPlacements();
+
+            // wire up term/day buttons (adds the click handlers)
+            initTermDayControls();
+
+            // initial view: 1st Term, Monday (0, 0)
+            switchToView(0, 0);
         });
+
+        // ---------- TRAY RENDERING ----------
 
         // ---------- TRAY RENDERING ----------
 
@@ -186,6 +373,8 @@
 
                 const groupTitleFull = groupTitle.trim();
 
+                const groupColor = group.session_color || '';
+
                 title.textContent = groupTitleFull;
                 title.className = 'font-semibold text-gray-700';
                 header.appendChild(title);
@@ -195,6 +384,11 @@
 
                 const colorDisplay = document.createElement('div');
                 colorDisplay.className = 'group-color-display w-4 h-4 rounded border border-gray-400';
+
+                if (groupColor) {
+                    colorDisplay.style.backgroundColor = groupColor;
+                }
+
                 controls.appendChild(colorDisplay);
 
                 const colorBtn = document.createElement('button');
@@ -321,8 +515,7 @@
                                     courseLabel = course.course_title || course.course_name;
                                 }
 
-                                // Combined label: [GROUP] – [COURSE]
-                                const combinedLabel = groupTitleFull + ' – ' + courseLabel;
+                                // label inside tray cell
                                 td.innerHTML = `
                                     <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
                                     <div class="text-sm text-gray-800">${courseLabel}</div>
@@ -335,6 +528,7 @@
                                         hours = 1;
                                     }
                                     const blocks = Math.max(1, Math.round(hours * 2));
+
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
                                             <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
@@ -343,19 +537,38 @@
                                         blocks,
                                         groupIndex,
                                         groupTitle: groupTitleFull,
-                                        courseLabel: courseLabel
+                                        courseLabel: courseLabel,
+                                        color: groupColor || null   // used by renderCanvas()
                                     };
                                 }
 
+                                // is this session already placed in the active (term, day) view?
+                                const currentKey = getCurrentViewKey();
+                                const viewPlacements = placementsByView[currentKey] || {};
+                                const isPlacedInCurrentView = !!viewPlacements[sess.id];
+
                                 if (lockedSessions.has(String(sess.id))) {
+                                    // locked: keep its group color, not draggable
                                     td.classList.add('locked');
                                     td.draggable = false;
+                                    if (groupColor) {
+                                        td.style.backgroundColor = groupColor;
+                                    }
+                                } else if (isPlacedInCurrentView) {
+                                    // used in this timetable: greyed out, not draggable
+                                    td.classList.add('tray-used');
+                                    td.draggable = false;
                                 } else {
+                                    // normal, draggable tray cell with group color
+                                    if (groupColor) {
+                                        td.style.backgroundColor = groupColor;
+                                    }
                                     td.draggable = true;
                                     td.addEventListener('dragstart', handleTrayDragStart);
                                     td.addEventListener('dragend', handleDragEnd);
                                 }
 
+                                // tray context menu + drag-over/drop
                                 td.addEventListener('contextmenu', handleCellContextMenu);
                                 td.addEventListener('dragover', handleTrayDragOver);
                                 td.addEventListener('drop', handleTrayDrop);
@@ -381,6 +594,7 @@
                 container.appendChild(wrapper);
             });
         }
+
 
         // ---------- CANVAS INIT & RENDERING ----------
 
@@ -416,7 +630,10 @@
         function renderCanvas() {
             if (!canvasBody) return;
 
-            // reset all room cells: clear content, show them, remove rowspans & previews
+            // Recompute conflicts for current view
+            recomputeConflicts();
+
+            // Reset all cells
             for (let r = 0; r < canvasRows; r++) {
                 const tr = canvasBody.rows[r];
                 for (let c = 0; c < canvasCols; c++) {
@@ -424,8 +641,17 @@
                     td.textContent = '';
                     td.rowSpan = 1;
                     td.style.display = '';
+                    td.style.backgroundColor = '';
                     td.draggable = false;
-                    td.classList.remove('merged', 'preview-place', 'preview-swap', 'preview-invalid', 'locked');
+                    td.classList.remove(
+                        'merged',
+                        'preview-place',
+                        'preview-swap',
+                        'preview-invalid',
+                        'locked',
+                        'course-cell'
+                    );
+                    td.removeAttribute('title');
                     td.removeEventListener('dragstart', handleCanvasDragStart);
                     td.removeEventListener('dragend', handleDragEnd);
                     td.removeEventListener('contextmenu', handleCellContextMenu);
@@ -435,7 +661,7 @@
                 }
             }
 
-            // draw each placement as a vertical merged cell
+            // Draw all placements
             Object.keys(placements).forEach(sessionId => {
                 const place = placements[sessionId];
                 const meta = courseMetaById[sessionId];
@@ -453,7 +679,7 @@
                 const topTd = topTr.cells[col + 1];
                 if (!topTd) return;
 
-                // hide underlying cells
+                // hide underlying rows for merged block
                 for (let r = topRow + 1; r < Math.min(canvasRows, topRow + blocks); r++) {
                     const tr = canvasBody.rows[r];
                     const td = tr.cells[col + 1];
@@ -461,8 +687,28 @@
                 }
 
                 topTd.rowSpan = Math.min(blocks, canvasRows - topRow);
-                topTd.innerHTML = meta.labelHTML;
-                topTd.classList.add('merged');
+
+                // base label
+                let contentHTML = meta.labelHTML;
+
+                // conflict?
+                const hasConflict = conflictSessionIds.has(sessionId);
+                if (hasConflict) {
+                    contentHTML += `
+                <div class="conflict-warning-icon">⚠</div>
+                    `;
+                    topTd.title = "Conflict warning — this session group is double-scheduled at this timeframe.";
+                }
+
+                topTd.innerHTML = contentHTML;
+
+                if (meta.color) {
+                    topTd.style.backgroundColor = meta.color;
+                }
+
+                // apply consistent course cell border
+                topTd.classList.add('merged', 'course-cell');
+
                 topTd.dataset.sessionId = sessionId;
                 topTd.dataset.topRow = topRow;
                 topTd.dataset.blocks = blocks;
@@ -480,6 +726,7 @@
                 topTd.addEventListener('contextmenu', handleCellContextMenu);
             });
         }
+
 
         // ---------- PREVIEW HELPERS ----------
 
@@ -910,7 +1157,11 @@
                 topRow: evalResult.topRow,
                 blocks: blocks
             };
+
+            // reflect "used in this timetable" state in the tray
+            buildTray();
         }
+
 
         function evaluateTrayPlacement(targetRow, targetCol, blocks, sessionId) {
             const rowsCount = canvasRows;

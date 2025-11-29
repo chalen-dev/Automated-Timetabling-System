@@ -1,4 +1,7 @@
+{{-- courses-tray.blade.php --}}
+
 <div
+
     x-data="{ open: false }"
     @click.outside="open = false"
     class="fixed top-30 right-0 z-50"

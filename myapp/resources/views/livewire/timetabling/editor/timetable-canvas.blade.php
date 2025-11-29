@@ -1,4 +1,8 @@
+{{-- timetable-canvas.blade.php --}}
+
 <div class="timetable-editor">
+
+
     @if ($rooms->isNotEmpty())
         <div class="relative overflow-x-auto rounded-lg shadow-md flex flex-col justify-center items-center">
 
@@ -7,21 +11,27 @@
                 {{-- TERM SELECTOR --}}
                 <div class="flex flex-row justify-center w-full p-3 gap-6 bg-gray-100 border-b border-gray-200 rounded-t-lg">
                     <button
-                        class="px-6 py-2 bg-red-700 text-white font-semibold rounded-lg shadow hover:bg-red-800 transition">
+                        type="button"
+                        data-term-index="0"
+                        class="term-button px-6 py-2 bg-red-700 text-white font-semibold rounded-lg shadow hover:bg-red-800 transition">
                         1st Term
                     </button>
 
                     <button
-                        class="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-300 transition">
+                        type="button"
+                        data-term-index="1"
+                        class="term-button px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-300 transition">
                         2nd Term
                     </button>
                 </div>
 
                 {{-- DAY SELECTOR --}}
                 <div class="grid grid-cols-6 w-full bg-white p-3 gap-2 border-b border-gray-200">
-                    @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $day)
+                    @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $index => $day)
                         <button
-                            class="py-2 text-center rounded-lg text-sm font-medium bg-gray-200 text-gray-700
+                            type="button"
+                            data-day-index="{{ $index }}"
+                            class="day-button py-2 text-center rounded-lg text-sm font-medium bg-gray-200 text-gray-700
                             hover:bg-red-700 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg">
                             {{ $day }}
                         </button>
