@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('year_level'); //values ('1st','2nd','3rd','4th')
 
             $table->text('short_description')->nullable();
+            $table->string('session_color')->nullable();
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
             $table->foreignId('timetable_id')->constrained('timetables')->cascadeOnDelete();
             $table->unique(
