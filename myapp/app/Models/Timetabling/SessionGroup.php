@@ -13,7 +13,9 @@ class SessionGroup extends Model
         'year_level',
         'academic_program_id',
         'timetable_id',
-        'short_description'
+        'short_description',
+        'session_color'
+
     ];
 
     public function academicProgram()

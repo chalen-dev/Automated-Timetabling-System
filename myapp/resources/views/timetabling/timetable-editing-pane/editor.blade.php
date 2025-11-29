@@ -184,7 +184,9 @@
                     groupTitle += ' ' + yearLevel + ' Year';
                 }
 
-                title.textContent = groupTitle.trim();
+                const groupTitleFull = groupTitle.trim();
+
+                title.textContent = groupTitleFull;
                 title.className = 'font-semibold text-gray-700';
                 header.appendChild(title);
 
@@ -314,12 +316,17 @@
                                 td.dataset.sessionId = sess.id;
 
                                 const course = sess.course || {};
-                                let label = 'Course #' + sess.id;
+                                let courseLabel = 'Course #' + sess.id;
                                 if (course.course_title || course.course_name) {
-                                    label = course.course_title || course.course_name;
+                                    courseLabel = course.course_title || course.course_name;
                                 }
 
-                                td.textContent = label;
+                                // Combined label: [GROUP] – [COURSE]
+                                const combinedLabel = groupTitleFull + ' – ' + courseLabel;
+                                td.innerHTML = `
+                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                    <div class="text-sm text-gray-800">${courseLabel}</div>
+                                `;
 
                                 // store meta for this sessionId (if not already)
                                 if (!courseMetaById[sess.id]) {
@@ -329,9 +336,14 @@
                                     }
                                     const blocks = Math.max(1, Math.round(hours * 2));
                                     courseMetaById[sess.id] = {
-                                        label,
+                                        labelHTML: `
+                                            <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                            <div class="text-sm text-gray-800">${courseLabel}</div>
+                                        `,
                                         blocks,
-                                        groupIndex
+                                        groupIndex,
+                                        groupTitle: groupTitleFull,
+                                        courseLabel: courseLabel
                                     };
                                 }
 
@@ -344,10 +356,7 @@
                                     td.addEventListener('dragend', handleDragEnd);
                                 }
 
-                                // right-click menu on tray
                                 td.addEventListener('contextmenu', handleCellContextMenu);
-
-                                // allow canvas->tray drop (reset)
                                 td.addEventListener('dragover', handleTrayDragOver);
                                 td.addEventListener('drop', handleTrayDrop);
                             } else {
@@ -452,7 +461,7 @@
                 }
 
                 topTd.rowSpan = Math.min(blocks, canvasRows - topRow);
-                topTd.textContent = meta.label;
+                topTd.innerHTML = meta.labelHTML;
                 topTd.classList.add('merged');
                 topTd.dataset.sessionId = sessionId;
                 topTd.dataset.topRow = topRow;

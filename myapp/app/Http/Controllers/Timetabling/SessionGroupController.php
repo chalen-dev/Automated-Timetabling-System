@@ -201,4 +201,24 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session deleted successfully.');
     }
+
+    public function updateColor(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        $data = $request->validate([
+            'session_color' => [
+                'nullable',
+                'string',
+                'regex:/^#[0-9a-fA-F]{6}$/',
+            ],
+        ]);
+
+        $sessionGroup->session_color = $data['session_color'];
+        $sessionGroup->save();
+
+        return response()->json([
+            'status' => 'ok',
+            'session_color' => $sessionGroup->session_color,
+        ]);
+    }
+
 }
