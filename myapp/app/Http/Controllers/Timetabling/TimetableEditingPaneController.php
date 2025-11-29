@@ -6,8 +6,10 @@ use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\SessionGroup;
+use App\Models\Timetabling\CourseSession;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+
 
 class TimetableEditingPaneController extends Controller
 {
@@ -136,12 +138,17 @@ class TimetableEditingPaneController extends Controller
         ]);
 
         $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
-            ->with('courseSessions')
+            ->with([
+                'academicProgram',       // for program_abbreviation
+                'courseSessions.course'  // for course_title + class_hours
+            ])
             ->get();
 
         return view('timetabling.timetable-editing-pane.editor', [
-            'timetable' => $timetable,
-            'sessionGroups' => $sessionGroups,
+            'timetable'      => $timetable,
+            'sessionGroups'  => $sessionGroups,
         ]);
     }
+
+
 }
