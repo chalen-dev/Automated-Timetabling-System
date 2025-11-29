@@ -85,6 +85,43 @@
         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.8);
         background-color: rgba(0, 123, 255, 0.06);
     }
+
+    #timetableContextMenu {
+        position: fixed;
+        z-index: 9999;
+        background: #ffffff;
+        border-radius: 0.25rem;
+        box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+        color: #111827;
+        padding: 0.25rem 0;
+        min-width: 160px;
+        display: none;
+    }
+
+    #timetableContextMenu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #timetableContextMenu li {
+        padding: 0.35rem 0.75rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    #timetableContextMenu li:hover {
+        background-color: #f3f4f6;
+    }
+
+    #timetableContextMenu hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 0.25rem 0;
+    }
 </style>
 
 <script>
@@ -95,6 +132,8 @@
         const courseMetaById = {}; // sessionId -> { label, blocks, groupIndex }
         // placements on the canvas: sessionId -> { col, topRow, blocks }
         const placements = {};
+        // locked courses (by CourseSession id)
+        const lockedSessions = new Set();
 
         // canvas dimensions & references
         let canvasRows = 0;
@@ -103,6 +142,10 @@
 
         // drag state
         let dragState = null;
+
+        // context menu
+        let contextMenuEl = null;
+        let contextTarget = null; // { sessionId, from: 'tray'|'canvas' }
 
         document.addEventListener('DOMContentLoaded', function () {
             buildTray();
@@ -292,10 +335,21 @@
                                     };
                                 }
 
-                                // make tray cell draggable
-                                td.draggable = true;
-                                td.addEventListener('dragstart', handleTrayDragStart);
-                                td.addEventListener('dragend', handleDragEnd);
+                                if (lockedSessions.has(String(sess.id))) {
+                                    td.classList.add('locked');
+                                    td.draggable = false;
+                                } else {
+                                    td.draggable = true;
+                                    td.addEventListener('dragstart', handleTrayDragStart);
+                                    td.addEventListener('dragend', handleDragEnd);
+                                }
+
+                                // right-click menu on tray
+                                td.addEventListener('contextmenu', handleCellContextMenu);
+
+                                // allow canvas->tray drop (reset)
+                                td.addEventListener('dragover', handleTrayDragOver);
+                                td.addEventListener('drop', handleTrayDrop);
                             } else {
                                 td.textContent = '';
                             }
@@ -362,9 +416,10 @@
                     td.rowSpan = 1;
                     td.style.display = '';
                     td.draggable = false;
-                    td.classList.remove('merged', 'preview-place', 'preview-swap', 'preview-invalid');
+                    td.classList.remove('merged', 'preview-place', 'preview-swap', 'preview-invalid', 'locked');
                     td.removeEventListener('dragstart', handleCanvasDragStart);
                     td.removeEventListener('dragend', handleDragEnd);
+                    td.removeEventListener('contextmenu', handleCellContextMenu);
                     delete td.dataset.sessionId;
                     delete td.dataset.topRow;
                     delete td.dataset.blocks;
@@ -399,28 +454,40 @@
                 topTd.rowSpan = Math.min(blocks, canvasRows - topRow);
                 topTd.textContent = meta.label;
                 topTd.classList.add('merged');
-                topTd.draggable = true;
                 topTd.dataset.sessionId = sessionId;
                 topTd.dataset.topRow = topRow;
                 topTd.dataset.blocks = blocks;
-                // keep col info on the merged cell itself
                 topTd.dataset.col = col;
-                topTd.addEventListener('dragstart', handleCanvasDragStart);
-                topTd.addEventListener('dragend', handleDragEnd);
+
+                if (lockedSessions.has(String(sessionId))) {
+                    topTd.classList.add('locked');
+                    topTd.draggable = false;
+                } else {
+                    topTd.draggable = true;
+                    topTd.addEventListener('dragstart', handleCanvasDragStart);
+                    topTd.addEventListener('dragend', handleDragEnd);
+                }
+
+                topTd.addEventListener('contextmenu', handleCellContextMenu);
             });
         }
 
         // ---------- PREVIEW HELPERS ----------
 
         function clearCanvasPreviews() {
-            if (!canvasBody) return;
-            for (let r = 0; r < canvasRows; r++) {
-                const tr = canvasBody.rows[r];
-                for (let c = 0; c < canvasCols; c++) {
-                    const td = tr.cells[c + 1];
-                    td.classList.remove('preview-place', 'preview-swap', 'preview-invalid');
+            if (canvasBody) {
+                for (let r = 0; r < canvasRows; r++) {
+                    const tr = canvasBody.rows[r];
+                    for (let c = 0; c < canvasCols; c++) {
+                        const td = tr.cells[c + 1];
+                        td.classList.remove('preview-place', 'preview-swap', 'preview-invalid');
+                    }
                 }
             }
+            // also clear tray "return" preview
+            document
+                .querySelectorAll('#coursesTray .session-table.session-return-preview')
+                .forEach(tbl => tbl.classList.remove('session-return-preview'));
         }
 
         function applyPreviewBand(topRow, blocks, col, cls) {
@@ -435,13 +502,13 @@
             }
         }
 
-        // ---------- ROW PICKING (from mouse Y, like prototype) ----------
+        // ---------- ROW PICKING (from mouse Y) ----------
 
         function getCanvasRowFromEvent(e) {
             if (!canvasBody) return null;
 
             const tbodyRect = canvasBody.getBoundingClientRect();
-            const y = e.clientY - tbodyRect.top; // distance from top of tbody
+            const y = e.clientY - tbodyRect.top;
 
             let accumulated = 0;
             for (let r = 0; r < canvasRows; r++) {
@@ -453,17 +520,116 @@
                 accumulated += h;
             }
 
-            // If somehow beyond, clamp to last row
             return canvasRows > 0 ? canvasRows - 1 : null;
         }
 
+        // ---------- CONTEXT MENU HELPERS ----------
 
-        // ---------- DRAG HANDLERS ----------
+        function ensureContextMenu() {
+            if (contextMenuEl) return contextMenuEl;
+
+            const el = document.createElement('div');
+            el.id = 'timetableContextMenu';
+
+            const ul = document.createElement('ul');
+            el.appendChild(ul);
+
+            document.body.appendChild(el);
+            contextMenuEl = el;
+
+            document.addEventListener('click', hideContextMenu);
+            window.addEventListener('resize', hideContextMenu);
+            document.addEventListener('scroll', hideContextMenu, true);
+
+            return el;
+        }
+
+        function hideContextMenu() {
+            if (!contextMenuEl) return;
+            contextMenuEl.style.display = 'none';
+            contextTarget = null;
+        }
+
+        function showContextMenu(x, y, target) {
+            const menu = ensureContextMenu();
+            const ul = menu.querySelector('ul');
+            ul.innerHTML = '';
+            contextTarget = target;
+
+            const sessionId = String(target.sessionId);
+            const isLocked = lockedSessions.has(sessionId);
+
+            // Lock / Unlock item
+            const lockItem = document.createElement('li');
+            lockItem.textContent = isLocked ? 'Unlock course' : 'Lock course';
+            lockItem.addEventListener('click', function () {
+                if (lockedSessions.has(sessionId)) {
+                    lockedSessions.delete(sessionId);
+                } else {
+                    lockedSessions.add(sessionId);
+                }
+                hideContextMenu();
+                buildTray();
+                renderCanvas();
+            });
+            ul.appendChild(lockItem);
+
+            // Canvas-only: Remove from timetable (also unlock)
+            if (target.from === 'canvas') {
+                const hr = document.createElement('hr');
+                ul.appendChild(hr);
+
+                const removeItem = document.createElement('li');
+                removeItem.textContent = 'Remove from timetable';
+                removeItem.addEventListener('click', function () {
+                    delete placements[sessionId];
+                    lockedSessions.delete(sessionId);
+                    hideContextMenu();
+                    buildTray();
+                    renderCanvas();
+                });
+                ul.appendChild(removeItem);
+            }
+
+            // position menu
+            menu.style.display = 'block';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+
+            const rect = menu.getBoundingClientRect();
+            let dx = 0;
+            let dy = 0;
+            if (rect.right > window.innerWidth) {
+                dx = window.innerWidth - rect.right - 8;
+            }
+            if (rect.bottom > window.innerHeight) {
+                dy = window.innerHeight - rect.bottom - 8;
+            }
+            if (dx || dy) {
+                menu.style.left = (rect.left + dx) + 'px';
+                menu.style.top = (rect.top + dy) + 'px';
+            }
+        }
+
+        function handleCellContextMenu(e) {
+            e.preventDefault();
+            hideContextMenu();
+
+            const td = e.currentTarget;
+            const sessionId = td.dataset.sessionId;
+            if (!sessionId) return;
+
+            const from = td.closest('.timetable-editor') ? 'canvas' : 'tray';
+            showContextMenu(e.clientX, e.clientY, { sessionId, from });
+        }
+
+        // ---------- DRAG HELPERS ----------
 
         function handleTrayDragStart(e) {
             const td = e.currentTarget;
             const sessionId = td.dataset.sessionId;
             if (!sessionId || !courseMetaById[sessionId]) return;
+            if (lockedSessions.has(String(sessionId))) return;
 
             dragState = {
                 source: 'tray',
@@ -472,7 +638,6 @@
             };
 
             e.dataTransfer.effectAllowed = 'move';
-            // Firefox requires some data
             e.dataTransfer.setData('text/plain', sessionId);
         }
 
@@ -480,6 +645,7 @@
             const td = e.currentTarget;
             const sessionId = td.dataset.sessionId;
             if (!sessionId || !placements[sessionId]) return;
+            if (lockedSessions.has(String(sessionId))) return;
 
             const col = parseInt(td.dataset.col, 10);
             const topRow = parseInt(td.dataset.topRow, 10);
@@ -502,6 +668,107 @@
             clearCanvasPreviews();
         }
 
+        // canvas helper: which session occupies (row,col)?
+        function getSessionIdAt(row, col) {
+            for (const sessionId of Object.keys(placements)) {
+                const p = placements[sessionId];
+                if (!p) continue;
+                if (p.col !== col) continue;
+                if (row >= p.topRow && row < p.topRow + p.blocks) {
+                    return sessionId;
+                }
+            }
+            return null;
+        }
+
+        // evaluate swap between two canvas blocks
+        function evaluateCanvasSwap(sessionIdA, sessionIdB) {
+            const a = placements[sessionIdA];
+            const b = placements[sessionIdB];
+            if (!a || !b) return { ok: false };
+
+            const rowsCount = canvasRows;
+            const aBlocks = a.blocks;
+            const bBlocks = b.blocks;
+
+            const aTop = a.topRow;
+            const bTop = b.topRow;
+            const aCol = a.col;
+            const bCol = b.col;
+
+            if (lockedSessions.has(String(sessionIdA)) || lockedSessions.has(String(sessionIdB))) {
+                return { ok: false };
+            }
+
+            // Ensure they fit in destination positions
+            if (bTop + aBlocks > rowsCount || aTop + bBlocks > rowsCount) {
+                return { ok: false };
+            }
+
+            // no other occupants in A-destination band on B column
+            if (hasOtherOccupants(bCol, bTop, aBlocks, new Set([sessionIdB]))) {
+                return { ok: false };
+            }
+            // no other occupants in B-destination band on A column
+            if (hasOtherOccupants(aCol, aTop, bBlocks, new Set([sessionIdA]))) {
+                return { ok: false };
+            }
+
+            return {
+                ok: true,
+                aNewTop: bTop,
+                bNewTop: aTop
+            };
+        }
+
+        function hasOtherOccupants(col, top, blocks, allowed) {
+            const bandStart = top;
+            const bandEnd = top + blocks;
+            for (const sessionId of Object.keys(placements)) {
+                if (allowed && allowed.has(sessionId)) continue;
+                const p = placements[sessionId];
+                if (!p || p.col !== col) continue;
+                const pStart = p.topRow;
+                const pEnd = p.topRow + p.blocks;
+                if (pEnd <= bandStart || pStart >= bandEnd) continue;
+                return true;
+            }
+            return false;
+        }
+
+        // ---------- TRAY DROP (canvas -> tray = reset/unlock) ----------
+
+        function handleTrayDragOver(e) {
+            if (!dragState || dragState.source !== 'canvas') return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            clearCanvasPreviews();
+            const tbl = e.currentTarget.closest('table.session-table');
+            if (tbl) {
+                tbl.classList.add('session-return-preview');
+            }
+        }
+
+        function handleTrayDrop(e) {
+            if (!dragState || dragState.source !== 'canvas') return;
+            e.preventDefault();
+
+            clearCanvasPreviews();
+
+            const sessionId = dragState.sessionId;
+            if (sessionId) {
+                delete placements[sessionId];
+                lockedSessions.delete(String(sessionId));
+                buildTray();
+                renderCanvas();
+            }
+
+            dragState = null;
+        }
+
+        // ---------- CANVAS DRAGOVER / DROP ----------
+
         function handleCanvasDragOver(e) {
             if (!dragState) return;
             e.preventDefault();
@@ -512,7 +779,7 @@
 
             const row = getCanvasRowFromEvent(e);
             const col = parseInt(td.dataset.col, 10);
-            if (!Number.isFinite(row) || !Number.isFinite(col)) return;
+            if (!Number.isFinite(col) || row === null || row === undefined) return;
 
             clearCanvasPreviews();
 
@@ -532,11 +799,10 @@
 
                 if (evalResult.ok) {
                     if (evalResult.displaced && evalResult.displaced.length > 0) {
-                        cls = 'preview-swap'; // displacing existing blocks
+                        cls = 'preview-swap'; // displacing existing band
                     } else {
                         cls = 'preview-place'; // clean place
                     }
-                    // align preview to the actual topRow used by evaluation
                     if (Number.isFinite(evalResult.topRow)) {
                         previewTop = evalResult.topRow;
                     }
@@ -554,22 +820,41 @@
                 }
                 if (previewTop < 0) previewTop = 0;
 
-                let ok = false;
+                let cls = 'preview-invalid';
+
                 if (col === origCol) {
+                    // slide up/down in same column
                     const result = evaluateSlide(sessionId, row);
-                    ok = result.ok;
-                    if (result.ok && Number.isFinite(result.topRow)) {
-                        previewTop = result.topRow;
+                    if (result.ok) {
+                        cls = 'preview-place';
+                        if (Number.isFinite(result.topRow)) {
+                            previewTop = result.topRow;
+                        }
                     }
                 } else {
-                    const result = evaluateMoveToOtherColumn(sessionId, row, col);
-                    ok = result.ok;
-                    if (result.ok && Number.isFinite(result.topRow)) {
-                        previewTop = result.topRow;
+                    // different column: either swap with target block or move into empty column
+                    const targetSessionId = getSessionIdAt(row, col);
+                    if (targetSessionId && targetSessionId !== sessionId) {
+                        const swapRes = evaluateCanvasSwap(sessionId, targetSessionId);
+                        if (swapRes.ok) {
+                            cls = 'preview-swap';
+                            previewTop = swapRes.aNewTop;
+                        } else {
+                            cls = 'preview-invalid';
+                        }
+                    } else {
+                        const result = evaluateMoveToOtherColumn(sessionId, row, col);
+                        if (result.ok) {
+                            cls = 'preview-place';
+                            if (Number.isFinite(result.topRow)) {
+                                previewTop = result.topRow;
+                            }
+                        } else {
+                            cls = 'preview-invalid';
+                        }
                     }
                 }
 
-                const cls = ok ? 'preview-place' : 'preview-invalid';
                 applyPreviewBand(previewTop, blocks, col, cls);
             }
         }
@@ -583,7 +868,7 @@
 
             const row = getCanvasRowFromEvent(e);
             const col = parseInt(td.dataset.col, 10);
-            if (!Number.isFinite(row) || !Number.isFinite(col)) return;
+            if (!Number.isFinite(col) || row === null || row === undefined) return;
 
             clearCanvasPreviews();
 
@@ -597,7 +882,7 @@
             renderCanvas();
         }
 
-        // ---------- DROP LOGIC ----------
+        // ---------- BAND EVALUATION / DROP LOGIC ----------
 
         function handleDropFromTray(targetRow, targetCol) {
             const sessionId = dragState.sessionId;
@@ -607,12 +892,10 @@
             const evalResult = evaluateTrayPlacement(targetRow, targetCol, blocks, sessionId);
             if (!evalResult.ok) return;
 
-            // remove displaced placements
             evalResult.displaced.forEach(id => {
                 delete placements[id];
             });
 
-            // place (or move) this session
             placements[sessionId] = {
                 col: targetCol,
                 topRow: evalResult.topRow,
@@ -634,25 +917,32 @@
             const bandEnd = topRow + blocks;
             const displaced = new Set();
 
-            Object.keys(placements).forEach(id => {
+            for (const id of Object.keys(placements)) {
                 const p = placements[id];
-                if (!p || p.col !== targetCol) return;
+                if (!p || p.col !== targetCol) continue;
 
                 const pStart = p.topRow;
                 const pEnd = p.topRow + p.blocks;
 
-                // disjoint -> ok
-                if (pEnd <= bandStart || pStart >= bandEnd) return;
+                if (pEnd <= bandStart || pStart >= bandEnd) continue;
 
-                // allow displacement only if fully inside band (no-cut)
-                if (pStart < bandStart || pEnd > bandEnd) {
-                    // would slice a block -> invalid
+                // band intersects this block
+                if (lockedSessions.has(String(id))) {
+                    // cannot displace/cut locked course
                     displaced.clear();
                     topRow = null;
+                    break;
+                }
+
+                // only allow if fully inside band (no-cut)
+                if (pStart < bandStart || pEnd > bandEnd) {
+                    displaced.clear();
+                    topRow = null;
+                    break;
                 } else {
                     displaced.add(id);
                 }
-            });
+            }
 
             if (topRow === null) {
                 return { ok: false };
@@ -662,23 +952,38 @@
         }
 
         function handleDropFromCanvas(targetRow, targetCol) {
-            const { sessionId, col, topRow, blocks } = dragState;
+            const { sessionId, col, blocks } = dragState;
             if (!sessionId || !placements[sessionId]) return;
 
-            // same column -> slide up/down
             if (targetCol === col) {
+                // simple slide
                 const result = evaluateSlide(sessionId, targetRow);
                 if (!result.ok) return;
                 placements[sessionId].topRow = result.topRow;
                 return;
             }
 
-            // different column -> simple move (no overlaps)
-            const result = evaluateMoveToOtherColumn(sessionId, targetRow, targetCol);
-            if (!result.ok) return;
+            // cross-column: swap if hitting another block, else move
+            const targetSessionId = getSessionIdAt(targetRow, targetCol);
+            if (targetSessionId && targetSessionId !== sessionId) {
+                const swapRes = evaluateCanvasSwap(sessionId, targetSessionId);
+                if (!swapRes.ok) return;
 
-            placements[sessionId].col = targetCol;
-            placements[sessionId].topRow = result.topRow;
+                const a = placements[sessionId];
+                const b = placements[targetSessionId];
+
+                a.col = targetCol;
+                a.topRow = swapRes.aNewTop;
+
+                b.col = col;
+                b.topRow = swapRes.bNewTop;
+            } else {
+                const result = evaluateMoveToOtherColumn(sessionId, targetRow, targetCol);
+                if (!result.ok) return;
+
+                placements[sessionId].col = targetCol;
+                placements[sessionId].topRow = result.topRow;
+            }
         }
 
         function evaluateSlide(sessionId, targetRow) {
@@ -692,7 +997,6 @@
             const bandStart = newTop;
             const bandEnd = newTop + place.blocks;
 
-            // can't overlap other placements in same column
             for (const id of Object.keys(placements)) {
                 if (id === sessionId) continue;
                 const p = placements[id];
@@ -719,7 +1023,6 @@
             const bandStart = newTop;
             const bandEnd = newTop + place.blocks;
 
-            // no overlaps in new column
             for (const id of Object.keys(placements)) {
                 if (id === sessionId) continue;
                 const p = placements[id];
@@ -736,6 +1039,8 @@
         }
     })();
 </script>
+
+
 
 
 
