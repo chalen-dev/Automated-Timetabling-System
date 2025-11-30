@@ -12,8 +12,12 @@
             <h3 class="text-base font-semibold mb-3">Tools</h3>
 
             <div class="space-y-2 text-sm">
-                <button class="w-full px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-left">
-                    Add Room
+                <button
+                    type="button"
+                    class="px-4 py-2 rounded-md bg-green-600 text-white text-sm hover:bg-green-700"
+                    onclick="window.saveTimetableToExcel()"
+                >
+                    Save changes
                 </button>
                 <button class="w-full px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-left">
                     Download XLSX

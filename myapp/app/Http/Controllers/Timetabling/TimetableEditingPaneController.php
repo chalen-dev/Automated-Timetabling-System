@@ -9,6 +9,7 @@ use App\Models\Timetabling\SessionGroup;
 use App\Models\Timetabling\CourseSession;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Log;
 
 
 class TimetableEditingPaneController extends Controller
@@ -106,7 +107,7 @@ class TimetableEditingPaneController extends Controller
         $map = [];
 
         foreach ($sessionGroups as $group) {
-            $programAbbrev = $group->academicProgram->program_abbreviation ?? 'Unknown';
+            $programAbbrev = $group->academicProgram?->program_abbreviation ?? 'Unknown';
             $sessionName   = $group->session_name ?? '';
             $yearLevel     = $group->year_level;
 
@@ -248,8 +249,6 @@ class TimetableEditingPaneController extends Controller
         return $placementsByView;
     }
 
-
-
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -370,6 +369,163 @@ class TimetableEditingPaneController extends Controller
             'sessionGroups'           => $sessionGroups,
             'initialPlacementsByView' => $initialPlacementsByView,
         ]);
+    }
+
+    public function saveFromEditor(Timetable $timetable, Request $request)
+    {
+        try {
+            // 1) Get placements from request (be permissive, don't rely on validate's redirect)
+            $placementsByView = $request->input('placementsByView', []);
+            if (!is_array($placementsByView)) {
+                throw new \RuntimeException('placementsByView must be an array.');
+            }
+
+            // 2) Load existing XLSX (same path pattern as index/editor)
+            $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            if (!file_exists($xlsxPath)) {
+                Log::error('Timetable XLSX not found for saveFromEditor', [
+                    'timetable_id' => $timetable->id,
+                    'path'         => $xlsxPath,
+                ]);
+
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Timetable XLSX not found.',
+                ], 404);
+            }
+
+            $spreadsheet = IOFactory::load($xlsxPath);
+            $sheetCount  = $spreadsheet->getSheetCount();
+
+            // 3) Build map: sessionId => "CS_3rd_5_33"
+            $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
+                ->with(['academicProgram', 'courseSessions'])
+                ->get();
+
+            $codeBySessionId = [];
+
+            foreach ($sessionGroups as $group) {
+                // null-safe: if academicProgram is missing, don't blow up; mark as UNK
+                $programAbbr = $group->academicProgram?->program_abbreviation ?? 'UNK';
+                $yearLevel   = $group->year_level ?? '';
+
+                foreach ($group->courseSessions as $session) {
+                    $sessionId = (string) $session->id;
+
+                    // {program_abbreviation}_{year_level}_{session_group_id}_{course_session_id}
+                    $codeBySessionId[$sessionId] =
+                        "{$programAbbr}_{$yearLevel}_{$group->id}_{$session->id}";
+                }
+            }
+
+            // Helper: convert 1-based column index => letter (A..Z), enough for typical room counts
+            $colIndexToLetter = function (int $index): string {
+                // Handle only A-Z; if you ever have more than 26 columns, we can extend this later.
+                return chr(ord('A') + $index - 1);
+            };
+
+            // 4) Overwrite each sheet's data cells from placementsByView
+            for ($sheetIndex = 0; $sheetIndex < $sheetCount; $sheetIndex++) {
+                // Map sheet index to (termIndex, dayIndex): 0..5 = 1st term, 6..11 = 2nd term
+                $termIndex = $sheetIndex < 6 ? 0 : 1;
+                $dayIndex  = $sheetIndex % 6;
+                $viewKey   = $termIndex . '-' . $dayIndex;
+
+                $sheet = $spreadsheet->getSheet($sheetIndex);
+                $table = $sheet->toArray(null, true, true, false);
+
+                $rowCount = count($table);
+                if ($rowCount < 2) {
+                    // no data rows
+                    continue;
+                }
+                $colCount = count($table[0] ?? []);
+
+                // 4a) Clear data area to "Vacant"
+                // row 0 = header; rows 1..N-1 are timeslots
+                // col 0 = Time; cols 1..M-1 are rooms
+                for ($row = 1; $row < $rowCount; $row++) {
+                    for ($col = 1; $col < $colCount; $col++) {
+                        $excelRowIndex = $row + 1;        // PhpSpreadsheet rows are 1-based
+                        $excelColIndex = $col + 1;        // PhpSpreadsheet cols are 1-based
+                        $colLetter     = $colIndexToLetter($excelColIndex);
+                        $cellAddress   = $colLetter . $excelRowIndex; // e.g. "B2"
+
+                        $sheet->setCellValue($cellAddress, 'Vacant');
+                    }
+                }
+
+                // 4b) Fill from placements for this view, if any
+                if (
+                    !isset($placementsByView[$viewKey]) ||
+                    !is_array($placementsByView[$viewKey]) ||
+                    empty($placementsByView[$viewKey])
+                ) {
+                    continue;
+                }
+
+                foreach ($placementsByView[$viewKey] as $sessionId => $placement) {
+                    $sessionId = (string) $sessionId;
+
+                    if (!isset($codeBySessionId[$sessionId])) {
+                        // Session not part of this timetable (defensive)
+                        Log::warning('saveFromEditor: sessionId not found in codeBySessionId', [
+                            'timetable_id' => $timetable->id,
+                            'session_id'   => $sessionId,
+                        ]);
+                        continue;
+                    }
+
+                    $code   = $codeBySessionId[$sessionId];
+                    $col    = (int) ($placement['col'] ?? 0);     // 0-based among rooms
+                    $topRow = (int) ($placement['topRow'] ?? 0);  // 0-based among timeslots
+                    $blocks = max(1, (int) ($placement['blocks'] ?? 1));
+
+                    // Data column 0 => Excel col index 2 (B); row 0 => Excel row index 2
+                    $excelColIndex = $col + 2;   // B = 2
+                    $excelRowTop   = $topRow + 2;
+                    $colLetter     = $colIndexToLetter($excelColIndex);
+
+                    for ($offset = 0; $offset < $blocks; $offset++) {
+                        $excelRowIndex = $excelRowTop + $offset;
+                        $cellAddress   = $colLetter . $excelRowIndex; // e.g. "C5"
+                        $sheet->setCellValue($cellAddress, $code);
+                    }
+                }
+            }
+
+            // 5) Save XLSX back to disk
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save($xlsxPath);
+
+            return response()->json([
+                'status'  => 'ok',
+                'message' => 'Timetable saved to Excel.',
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Error in saveFromEditor', [
+                'timetable_id' => $timetable->id ?? null,
+                'error'        => $e->getMessage(),
+                'trace'        => $e->getTraceAsString(),
+            ]);
+
+            $msg = $e->getMessage();
+
+            if (str_contains($msg, 'Resource temporarily unavailable') || str_contains($msg, 'Permission denied')) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Cannot save the Excel file because it is locked or not writable. ' .
+                        'Close the XLSX in Excel / any viewer and make sure the file is writable, then try again.',
+                ], 500);
+            }
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => $msg,
+            ], 500);
+        }
+
     }
 
 

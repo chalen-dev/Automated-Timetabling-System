@@ -637,6 +637,54 @@
         let activeTermIndex = 0;
         let activeDayIndex  = 0;
 
+        // ---- PUBLIC SNAPSHOT FUNCTION (for saving back to Excel) ----
+        window.getTimetableEditorState = function () {
+            return {
+                placementsByView: placementsByView
+                // lockedSessions: Array.from(lockedSessions), // optional later
+            };
+        };
+
+        // ---- PUBLIC SAVE FUNCTION ----
+        window.saveTimetableToExcel = function () {
+            const state = window.getTimetableEditorState && window.getTimetableEditorState();
+            if (!state) {
+                console.error('Editor state not available');
+                return;
+            }
+
+            fetch(@json(route('timetables.editor.save', $timetable)), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': @json(csrf_token()),
+                },
+                body: JSON.stringify({
+                    placementsByView: state.placementsByView,
+                }),
+            })
+                .then(async (response) => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        console.error('Save response is not valid JSON');
+                    }
+
+                    if (!response.ok) {
+                        console.error('Save failed:', response.status, data);
+                    } else {
+                        console.log('Save succeeded:', data);
+                    }
+                })
+                .catch((err) => {
+                    console.error('Network / JS error while saving timetable:', err);
+                });
+        };
+
+
+
         // canvas dimensions & references
         let canvasRows = 0;
         let canvasCols = 0;

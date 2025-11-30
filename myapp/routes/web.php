@@ -46,9 +46,16 @@ Route::middleware([Authenticate::class])->group(function () {
 
     // Timetables & related resources (same for admin and normal users)
     Route::resource('timetables', TimetableController::class);
+
     Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
     Route::get('/timetables/{timetable}/editor', [TimetableEditingPaneController::class, 'editor'])
         ->name('timetables.timetable-editing-pane.editor');
+    Route::post(
+        '/timetables/{timetable}/editor/save',
+        [TimetableEditingPaneController::class, 'saveFromEditor']
+    )->name('timetables.editor.save');
+
+
     Route::resource('timetables.session-groups', SessionGroupController::class);
     Route::patch(
         '/timetables/{timetable}/session-groups/{sessionGroup}/color',
