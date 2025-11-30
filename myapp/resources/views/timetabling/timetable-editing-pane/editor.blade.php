@@ -47,6 +47,29 @@
         pointer-events: none;
     }
 
+    /* term badge at the bottom of each course cell (canvas + tray) */
+    .timetable-editor td .term-badge,
+    #coursesTray td .term-badge {
+        position: absolute;
+        left: 50%;
+        bottom: 4px;
+        transform: translateX(-50%);
+        font-size: 11px;
+        line-height: 1;
+        padding: 3px 14px;   /* widened */
+        border-radius: 9999px;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        text-transform: uppercase;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .term-badge-1st { border-color: #60a5fa; }
+    .term-badge-2nd { border-color: #f97316; }
+    .term-badge-sem { border-color: #a855f7; }
+
 
 
     /* Blue band = valid placement (tray -> canvas, slide) */
@@ -63,6 +86,12 @@
     .timetable-editor td.preview-invalid {
         box-shadow: inset 0 0 0 2px rgba(220, 53, 69, 0.6);
     }
+
+    /* Alignment row highlight (when hovering a misaligned course cell) */
+    .timetable-editor td.alignment-row-highlight {
+        box-shadow: inset 0 0 0 2px rgba(234, 179, 8, 0.9); /* yellow-ish */
+    }
+
 
     /* While hovering a swap target (single-cell dashed outline) */
     .timetable-editor td.drag-over {
@@ -106,11 +135,51 @@
         background-color: rgba(0, 123, 255, 0.06);
     }
 
+    #coursesTray td {
+        position: relative;
+    }
+
+    #coursesTray td.tray-cell {
+        padding-bottom: 1.75rem; /* extra height so text doesn't collide with badge */
+    }
+
     /* Tray cells that are "used" in the current term/day view */
     #coursesTray td.tray-used {
         background-color: #e5e7eb; /* gray-200 */
         color: #9ca3af;            /* gray-400-ish text */
     }
+
+    /* Tray cells that are "used" in the current term/day view */
+    #coursesTray td.tray-used {
+        background-color: #e5e7eb; /* gray-200 */
+        color: #9ca3af;            /* gray-400-ish text */
+    }
+
+    /* Tray cells that cannot be placed because of academic term mismatch */
+    #coursesTray td.tray-term-disabled {
+        background-color: #d1d5db; /* gray-300, darker than tray-used */
+        color: #6b7280;            /* gray-500-ish text */
+        cursor: not-allowed;
+    }
+
+    /* Optional: keep the term badge readable on disabled cells */
+    #coursesTray td.tray-term-disabled .term-badge {
+        background-color: #f9fafb;
+        color: #4b5563;
+    }
+
+    /* Tray cells that have reached their max class days in this term */
+    #coursesTray td.tray-days-exhausted {
+        background-color: #9ca3af; /* darker gray than tray-term-disabled */
+        color: #111827;            /* gray-900 for contrast */
+        cursor: not-allowed;
+    }
+
+    #coursesTray td.tray-days-exhausted .term-badge {
+        background-color: #f9fafb;
+        color: #1f2937;
+    }
+
 
 
     #timetableContextMenu {
@@ -149,11 +218,91 @@
         border-top: 1px solid #e5e7eb;
         margin: 0.25rem 0;
     }
+
+
 </style>
 
 <script>
     (function () {
         const sessionGroups = window.sessionGroupsData || [];
+
+        // --- Academic term helpers for courses/sessions ---
+        // Accepts a CourseSession object (preferred) but also works
+        // if you accidentally pass just the Course.
+        // Returns { raw, badgeLabel, termIndex }
+        // termIndex: 0 => 1st term, 1 => 2nd term, null => semestral / always allowed
+        function getCourseTermInfo(sessionOrCourse) {
+            if (!sessionOrCourse) {
+                return { raw: '', badgeLabel: '', termIndex: null };
+            }
+
+            // If it's a CourseSession, pull from session.academic_term first,
+            // then fall back to session.course.academic_term.
+            let rawVal;
+            if ('course' in sessionOrCourse || 'academic_term' in sessionOrCourse) {
+                const session = sessionOrCourse;
+                const course  = session.course || {};
+                rawVal = (session.academic_term || course.academic_term || '');
+            } else {
+                // Fallback: plain Course object passed in
+                const course = sessionOrCourse;
+                rawVal = (course.academic_term || '');
+            }
+
+            rawVal = rawVal.toString().toLowerCase().trim();
+
+            let badgeLabel = '';
+            let termIndex  = null; // semestral / always allowed by default
+
+            if (rawVal.startsWith('1')) {
+                badgeLabel = '1ST';
+                termIndex  = 0;
+            } else if (rawVal.startsWith('2')) {
+                badgeLabel = '2ND';
+                termIndex  = 1;
+            } else if (rawVal.includes('sem')) {
+                badgeLabel = 'SEM';
+                termIndex  = null;
+            }
+
+            return { raw: rawVal, badgeLabel, termIndex };
+        }
+
+
+        function getSessionAcademicTerm(session) {
+            if (!session) return '';
+
+            // prefer CourseSession.academic_term; fall back to Course.academic_term if present
+            let term = session.academic_term;
+            if (!term && session.course) {
+                term = session.course.academic_term;
+            }
+            if (!term) return '';
+
+            return String(term).toLowerCase(); // e.g. "1st", "2nd", "semestral"
+        }
+
+        function isSessionAllowedInActiveTerm(session) {
+            const term = getSessionAcademicTerm(session);
+
+            // empty / unknown / semestral => allowed in both
+            if (!term || term === 'semestral' || term === 'sem') {
+                return true;
+            }
+
+            // 1st-term only
+            if (term === '1st' || term === 'first' || term === '1') {
+                return activeTermIndex === 0;
+            }
+
+            // 2nd-term only
+            if (term === '2nd' || term === 'second' || term === '2') {
+                return activeTermIndex === 1;
+            }
+
+            // anything else, be permissive
+            return true;
+        }
 
         // ----- SESSION GROUP COLOR PICKER (same palette as session-group index) -----
 
@@ -386,11 +535,21 @@
         const placementsByView = {};
         let placements = {}; // points to placementsByView for the active view
 
+        // total class-day usage per CourseSession:
+        // classDayUsageBySessionId[sessionId] = { 0: Set(dayIndex), 1: Set(dayIndex) }
+        let classDayUsageBySessionId = {};
+
         // locked courses (by CourseSession id) - global across all views
         const lockedSessions = new Set();
 
         // sessions that are in conflict in the current view (same group, same timeframe)
         let conflictSessionIds = new Set();
+
+        // sessions that are misaligned across timetables (same group+course, different timeslots)
+        let alignmentIssueSessionIds = new Set();
+        // alignmentTargetRowByViewAndSession[viewKey][sessionId] = targetRow
+        let alignmentTargetRowByViewAndSession = {};
+        const alignmentTargetBlocksBySessionId = {};
 
         // active term/day (term: 0 = 1st, 1 = 2nd; day: 0..5 = Mon..Sat)
         let activeTermIndex = 0;
@@ -546,6 +705,209 @@
             }
         }
 
+        // ---------- ALIGNMENT COMPUTATION (ACROSS ALL TERM/DAY VIEWS) ----------
+
+        function recomputeAlignmentIssues() {
+            alignmentIssueSessionIds = new Set();
+            alignmentTargetRowByViewAndSession = {};
+
+            function setTargetRow(viewKey, sessionId, targetRow) {
+                if (!alignmentTargetRowByViewAndSession[viewKey]) {
+                    alignmentTargetRowByViewAndSession[viewKey] = {};
+                }
+                alignmentTargetRowByViewAndSession[viewKey][sessionId] = targetRow;
+            }
+
+            // Group placements by (groupIndex + courseLabel)
+            const groupCoursePlacements = new Map();
+
+            Object.keys(placementsByView).forEach(function (viewKey) {
+                const viewPlacements = placementsByView[viewKey];
+                if (!viewPlacements) return;
+
+                const [termStr, dayStr] = viewKey.split('-');
+                const termIndex = parseInt(termStr, 10) || 0;
+                const dayIndex  = parseInt(dayStr, 10) || 0;
+
+                Object.keys(viewPlacements).forEach(function (sessionId) {
+                    const p = viewPlacements[sessionId];
+                    const meta = courseMetaById[sessionId];
+                    if (!p || !meta) return;
+
+                    const gIdx = meta.groupIndex;
+                    const courseLabel = meta.courseLabel || '';
+                    if (gIdx === undefined || gIdx === null) return;
+
+                    const key = gIdx + '|' + courseLabel;
+
+                    let arr = groupCoursePlacements.get(key);
+                    if (!arr) {
+                        arr = [];
+                        groupCoursePlacements.set(key, arr);
+                    }
+                    arr.push({
+                        sessionId,
+                        viewKey,
+                        topRow: p.topRow,
+                        termIndex,
+                        dayIndex
+                    });
+                });
+            });
+
+            // Helper: nearest-day ordering
+            function viewDistance(a, b) {
+                const termDiff = Math.abs(a.termIndex - b.termIndex);
+                const dayDiff  = Math.abs(a.dayIndex  - b.dayIndex);
+                return termDiff * 10 + dayDiff; // prioritize term difference heavily
+            }
+
+            // Analyze misalignment for each course
+            groupCoursePlacements.forEach(function (arr) {
+                if (!arr || arr.length <= 1) return;
+
+                // Sort chronologically (earliest term, then day)
+                const sorted = arr.slice().sort(function (a, b) {
+                    if (a.termIndex !== b.termIndex) return a.termIndex - b.termIndex;
+                    return a.dayIndex - b.dayIndex;
+                });
+
+                const earliest = sorted[0];
+
+                // Check if ANY day has different row
+                const anyDifferentRow = sorted.some(function (entry) {
+                    return entry.topRow !== earliest.topRow;
+                });
+                if (!anyDifferentRow) return; // all aligned
+
+                // For non-earliest days: target = earliest.topRow
+                for (let i = 1; i < sorted.length; i++) {
+                    const entry = sorted[i];
+                    if (entry.topRow !== earliest.topRow) {
+                        alignmentIssueSessionIds.add(entry.sessionId);
+                        setTargetRow(entry.viewKey, entry.sessionId, earliest.topRow);
+                    }
+                }
+
+                // For the earliest placement itself:
+                // highlight the closest misaligned neighbor
+                const candidates = sorted.slice(1).filter(e => e.topRow !== earliest.topRow);
+                if (candidates.length > 0) {
+                    let best = candidates[0];
+                    let bestDist = viewDistance(earliest, best);
+
+                    for (let i = 1; i < candidates.length; i++) {
+                        const cand = candidates[i];
+                        const d = viewDistance(earliest, cand);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            best = cand;
+                        }
+                    }
+
+                    alignmentIssueSessionIds.add(earliest.sessionId);
+                    setTargetRow(earliest.viewKey, earliest.sessionId, best.topRow);
+                }
+            });
+        }
+
+        // ---------- CLASS-DAY USAGE COMPUTATION (across all term/day views) ----------
+
+        function recomputeClassDayUsage() {
+            classDayUsageBySessionId = {};
+
+            Object.keys(placementsByView).forEach(function (viewKey) {
+                const viewPlacements = placementsByView[viewKey];
+                if (!viewPlacements) return;
+
+                const parts    = viewKey.split('-');
+                const termIndex = parseInt(parts[0], 10);
+                const dayIndex  = parseInt(parts[1], 10);
+
+                if (!Number.isFinite(termIndex) || !Number.isFinite(dayIndex)) {
+                    return;
+                }
+
+                Object.keys(viewPlacements).forEach(function (sessionId) {
+                    let perSession = classDayUsageBySessionId[sessionId];
+                    if (!perSession) {
+                        perSession = classDayUsageBySessionId[sessionId] = {
+                            0: new Set(),
+                            1: new Set()
+                        };
+                    }
+
+                    if (termIndex === 0 || termIndex === 1) {
+                        perSession[termIndex].add(dayIndex);
+                    }
+                });
+            });
+        }
+
+        function getUsedClassDaysInTerm(sessionId, termIndex) {
+            const perSession = classDayUsageBySessionId[sessionId];
+            if (!perSession) return 0;
+            const set = perSession[termIndex];
+            return set ? set.size : 0;
+        }
+
+
+        // ---------- ALIGNMENT ROW HIGHLIGHT HELPERS ----------
+
+        function clearAlignmentRowHighlight() {
+            if (!canvasBody) return;
+            for (let r = 0; r < canvasRows; r++) {
+                const tr = canvasBody.rows[r];
+                if (!tr) continue;
+                for (let c = 0; c < tr.cells.length; c++) {
+                    tr.cells[c].classList.remove('alignment-row-highlight');
+                }
+            }
+        }
+
+        function applyAlignmentRowHighlight(startRow, blocks) {
+            if (!canvasBody) return;
+
+            const rowsCount = canvasRows;
+            const bandStart = Math.max(0, startRow);
+            const bandEnd   = Math.min(rowsCount, startRow + (blocks || 1));
+
+            for (let r = bandStart; r < bandEnd; r++) {
+                const tr = canvasBody.rows[r];
+                if (!tr) continue;
+                for (let c = 0; c < tr.cells.length; c++) {
+                    tr.cells[c].classList.add('alignment-row-highlight');
+                }
+            }
+        }
+
+
+
+        function handleAlignmentMouseEnter(e) {
+            const td = e.currentTarget;
+            const sessionId = td.dataset.sessionId;
+            if (!sessionId) return;
+
+            const viewKey   = getCurrentViewKey();
+            const mapForView = alignmentTargetRowByViewAndSession[viewKey] || {};
+            const targetRow  = mapForView[sessionId];
+
+            const meta   = courseMetaById[sessionId];
+            const blocks = meta ? meta.blocks : 1;
+
+            if (typeof targetRow === 'number' && targetRow >= 0 && targetRow < canvasRows) {
+                clearAlignmentRowHighlight();
+                applyAlignmentRowHighlight(targetRow, blocks);
+            }
+        }
+
+
+
+
+        function handleAlignmentMouseLeave() {
+            clearAlignmentRowHighlight();
+        }
+
 
         document.addEventListener('DOMContentLoaded', function () {
             buildTray();
@@ -565,9 +927,31 @@
 
         // ---------- TRAY RENDERING ----------
 
+        // ---------- TRAY RENDERING ----------
+
         function buildTray() {
             const container = document.getElementById('sessionGroupsContainer');
             if (!container) return;
+
+            // recompute per-session class-day usage across all term/day views
+            recomputeClassDayUsage();
+
+            // --- NEW: remember vertical scroll of the whole tray ---
+            const trayRoot = document.getElementById('coursesTray');
+            const previousTrayScrollTop = trayRoot ? trayRoot.scrollTop : 0;
+            // -------------------------------------------------------
+
+            // --- remember horizontal scroll per session group before rebuild ---
+            const previousScrollLeftByGroupId = {};
+            container.querySelectorAll('.tray-group').forEach(groupEl => {
+                const groupId = groupEl.dataset.sessionGroupId;
+                if (!groupId) return;
+                const scrollWrapper = groupEl.querySelector('.session-table-wrapper');
+                if (scrollWrapper) {
+                    previousScrollLeftByGroupId[groupId] = scrollWrapper.scrollLeft;
+                }
+            });
+            // -------------------------------------------------------------------
 
             container.innerHTML = '';
 
@@ -601,7 +985,6 @@
                 }
 
                 const groupTitleFull = groupTitle.trim();
-
                 const groupColor = group.session_color || '';
 
                 title.textContent = groupTitleFull;
@@ -613,7 +996,6 @@
 
                 const colorDisplay = document.createElement('div');
                 colorDisplay.className = 'group-color-display sg-color-display w-4 h-4 rounded border border-gray-400';
-
 
                 if (groupColor) {
                     colorDisplay.style.backgroundColor = groupColor;
@@ -679,7 +1061,7 @@
                         }
                     });
 
-                    // Step 3: compute span info like prototype
+                    // Step 3: compute span info
                     const spanInfo = Array.from({ length: rowsCount }, () =>
                         Array.from({ length: cols }, () => ({
                             render: true,
@@ -721,7 +1103,7 @@
                     }
 
                     // Step 4: render rows/cols using spanInfo
-                    tbl.style.width = (cols * 80) + 'px'; // similar to prototype
+                    tbl.style.width = (cols * 80) + 'px';
 
                     for (let r = 0; r < rowsCount; r++) {
                         const tr = document.createElement('tr');
@@ -731,7 +1113,7 @@
                             if (!info.render) continue;
 
                             const td = document.createElement('td');
-                            td.className = 'tray-cell border px-3 py-2 text-sm text-gray-700 bg-white';
+                            td.className = 'tray-cell border px-3 py-3 text-sm text-gray-700 bg-white';
                             td.dataset.groupIndex = groupIndex;
                             td.dataset.col = c;
                             td.dataset.row = r;
@@ -746,11 +1128,23 @@
                                     courseLabel = course.course_title || course.course_name;
                                 }
 
-                                // label inside tray cell
+                                const termInfo = getCourseTermInfo(sess);
+
+                                // term badge HTML
+                                const termBadgeHTML = termInfo.badgeLabel
+                                    ? `
+                                <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
+                                    ${termInfo.badgeLabel}
+                                </div>
+                              `
+                                    : '';
+
+                                // label inside tray cell (centered text)
                                 td.innerHTML = `
-                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                    <div class="text-sm text-gray-800">${courseLabel}</div>
-                                `;
+                            <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
+                            <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
+                            <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
+                        `;
 
                                 // store meta for this sessionId (if not already)
                                 if (!courseMetaById[sess.id]) {
@@ -760,37 +1154,84 @@
                                     }
                                     const blocks = Math.max(1, Math.round(hours * 2));
 
+                                    // total class days (lecture + lab)
+                                    const lecDays = parseInt(course.total_lecture_class_days, 10) || 0;
+                                    const labDays = parseInt(course.total_laboratory_class_days, 10) || 0;
+                                    let totalClassDays = lecDays + labDays;
+                                    if (totalClassDays <= 0) {
+                                        totalClassDays = null; // treat as "no limit" safeguard
+                                    }
+
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
-                                            <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                            <div class="text-sm text-gray-800">${courseLabel}</div>
-                                        `,
+                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                    <div class="text-sm text-gray-800">${courseLabel}</div>
+                                `,
                                         blocks,
                                         groupIndex,
                                         groupTitle: groupTitleFull,
                                         courseLabel: courseLabel,
-                                        color: groupColor || null   // used by renderCanvas()
+                                        color: groupColor || null,
+
+                                        // term info for both tray + canvas
+                                        termIndex: termInfo.termIndex,             // 0 = 1st, 1 = 2nd, null = semestral
+                                        termBadgeLabel: termInfo.badgeLabel || '', // e.g. "1ST", "2ND", "SEM"
+                                        termKey:
+                                            termInfo.termIndex === 0
+                                                ? '1st'
+                                                : (termInfo.termIndex === 1 ? '2nd' : 'sem'),
+
+                                        // class-day constraint
+                                        totalClassDays: totalClassDays            // null = no limit
                                     };
                                 }
 
-                                // is this session already placed in the active (term, day) view?
+
                                 const currentKey = getCurrentViewKey();
                                 const viewPlacements = placementsByView[currentKey] || {};
                                 const isPlacedInCurrentView = !!viewPlacements[sess.id];
 
-                                if (lockedSessions.has(String(sess.id))) {
-                                    // locked: keep its group color, not draggable
+                                const metaForSession = courseMetaById[sess.id];
+                                const termIndex     = metaForSession.termIndex;
+                                const isTermAllowed =
+                                    termIndex === null || termIndex === activeTermIndex;
+
+                                const totalClassDays = metaForSession.totalClassDays;
+                                let limitReachedInThisTerm = false;
+                                if (totalClassDays != null) {
+                                    const usedSoFar = getUsedClassDaysInTerm(String(sess.id), activeTermIndex);
+                                    limitReachedInThisTerm = usedSoFar >= totalClassDays;
+                                }
+
+                                // --- state priority:
+                                // 1) term mismatch (always disabled)
+                                // 2) locked
+                                // 3) used in this view
+                                // 4) class-day quota reached in this term
+                                // 5) normal
+                                if (!isTermAllowed) {
+                                    td.classList.add('tray-term-disabled');
+                                    td.draggable = false;
+                                    const timetableLabel  = activeTermIndex === 0 ? '1st' : '2nd';
+                                    const courseLabelTerm = termIndex === 0 ? '1st' : (termIndex === 1 ? '2nd' : 'this');
+                                    td.title = `Cannot place ${courseLabelTerm} term subjects on ${timetableLabel} term timetable.`;
+                                } else if (lockedSessions.has(String(sess.id))) {
                                     td.classList.add('locked');
                                     td.draggable = false;
                                     if (groupColor) {
                                         td.style.backgroundColor = groupColor;
                                     }
                                 } else if (isPlacedInCurrentView) {
-                                    // used in this timetable: greyed out, not draggable
+                                    // same behavior as before: grey because this timetable already uses it
                                     td.classList.add('tray-used');
                                     td.draggable = false;
+                                } else if (limitReachedInThisTerm) {
+                                    // NEW: max class days already used in this term across other timetables
+                                    td.classList.add('tray-days-exhausted');
+                                    td.draggable = false;
+                                    const totalText = totalClassDays === 1 ? 'day' : 'days';
+                                    td.title = `Total number of class days has been reached for this term (${totalClassDays} ${totalText}). Cannot place this session in more timetables.`;
                                 } else {
-                                    // normal, draggable tray cell with group color
                                     if (groupColor) {
                                         td.style.backgroundColor = groupColor;
                                     }
@@ -798,6 +1239,7 @@
                                     td.addEventListener('dragstart', handleTrayDragStart);
                                     td.addEventListener('dragend', handleDragEnd);
                                 }
+
 
                                 // tray context menu + drag-over/drop
                                 td.addEventListener('contextmenu', handleCellContextMenu);
@@ -824,8 +1266,22 @@
                 wrapper.appendChild(scrollWrapper);
                 attachColorPickerToWrapper(wrapper);
                 container.appendChild(wrapper);
+
+                // --- restore saved horizontal scroll for this group, if any ---
+                const savedScrollLeft = previousScrollLeftByGroupId[String(group.id)];
+                if (typeof savedScrollLeft === 'number') {
+                    scrollWrapper.scrollLeft = savedScrollLeft;
+                }
+                // ---------------------------------------------------------------
             });
+
+            // --- NEW: restore vertical scroll of the whole tray ---
+            if (trayRoot) {
+                trayRoot.scrollTop = previousTrayScrollTop;
+            }
+            // ------------------------------------------------------
         }
+
 
 
         // ---------- CANVAS INIT & RENDERING ----------
@@ -862,8 +1318,12 @@
         function renderCanvas() {
             if (!canvasBody) return;
 
-            // Recompute conflicts for current view
+            // Recompute alignment (across all term/day views) and conflicts (within current view)
+            recomputeAlignmentIssues();
             recomputeConflicts();
+
+            // clear any previous alignment row highlight
+            clearAlignmentRowHighlight();
 
             // Reset all cells
             for (let r = 0; r < canvasRows; r++) {
@@ -881,19 +1341,22 @@
                         'preview-swap',
                         'preview-invalid',
                         'locked',
-                        'course-cell'
+                        'course-cell',
+                        'alignment-row-highlight'
                     );
                     td.removeAttribute('title');
                     td.removeEventListener('dragstart', handleCanvasDragStart);
                     td.removeEventListener('dragend', handleDragEnd);
                     td.removeEventListener('contextmenu', handleCellContextMenu);
+                    td.removeEventListener('mouseenter', handleAlignmentMouseEnter);
+                    td.removeEventListener('mouseleave', handleAlignmentMouseLeave);
                     delete td.dataset.sessionId;
                     delete td.dataset.topRow;
                     delete td.dataset.blocks;
                 }
             }
 
-            // Draw all placements
+            // Draw all placements for the CURRENT view
             Object.keys(placements).forEach(sessionId => {
                 const place = placements[sessionId];
                 const meta = courseMetaById[sessionId];
@@ -923,13 +1386,40 @@
                 // base label
                 let contentHTML = meta.labelHTML;
 
-                // conflict?
-                const hasConflict = conflictSessionIds.has(sessionId);
-                if (hasConflict) {
+                // separate conflict vs alignment
+                const hasConflict  = conflictSessionIds.has(sessionId);
+                const hasAlignment = alignmentIssueSessionIds.has(sessionId);
+
+                if (hasConflict || hasAlignment) {
                     contentHTML += `
-                <div class="conflict-warning-icon">⚠</div>
+                        <div class="conflict-warning-icon">⚠</div>
                     `;
-                    topTd.title = "Conflict warning — this session group is double-scheduled at this timeframe.";
+
+                    const messages = [];
+                    if (hasConflict) {
+                        messages.push(
+                            "Conflict: this session group is double-scheduled in this timeframe (same group appearing in multiple rooms)."
+                        );
+                    }
+                    if (hasAlignment) {
+                        messages.push(
+                            "Alignment: this course is placed at different timeslots across other timetables; consider aligning its time."
+                        );
+                    }
+                    topTd.title = messages.join(" ");
+                }
+
+
+                // term badge at bottom of the cell
+                if (meta.termBadgeLabel || meta.termLabel) {
+                    const label = meta.termBadgeLabel || meta.termLabel;
+                    const key   = meta.termKey ||
+                        (meta.termIndex === 0 ? '1st' : (meta.termIndex === 1 ? '2nd' : 'sem'));
+
+                    const termClass = key ? ` term-badge-${key}` : '';
+                    contentHTML += `
+                        <div class="term-badge${termClass}">${label}</div>
+                    `;
                 }
 
                 topTd.innerHTML = contentHTML;
@@ -956,8 +1446,16 @@
                 }
 
                 topTd.addEventListener('contextmenu', handleCellContextMenu);
+
+                // hover alignment highlight only for cells involved in alignment issues
+                if (alignmentIssueSessionIds.has(sessionId)) {
+                    topTd.addEventListener('mouseenter', handleAlignmentMouseEnter);
+                    topTd.addEventListener('mouseleave', handleAlignmentMouseLeave);
+                }
             });
         }
+
+
 
 
         // ---------- PREVIEW HELPERS ----------
@@ -1047,7 +1545,7 @@
             const sessionId = String(target.sessionId);
             const isLocked = lockedSessions.has(sessionId);
 
-            // Lock / Unlock item
+            // --- Lock / Unlock item ---
             const lockItem = document.createElement('li');
             lockItem.textContent = isLocked ? 'Unlock course' : 'Lock course';
             lockItem.addEventListener('click', function () {
@@ -1062,8 +1560,13 @@
             });
             ul.appendChild(lockItem);
 
-            // Canvas-only: Remove from timetable (also unlock)
+            // --- Context-specific items ---
+            const currentKey = getCurrentViewKey();
+            const viewPlacements = placementsByView[currentKey] || {};
+            const isPlacedInCurrentView = !!viewPlacements[sessionId];
+
             if (target.from === 'canvas') {
+                // Canvas-only: Remove from timetable (also unlock)
                 const hr = document.createElement('hr');
                 ul.appendChild(hr);
 
@@ -1077,6 +1580,21 @@
                     renderCanvas();
                 });
                 ul.appendChild(removeItem);
+            } else if (target.from === 'tray' && isPlacedInCurrentView) {
+                // Tray-only: Return to tray (remove placement in this view)
+                const hr2 = document.createElement('hr');
+                ul.appendChild(hr2);
+
+                const returnItem = document.createElement('li');
+                returnItem.textContent = 'Return to tray';
+                returnItem.addEventListener('click', function () {
+                    delete placements[sessionId];
+                    lockedSessions.delete(sessionId);
+                    hideContextMenu();
+                    buildTray();
+                    renderCanvas();
+                });
+                ul.appendChild(returnItem);
             }
 
             // position menu
@@ -1098,6 +1616,7 @@
                 menu.style.top = (rect.top + dy) + 'px';
             }
         }
+
 
         function handleCellContextMenu(e) {
             e.preventDefault();

@@ -13,14 +13,14 @@
                     <button
                         type="button"
                         data-term-index="0"
-                        class="term-button px-6 py-2 bg-red-700 text-white font-semibold rounded-lg shadow hover:bg-red-800 transition">
+                        class="term-button px-6 py-2 bg-red-700 text-white font-semibold rounded-lg shadow hover:bg-red-800 transition cursor-pointer">
                         1st Term
                     </button>
 
                     <button
                         type="button"
                         data-term-index="1"
-                        class="term-button px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-300 transition">
+                        class="term-button px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-300 transition cursor-pointer">
                         2nd Term
                     </button>
                 </div>
@@ -32,7 +32,7 @@
                             type="button"
                             data-day-index="{{ $index }}"
                             class="day-button py-2 text-center rounded-lg text-sm font-medium bg-gray-200 text-gray-700
-                            hover:bg-red-700 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg">
+                            hover:bg-red-700 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
                             {{ $day }}
                         </button>
                     @endforeach
