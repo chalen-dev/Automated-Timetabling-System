@@ -1,11 +1,12 @@
 {{-- courses-tray.blade.php --}}
 
 <div
-
     x-data="{ open: false }"
     @click.outside="open = false"
+    x-on:courses-tray:retract.window="open = false"
     class="fixed top-30 right-0 z-50"
 >
+
     <div class="flex flex-row items-start align-center">
         {{-- Toggle Button --}}
         <button

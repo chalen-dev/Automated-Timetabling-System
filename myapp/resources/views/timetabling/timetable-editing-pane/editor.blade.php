@@ -263,6 +263,47 @@
 
 <script>
     (function () {
+        // --- Auto-retract tray when dragging a cell out of it ---
+        let isDraggingFromTray = false;
+
+        // Track where the drag started
+        document.addEventListener('dragstart', function (e) {
+            const cell = e.target.closest('td');
+            if (!cell) return;
+
+            // If the dragged cell lives inside the tray, mark it
+            const trayEl = document.getElementById('coursesTray');
+            if (trayEl && trayEl.contains(cell)) {
+                isDraggingFromTray = true;
+            } else {
+                isDraggingFromTray = false;
+            }
+        });
+
+        // Clear state when drag ends (anywhere)
+        document.addEventListener('dragend', function () {
+            isDraggingFromTray = false;
+        });
+
+        // When a drag that started in the tray actually leaves the tray root,
+        // tell Alpine to close the tray.
+        document.addEventListener('DOMContentLoaded', function () {
+            const trayEl = document.getElementById('coursesTray');
+            if (!trayEl) return;
+
+            trayEl.addEventListener('dragleave', function (e) {
+                if (!isDraggingFromTray) return;
+
+                const related = e.relatedTarget;
+                // If we're still going to another element INSIDE the tray, ignore.
+                if (related && trayEl.contains(related)) return;
+
+                // We left the tray area during a tray-origin drag: retract.
+                window.dispatchEvent(new CustomEvent('courses-tray:retract'));
+            });
+        });
+
+
         const sessionGroups = window.sessionGroupsData || [];
 
         // --- Academic term helpers for courses/sessions ---
