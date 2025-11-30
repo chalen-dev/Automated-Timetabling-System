@@ -20,9 +20,11 @@
 @endsection
 
 <script>
-    // Raw session groups + their courseSessions from Laravel
     window.sessionGroupsData = @json($sessionGroups);
+    window.initialPlacementsByView = @json($initialPlacementsByView ?? []);
+    const CSRF_TOKEN = '{{ csrf_token() }}';
 </script>
+
 <style>
     /* Make sure cells can show the corner icons */
     .timetable-editor td {
@@ -1008,22 +1010,24 @@
 
 
         document.addEventListener('DOMContentLoaded', function () {
+            // 1) Accept initial placements from backend, if present
+            if (window.initialPlacementsByView) {
+                Object.keys(window.initialPlacementsByView).forEach(function (viewKey) {
+                    placementsByView[viewKey] = window.initialPlacementsByView[viewKey] || {};
+                });
+            }
+
+            // 2) Existing initialization
             buildTray();
             initCanvas();
 
-            // make sure the placements object for the current view exists
+            // Ensure current view has a placements object
             ensureCurrentViewPlacements();
 
-            // wire up term/day buttons (adds the click handlers)
-            initTermDayControls();
-
-            // initial view: 1st Term, Monday (0, 0)
+            // 3) Default view: 1st Term, Monday
             switchToView(0, 0);
         });
 
-        // ---------- TRAY RENDERING ----------
-
-        // ---------- TRAY RENDERING ----------
 
         // ---------- TRAY RENDERING ----------
 
