@@ -744,6 +744,35 @@
                 });
         };
 
+        // ---- GLOBAL KEYBOARD SHORTCUT: Ctrl+S / Cmd+S => Save timetable ----
+        document.addEventListener('keydown', function (e) {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const isSaveCombo =
+                (isMac && e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 's') ||
+                (!isMac && e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 's');
+
+            if (!isSaveCombo) {
+                return;
+            }
+
+            // Don’t hijack Ctrl+S while typing in inputs / textareas / editable fields
+            const target = e.target;
+            const tag = target.tagName;
+            const isEditable =
+                target.isContentEditable ||
+                tag === 'INPUT' ||
+                tag === 'TEXTAREA' ||
+                tag === 'SELECT';
+
+            if (isEditable) {
+                return;
+            }
+
+            e.preventDefault(); // stop browser "Save Page"
+            if (typeof window.saveTimetableToExcel === 'function') {
+                window.saveTimetableToExcel();
+            }
+        });
 
 
 
