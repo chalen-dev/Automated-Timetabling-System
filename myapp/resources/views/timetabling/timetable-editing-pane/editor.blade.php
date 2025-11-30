@@ -179,6 +179,45 @@
         background-color: #f9fafb;
         color: #1f2937;
     }
+    /* Show drag cursor on any draggable timetable/tray cell */
+    .timetable-editor td[draggable="true"],
+    #coursesTray td[draggable="true"] {
+        cursor: grab;
+    }
+    .timetable-editor td[draggable="true"]:active,
+    #coursesTray td[draggable="true"]:active {
+        cursor: grabbing;
+    }
+
+    /* Top badge in tray cells for placed/required class days (x/y) */
+    #coursesTray td .classdays-badge {
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        line-height: 1;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #111827; /* default text color (not complete) */
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    /* When x == y, text becomes green */
+    #coursesTray td .classdays-badge.completed {
+        color: #16a34a; /* green-600 */
+    }
+
+    /* Make tray cells a bit taller so top badge doesn't overlap text */
+    #coursesTray td.tray-cell {
+        padding-top: 1.5rem;  /* extra for top badge */
+        padding-bottom: 1.75rem; /* you already had this; keeping it */
+    }
+
+
 
 
 
@@ -581,6 +620,24 @@
             placements = placementsByView[key];
         }
 
+        // Count how many *days* this session is placed in a given term (0 = 1st, 1 = 2nd)
+        // x in "x / y" badge.
+        function getPlacementCountForSessionInTerm(sessionId, termIndex) {
+            const sid = String(sessionId);
+            let count = 0;
+
+            // We have dayIndex = 0..5 (Mon..Sat)
+            for (let day = 0; day <= 5; day++) {
+                const key  = termIndex + '-' + day;
+                const view = placementsByView[key];
+                if (view && view[sid]) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+
         function updateTermButtonsUI() {
             const termButtons = document.querySelectorAll('.timetable-editor .term-button');
             termButtons.forEach(btn => {
@@ -933,13 +990,10 @@
             const container = document.getElementById('sessionGroupsContainer');
             if (!container) return;
 
-            // recompute per-session class-day usage across all term/day views
-            recomputeClassDayUsage();
-
-            // --- NEW: remember vertical scroll of the whole tray ---
+            // --- remember vertical scroll of the whole tray ---
             const trayRoot = document.getElementById('coursesTray');
             const previousTrayScrollTop = trayRoot ? trayRoot.scrollTop : 0;
-            // -------------------------------------------------------
+            // --------------------------------------------------
 
             // --- remember horizontal scroll per session group before rebuild ---
             const previousScrollLeftByGroupId = {};
@@ -1130,23 +1184,12 @@
 
                                 const termInfo = getCourseTermInfo(sess);
 
-                                // term badge HTML
-                                const termBadgeHTML = termInfo.badgeLabel
-                                    ? `
-                                <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
-                                    ${termInfo.badgeLabel}
-                                </div>
-                              `
-                                    : '';
+                                // --- total class days (y in x/y) ---
+                                const lectureDays = parseInt(course.total_lecture_class_days, 10) || 0;
+                                const labDays     = parseInt(course.total_laboratory_class_days, 10) || 0;
+                                const totalClassDays = lectureDays + labDays;
 
-                                // label inside tray cell (centered text)
-                                td.innerHTML = `
-                            <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
-                            <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
-                            <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
-                        `;
-
-                                // store meta for this sessionId (if not already)
+                                // Store meta only once
                                 if (!courseMetaById[sess.id]) {
                                     let hours = parseFloat(course.class_hours);
                                     if (!Number.isFinite(hours) || hours <= 0) {
@@ -1154,19 +1197,11 @@
                                     }
                                     const blocks = Math.max(1, Math.round(hours * 2));
 
-                                    // total class days (lecture + lab)
-                                    const lecDays = parseInt(course.total_lecture_class_days, 10) || 0;
-                                    const labDays = parseInt(course.total_laboratory_class_days, 10) || 0;
-                                    let totalClassDays = lecDays + labDays;
-                                    if (totalClassDays <= 0) {
-                                        totalClassDays = null; // treat as "no limit" safeguard
-                                    }
-
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
-                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                    <div class="text-sm text-gray-800">${courseLabel}</div>
-                                `,
+                                            <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                            <div class="text-sm text-gray-800">${courseLabel}</div>
+                                        `,
                                         blocks,
                                         groupIndex,
                                         groupTitle: groupTitleFull,
@@ -1181,38 +1216,66 @@
                                                 ? '1st'
                                                 : (termInfo.termIndex === 1 ? '2nd' : 'sem'),
 
-                                        // class-day constraint
-                                        totalClassDays: totalClassDays            // null = no limit
+                                        // total class days for this course
+                                        totalClassDays: totalClassDays
                                     };
+                                } else if (courseMetaById[sess.id].totalClassDays == null) {
+                                    // in case meta was created earlier without this field
+                                    courseMetaById[sess.id].totalClassDays = totalClassDays;
                                 }
 
+                                const metaForSession = courseMetaById[sess.id];
+
+                                // --- x in x/y: how many timetables (days) this session is placed in THIS term ---
+                                let placedCount = 0;
+                                if (metaForSession.totalClassDays > 0) {
+                                    placedCount = getPlacementCountForSessionInTerm(sess.id, activeTermIndex);
+                                }
+
+                                // top badge: x/y
+                                let classdaysBadgeHTML = '';
+                                if (metaForSession.totalClassDays > 0) {
+                                    const x = placedCount;
+                                    const y = metaForSession.totalClassDays;
+                                    const completed = x >= y;
+                                    const completedClass = completed ? ' completed' : '';
+                                    classdaysBadgeHTML = `
+                                        <div class="classdays-badge${completedClass}">
+                                            ${x}/${y}
+                                        </div>
+                                    `;
+                                }
+
+                                // term badge HTML (bottom)
+                                const termBadgeHTML = termInfo.badgeLabel
+                                    ? `
+                                        <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
+                                            ${termInfo.badgeLabel}
+                                        </div>
+                                      `
+                                    : '';
+
+                                // label inside tray cell (centered text)
+                                td.innerHTML = `
+                                    ${classdaysBadgeHTML}
+                                    <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
+                                    <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
+                                    <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
+                                `;
 
                                 const currentKey = getCurrentViewKey();
                                 const viewPlacements = placementsByView[currentKey] || {};
                                 const isPlacedInCurrentView = !!viewPlacements[sess.id];
 
-                                const metaForSession = courseMetaById[sess.id];
-                                const termIndex     = metaForSession.termIndex;
+                                const termIndex = metaForSession.termIndex;
                                 const isTermAllowed =
                                     termIndex === null || termIndex === activeTermIndex;
 
-                                const totalClassDays = metaForSession.totalClassDays;
-                                let limitReachedInThisTerm = false;
-                                if (totalClassDays != null) {
-                                    const usedSoFar = getUsedClassDaysInTerm(String(sess.id), activeTermIndex);
-                                    limitReachedInThisTerm = usedSoFar >= totalClassDays;
-                                }
-
-                                // --- state priority:
-                                // 1) term mismatch (always disabled)
-                                // 2) locked
-                                // 3) used in this view
-                                // 4) class-day quota reached in this term
-                                // 5) normal
+                                // --- state priority: term-disabled > locked > used > normal ---
                                 if (!isTermAllowed) {
                                     td.classList.add('tray-term-disabled');
                                     td.draggable = false;
-                                    const timetableLabel  = activeTermIndex === 0 ? '1st' : '2nd';
+                                    const timetableLabel = activeTermIndex === 0 ? '1st' : '2nd';
                                     const courseLabelTerm = termIndex === 0 ? '1st' : (termIndex === 1 ? '2nd' : 'this');
                                     td.title = `Cannot place ${courseLabelTerm} term subjects on ${timetableLabel} term timetable.`;
                                 } else if (lockedSessions.has(String(sess.id))) {
@@ -1222,15 +1285,8 @@
                                         td.style.backgroundColor = groupColor;
                                     }
                                 } else if (isPlacedInCurrentView) {
-                                    // same behavior as before: grey because this timetable already uses it
                                     td.classList.add('tray-used');
                                     td.draggable = false;
-                                } else if (limitReachedInThisTerm) {
-                                    // NEW: max class days already used in this term across other timetables
-                                    td.classList.add('tray-days-exhausted');
-                                    td.draggable = false;
-                                    const totalText = totalClassDays === 1 ? 'day' : 'days';
-                                    td.title = `Total number of class days has been reached for this term (${totalClassDays} ${totalText}). Cannot place this session in more timetables.`;
                                 } else {
                                     if (groupColor) {
                                         td.style.backgroundColor = groupColor;
@@ -1239,7 +1295,6 @@
                                     td.addEventListener('dragstart', handleTrayDragStart);
                                     td.addEventListener('dragend', handleDragEnd);
                                 }
-
 
                                 // tray context menu + drag-over/drop
                                 td.addEventListener('contextmenu', handleCellContextMenu);
@@ -1275,14 +1330,12 @@
                 // ---------------------------------------------------------------
             });
 
-            // --- NEW: restore vertical scroll of the whole tray ---
+            // --- restore vertical scroll of the whole tray ---
             if (trayRoot) {
                 trayRoot.scrollTop = previousTrayScrollTop;
             }
-            // ------------------------------------------------------
+            // --------------------------------------------------
         }
-
-
 
         // ---------- CANVAS INIT & RENDERING ----------
 
@@ -1543,30 +1596,30 @@
             contextTarget = target;
 
             const sessionId = String(target.sessionId);
-            const isLocked = lockedSessions.has(sessionId);
+            const from      = target.from;
+            const isLocked  = lockedSessions.has(sessionId);
 
-            // --- Lock / Unlock item ---
-            const lockItem = document.createElement('li');
-            lockItem.textContent = isLocked ? 'Unlock course' : 'Lock course';
-            lockItem.addEventListener('click', function () {
-                if (lockedSessions.has(sessionId)) {
-                    lockedSessions.delete(sessionId);
-                } else {
-                    lockedSessions.add(sessionId);
-                }
-                hideContextMenu();
-                buildTray();
-                renderCanvas();
-            });
-            ul.appendChild(lockItem);
-
-            // --- Context-specific items ---
-            const currentKey = getCurrentViewKey();
+            const currentKey     = getCurrentViewKey();
             const viewPlacements = placementsByView[currentKey] || {};
             const isPlacedInCurrentView = !!viewPlacements[sessionId];
 
-            if (target.from === 'canvas') {
-                // Canvas-only: Remove from timetable (also unlock)
+            // --- Canvas: Lock/Unlock + Remove from timetable ---
+            if (from === 'canvas') {
+                // Lock / Unlock item (canvas only)
+                const lockItem = document.createElement('li');
+                lockItem.textContent = isLocked ? 'Unlock course' : 'Lock course';
+                lockItem.addEventListener('click', function () {
+                    if (lockedSessions.has(sessionId)) {
+                        lockedSessions.delete(sessionId);
+                    } else {
+                        lockedSessions.add(sessionId);
+                    }
+                    hideContextMenu();
+                    buildTray();
+                    renderCanvas();
+                });
+                ul.appendChild(lockItem);
+
                 const hr = document.createElement('hr');
                 ul.appendChild(hr);
 
@@ -1580,11 +1633,9 @@
                     renderCanvas();
                 });
                 ul.appendChild(removeItem);
-            } else if (target.from === 'tray' && isPlacedInCurrentView) {
-                // Tray-only: Return to tray (remove placement in this view)
-                const hr2 = document.createElement('hr');
-                ul.appendChild(hr2);
 
+            } else if (from === 'tray' && isPlacedInCurrentView) {
+                // --- Tray: ONLY "Return to tray" (no lock/unlock here) ---
                 const returnItem = document.createElement('li');
                 returnItem.textContent = 'Return to tray';
                 returnItem.addEventListener('click', function () {
@@ -1595,6 +1646,9 @@
                     renderCanvas();
                 });
                 ul.appendChild(returnItem);
+            } else {
+                // Safety: nothing to show
+                return;
             }
 
             // position menu
@@ -1613,9 +1667,10 @@
             }
             if (dx || dy) {
                 menu.style.left = (rect.left + dx) + 'px';
-                menu.style.top = (rect.top + dy) + 'px';
+                menu.style.top  = (rect.top + dy) + 'px';
             }
         }
+
 
 
         function handleCellContextMenu(e) {
@@ -1627,8 +1682,23 @@
             if (!sessionId) return;
 
             const from = td.closest('.timetable-editor') ? 'canvas' : 'tray';
+
+            // For TRAY cells: only show a context menu if the session
+            // is already placed in the current view. Otherwise, NO menu.
+            if (from === 'tray') {
+                const currentKey      = getCurrentViewKey();
+                const viewPlacements  = placementsByView[currentKey] || {};
+                const isPlacedHere    = !!viewPlacements[sessionId];
+
+                if (!isPlacedHere) {
+                    // Nothing to do, don't open any menu.
+                    return;
+                }
+            }
+
             showContextMenu(e.clientX, e.clientY, { sessionId, from });
         }
+
 
         // ---------- DRAG HELPERS ----------
 
