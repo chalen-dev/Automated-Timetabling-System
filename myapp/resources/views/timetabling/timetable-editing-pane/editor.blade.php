@@ -1024,6 +1024,8 @@
             // Ensure current view has a placements object
             ensureCurrentViewPlacements();
 
+            initTermDayControls();
+
             // 3) Default view: 1st Term, Monday
             switchToView(0, 0);
         });
