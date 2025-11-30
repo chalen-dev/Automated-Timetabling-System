@@ -1506,7 +1506,7 @@
                             "Alignment: this course is placed at different timeslots across other timetables; consider aligning its time."
                         );
                     }
-                    topTd.title = messages.join(" ");
+                    topTd.title = messages.join("\n");
                 }
 
 
