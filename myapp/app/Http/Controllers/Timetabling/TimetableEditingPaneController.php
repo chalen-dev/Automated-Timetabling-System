@@ -500,7 +500,7 @@ class TimetableEditingPaneController extends Controller
 
             return response()->json([
                 'status'  => 'ok',
-                'message' => 'Timetable saved to Excel.',
+                'message' => 'Timetable changes have been saved.',
             ]);
 
         } catch (\Throwable $e) {

@@ -264,6 +264,50 @@
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        window.Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        @if(session('success'))
+        Toast.fire({
+            icon: 'success',
+            title: "{{ session('success') }}"
+        });
+        @endif
+
+        @if(session('error'))
+        Toast.fire({
+            icon: 'error',
+            title: "{{ session('error') }}"
+        });
+        @endif
+
+        @if(session('info'))
+        Toast.fire({
+            icon: 'info',
+            title: "{{ session('info') }}"
+        });
+        @endif
+
+        @if(session('warning'))
+        Toast.fire({
+            icon: 'warning',
+            title: "{{ session('warning') }}"
+        });
+        @endif
+    });
+</script>
+
+<script>
     (function () {
         // --- Auto-retract tray when dragging a cell out of it ---
         let isDraggingFromTray = false;
@@ -649,7 +693,10 @@
         window.saveTimetableToExcel = function () {
             const state = window.getTimetableEditorState && window.getTimetableEditorState();
             if (!state) {
-                console.error('Editor state not available');
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Editor state not available.'
+                });
                 return;
             }
 
@@ -666,22 +713,37 @@
             })
                 .then(async (response) => {
                     let data = null;
+
                     try {
                         data = await response.json();
                     } catch (e) {
-                        console.error('Save response is not valid JSON');
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Invalid server response.'
+                        });
+                        return;
                     }
 
                     if (!response.ok) {
-                        console.error('Save failed:', response.status, data);
+                        Toast.fire({
+                            icon: 'error',
+                            title: data?.message || 'Save failed.'
+                        });
                     } else {
-                        console.log('Save succeeded:', data);
+                        Toast.fire({
+                            icon: 'success',
+                            title: data?.message || 'Timetable saved!'
+                        });
                     }
                 })
                 .catch((err) => {
-                    console.error('Network / JS error while saving timetable:', err);
+                    Toast.fire({
+                        icon: 'error',
+                        title: err?.message || 'Network error while saving.'
+                    });
                 });
         };
+
 
 
 
