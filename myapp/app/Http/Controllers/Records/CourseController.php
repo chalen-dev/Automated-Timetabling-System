@@ -140,18 +140,109 @@ class CourseController extends Controller
             ->with('success', 'Course updated successfully');
     }
 
-    public function destroy(Course $course){
+    public function destroy(Course $course)
+    {
+        // Collect metadata for logging
         $courseData = [
-            'course_id' => $course->id,
-            'course_title' => $course->course_title
+            'course_id'    => $course->id,
+            'course_title' => $course->course_title,
         ];
 
+        // Fetch all CourseSessions of this Course (across ALL SessionGroups / Timetables)
+        $sessions = $course->courseSessions()
+            ->with(['sessionGroup.academicProgram', 'sessionGroup.timetable'])
+            ->get();
+
+        // Loop each CourseSession and clean all XLSX references
+        foreach ($sessions as $session) {
+            $group = $session->sessionGroup;
+            if (!$group || !$group->timetable) {
+                continue;
+            }
+
+            $timetable = $group->timetable;
+
+            // Build encoded string used in XLSX sheets
+            $programAbbr = $group->academicProgram?->program_abbreviation ?? 'UNK';
+            $yearLevel   = $group->year_level ?? '';
+            $groupId     = $group->id;
+            $sessionId   = $session->id;
+
+            $encoded = "{$programAbbr}_{$yearLevel}_{$groupId}_{$sessionId}";
+
+            $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+
+            if (!file_exists($xlsxPath)) {
+                \Log::info("Course destroy: XLSX not found for timetable {$timetable->id}");
+                continue;
+            }
+
+            if (!is_writable($xlsxPath) && !is_writable(dirname($xlsxPath))) {
+                \Log::warning("Course destroy: XLSX not writable for timetable {$timetable->id}");
+                continue;
+            }
+
+            try {
+                // Load spreadsheet
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsxPath);
+                $sheetCount  = $spreadsheet->getSheetCount();
+                $madeChange  = false;
+
+                for ($si = 0; $si < $sheetCount; $si++) {
+                    $sheet = $spreadsheet->getSheet($si);
+                    $table = $sheet->toArray(null, true, true, false);
+
+                    if (empty($table) || !is_array($table[0])) continue;
+
+                    $rowCount = count($table);
+                    $colCount = count($table[0] ?? []);
+
+                    // skip col 0 (time), skip row 0 (room header)
+                    for ($r = 1; $r < $rowCount; $r++) {
+                        for ($c = 1; $c < $colCount; $c++) {
+                            $cellVal = trim((string)($table[$r][$c] ?? ''));
+
+                            if ($cellVal === $encoded) {
+                                // convert array index → Excel notation
+                                $excelRowIndex = $r + 1;
+                                $excelColIndex = $c + 1;
+                                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($excelColIndex);
+                                $cellAddress = $colLetter . $excelRowIndex;
+
+                                $sheet->setCellValue($cellAddress, 'Vacant');
+                                $madeChange = true;
+                            }
+                        }
+                    }
+                }
+
+                if ($madeChange) {
+                    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+                    $writer->save($xlsxPath);
+                    \Log::info("Course destroy: Removed encoded '{$encoded}' from timetable {$timetable->id}");
+                }
+
+            } catch (\Throwable $e) {
+                \Log::error("Error cleaning XLSX for Course destroy: " . $e->getMessage(), [
+                    'course_id'      => $course->id,
+                    'session_id'     => $sessionId,
+                    'timetable_id'   => $timetable->id,
+                ]);
+            }
+
+            // Finally delete the CourseSession record
+            $session->delete();
+        }
+
+        // Now delete the Course itself
         $course->delete();
 
-        //Log
+        // Log final deletion
         Logger::log('delete', 'course', $courseData);
 
-        return redirect()->route('courses.index')
+        return redirect()
+            ->route('courses.index')
             ->with('success', 'Course deleted successfully');
     }
+
 }

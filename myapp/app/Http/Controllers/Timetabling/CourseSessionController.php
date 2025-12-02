@@ -127,6 +127,99 @@ class CourseSessionController extends Controller
             abort(404);
         }
 
+        // Build encoded code exactly like saveFromEditor() expects:
+        // "{$programAbbr}_{$yearLevel}_{$sessionGroupId}_{$sessionId}"
+        try {
+            $programAbbr = $sessionGroup->academicProgram?->program_abbreviation ?? 'UNK';
+            $yearLevel   = $sessionGroup->year_level ?? '';
+            $sessionGroupId = $sessionGroup->id;
+            $sessionId = $courseSession->id;
+
+            $encoded = "{$programAbbr}_{$yearLevel}_{$sessionGroupId}_{$sessionId}";
+
+            $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+
+            if (file_exists($xlsxPath)) {
+                // Quick writable check (attempt to check dir too)
+                if (!is_writable($xlsxPath) && !is_writable(dirname($xlsxPath))) {
+                    \Illuminate\Support\Facades\Log::warning('CourseSession destroy: XLSX file or directory not writable — skipping sheet update', [
+                        'timetable_id' => $timetable->id,
+                        'path' => $xlsxPath,
+                    ]);
+                } else {
+                    // Load spreadsheet and scan all sheets for exact matches to $encoded
+                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsxPath);
+                    $sheetCount = $spreadsheet->getSheetCount();
+                    $madeChange = false;
+
+                    for ($si = 0; $si < $sheetCount; $si++) {
+                        $sheet = $spreadsheet->getSheet($si);
+                        // Convert to PHP array (0-based cols)
+                        $table = $sheet->toArray(null, true, true, false);
+                        if (empty($table) || !isset($table[0]) || !is_array($table[0])) {
+                            continue;
+                        }
+
+                        $rowCount = count($table);
+                        $colCount = count($table[0] ?? []);
+
+                        // Iterate data area rows (skip header row 0). Use the same indexing pattern your other code uses.
+                        for ($r = 1; $r < $rowCount; $r++) {
+                            for ($c = 1; $c < $colCount; $c++) {
+                                $cellVal = trim((string) ($table[$r][$c] ?? ''));
+                                if ($cellVal === $encoded) {
+                                    // Convert array indices to Excel (1-based)
+                                    $excelRowIndex = $r + 1;
+                                    $excelColIndex = $c + 1;
+                                    $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($excelColIndex);
+                                    $cellAddress = $colLetter . $excelRowIndex;
+                                    $sheet->setCellValue($cellAddress, 'Vacant');
+                                    $madeChange = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if ($madeChange) {
+                        // Save back (only if changed)
+                        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+                        $writer->save($xlsxPath);
+
+                        \Illuminate\Support\Facades\Log::info('CourseSession destroy: cleared encoded placements in XLSX', [
+                            'timetable_id' => $timetable->id,
+                            'session_group_id' => $sessionGroupId,
+                            'course_session_id' => $sessionId,
+                            'encoded' => $encoded,
+                            'path' => $xlsxPath,
+                        ]);
+                    } else {
+                        \Illuminate\Support\Facades\Log::info('CourseSession destroy: no matching encoded cells found in XLSX', [
+                            'timetable_id' => $timetable->id,
+                            'session_group_id' => $sessionGroupId,
+                            'course_session_id' => $sessionId,
+                            'encoded' => $encoded,
+                            'path' => $xlsxPath,
+                        ]);
+                    }
+                }
+            } else {
+                \Illuminate\Support\Facades\Log::info('CourseSession destroy: timetable XLSX not found — skipping sheet update', [
+                    'timetable_id' => $timetable->id,
+                    'path' => $xlsxPath,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Don't block the deletion if sheet update fails; log the error for investigation.
+            \Illuminate\Support\Facades\Log::error('Error while clearing CourseSession encoded values in XLSX during destroy()', [
+                'timetable_id' => $timetable->id ?? null,
+                'session_group_id' => $sessionGroup->id ?? null,
+                'course_session_id' => $courseSession->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+
+
         $courseSession->delete();
 
         Logger::log('delete', 'course sessions', [

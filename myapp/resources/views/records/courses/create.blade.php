@@ -13,11 +13,13 @@
                     <livewire:input.text
                         label="Course Title"
                         name="course_title"
+                        isRequired
                     />
 
                     <livewire:input.text
                         label="Course Name"
                         name="course_name"
+                        isRequired
                     />
                 </div>
 
@@ -27,6 +29,7 @@
                         name="course_type"
                         :options="$courseTypeOptions"
                         default=""
+                        isRequired
                     />
 
                     <livewire:input.number
@@ -36,6 +39,7 @@
                         :min="1"
                         :max="9"
                         :step="1"
+                        isRequired
                     />
                 </div>
 
@@ -47,6 +51,7 @@
                             :min="0"
                             :max="6"
                             :step="1"
+                            isRequired
                         />
 
                         <livewire:input.number
@@ -56,6 +61,7 @@
                             :min="0"
                             :max="6"
                             :step="1"
+                            isRequired
                         />
                     @if($errors->has('total_days'))
                         <div class="!text-red-500">{{$errors->first('total_days')}}</div>
@@ -69,6 +75,7 @@
                         :min="0.0"
                         :max="10.0"
                         :step="0.1"
+                        isRequired
                     />
 
                     <livewire:input.radio-group
@@ -76,18 +83,17 @@
                         name="duration_type"
                         :options="$durationTypeOptions"
                         default=""
+                        isRequired
                     />
                 </div>
             </div>
+            <div class="flex flex-row w-full justify-between items-center mt-[100px]">
+                <livewire:buttons.back
+                    :route="'courses.index'"
+                />
+                <livewire:buttons.create submit/>
+            </div>
         </form>
-        <div class="flex flex-row w-full justify-between items-center">
-            <a href="{{route('courses.index')}}">
-                <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
-                    <span>Back</span>
-                </button>
-            </a>
 
-            <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Create</span></button>
-        </div>
     </div>
 @endsection
