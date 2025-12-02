@@ -29,7 +29,7 @@
             <div class="text-red-500 mb-4">{{ $message }}</div>
         @endif
 
-        <table class="w-full border text-left border-separate border-spacing-0">
+        <table class="w-full border text-left border-separate border-spacing-0 bg-white">
             <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
                 <th class="px-6 py-3">Course Title</th>

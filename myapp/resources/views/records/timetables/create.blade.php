@@ -12,6 +12,7 @@
                     <livewire:input.text
                         label="Name of Timetable"
                         name="timetable_name"
+                        isRequired
                     />
 
                     <livewire:input.radio-group
@@ -19,11 +20,13 @@
                         name="semester"
                         :options="$semesterOptions"
                         default=""
+                        isRequired
                     />
 
                     <livewire:input.text
                         label="Academic Year"
                         name="academic_year"
+                        isRequired
                     />
                 </div>
                 <div>
@@ -35,10 +38,10 @@
                 </div>
             </div>
             <div class="flex flex-row w-full justify-between items-center">
-                <a href="{{route('timetables.index')}}" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600] hover:bg-[#828282]">
-                        <span>Back</span>
-                </a>
-                <button type="submit" class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]"><span>Create</span></button>
+                <livewire:buttons.back
+                    :route="'timetables.index'"
+                />
+                <livewire:buttons.create submit/>
             </div>
         </form>
     </div>
