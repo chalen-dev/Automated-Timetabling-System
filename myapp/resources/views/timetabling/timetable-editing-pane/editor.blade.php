@@ -12,7 +12,7 @@
 
         <livewire:timetabling.editor.courses-tray/>
 
-        <livewire:timetabling.editor.timetable-canvas :timetable="$timetable" />
+        <livewire:timetabling.editor.timetable-canvas :timetable="$timetable" :rooms="$rooms" />
 
 
 
@@ -22,8 +22,10 @@
 <script>
     window.sessionGroupsData = @json($sessionGroups);
     window.initialPlacementsByView = @json($initialPlacementsByView ?? []);
+    window.editorRooms = @json($rooms ?? []);
     const CSRF_TOKEN = '{{ csrf_token() }}';
 </script>
+
 
 <style>
     /* Make sure cells can show the corner icons */
@@ -2306,14 +2308,3 @@
         }
     })();
 </script>
-
-
-
-
-
-
-
-
-
-
-

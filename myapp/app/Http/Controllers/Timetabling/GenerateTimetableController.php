@@ -159,13 +159,14 @@ class GenerateTimetableController extends Controller
             ->where('tr.timetable_id', $timetableId)
             ->orderByRaw("
                 CASE r.room_type
-                    WHEN 'lecture' THEN 1
-                    WHEN 'comlab' THEN 2
+                    WHEN 'comlab' THEN 1
+                    WHEN 'lecture' THEN 2
                     WHEN 'gym' THEN 3
                     WHEN 'main' THEN 4
                     ELSE 5
                 END
             ")
+            ->orderBy('r.room_name', 'ASC')
             ->pluck('r.room_name')
             ->toArray();
 

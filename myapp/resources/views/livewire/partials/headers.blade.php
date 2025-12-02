@@ -1,4 +1,4 @@
-<div class="relative z-60">
+<div class="relative z-40">
 
     @guest
 

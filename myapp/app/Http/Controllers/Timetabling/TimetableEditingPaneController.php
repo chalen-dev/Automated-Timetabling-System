@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\SessionGroup;
 use App\Models\Timetabling\CourseSession;
+use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Log;
 
@@ -150,7 +152,8 @@ class TimetableEditingPaneController extends Controller
      *   ...
      * ]
      *
-     * where array keys like "33" are CourseSession IDs.
+     * where array keys like "33" are CourseSession IDs. This version maps sheet columns
+     * to the controller's canonical room ordering (so room deletions won't shift columns).
      */
     private function buildInitialPlacementsFromXlsx(Timetable $timetable): array
     {
@@ -163,6 +166,24 @@ class TimetableEditingPaneController extends Controller
         $sheetCount  = $spreadsheet->getSheetCount();
 
         $placementsByView = [];
+
+        // canonical rooms order for this timetable (same ordering used by the editor)
+        $rooms = DB::table('timetable_rooms as tr')
+            ->join('rooms as r', 'r.id', '=', 'tr.room_id')
+            ->where('tr.timetable_id', $timetable->id)
+            ->orderByRaw("
+            CASE
+                WHEN LOWER(r.room_type) IN ('comlab','com lab','com-lab','lab','computer lab','computer_lab') THEN 1
+                WHEN LOWER(r.room_type) IN ('lecture','lec','lecture_hall') THEN 2
+                WHEN LOWER(r.room_type) IN ('avr','av','audio-visual','av_room') THEN 3
+                WHEN LOWER(r.room_type) IN ('gym','gymnasium') THEN 4
+                WHEN LOWER(r.room_type) IN ('main','main_hall') THEN 5
+                ELSE 10
+            END
+        ")
+            ->orderBy('r.room_name')
+            ->pluck('room_name')
+            ->toArray();
 
         for ($sheetIndex = 0; $sheetIndex < $sheetCount; $sheetIndex++) {
             // Map sheet index to (termIndex, dayIndex):
@@ -180,15 +201,40 @@ class TimetableEditingPaneController extends Controller
                 continue; // no data rows
             }
 
-            // Column 0 is the "Time" column; rooms start from column 1.
-            $colCount       = count($table[0] ?? []);
+            // Column 0 is Time header; header row is $table[0]; sheet columns are array indices 0..N-1
+            $colCount = count($table[0] ?? []);
+
+            // Build normalized header mapping: normalized room name => sheet column index (0-based)
+            $header = $table[0] ?? [];
+            $sheetNameToColIndex = [];
+            for ($c = 1; $c < $colCount; $c++) {
+                $raw = trim((string) ($header[$c] ?? ''));
+                if ($raw === '') continue;
+                $norm = strtolower(preg_replace('/\s+/', ' ', $raw));
+                $sheetNameToColIndex[$norm] = $c;
+            }
+
+            // Map canonical room index (0-based) => sheet column index (0-based)
+            $canonicalIndexToSheetCol = [];
+            foreach ($rooms as $idx => $roomName) {
+                $norm = strtolower(preg_replace('/\s+/', ' ', trim($roomName)));
+                $canonicalIndexToSheetCol[$idx] = $sheetNameToColIndex[$norm] ?? null;
+            }
+
             $viewPlacements = [];
 
-            for ($col = 1; $col < $colCount; $col++) {
-                $row = 1; // skip header row 0 (room names)
+            // Iterate canonical room indices (so the editor's col index = canonical room index)
+            $totalCanonicalRooms = count($rooms);
+            for ($canonicalCol = 0; $canonicalCol < $totalCanonicalRooms; $canonicalCol++) {
+                $sheetCol = $canonicalIndexToSheetCol[$canonicalCol] ?? null;
+                if ($sheetCol === null) {
+                    // Room not present in this sheet header (deleted/renamed); skip safely.
+                    continue;
+                }
 
+                $row = 1; // skip header row 0 (room names)
                 while ($row < $rowCount) {
-                    $rawCell = $table[$row][$col] ?? '';
+                    $rawCell = $table[$row][$sheetCol] ?? '';
                     $cell    = trim((string) $rawCell);
                     $lower   = strtolower($cell);
 
@@ -198,24 +244,22 @@ class TimetableEditingPaneController extends Controller
                         continue;
                     }
 
-                    // Pattern: {program_abbreviation}_{year_level}_{session_group_id}_{course_session_id}
-                    // Example: CS_3rd_5_33
+                    // Pattern expected: {program_abbreviation}_{year_level}_{session_group_id}_{course_session_id}
                     if (!preg_match('/^[A-Za-z]+_[^_]+_(\d+)_(\d+)$/', $cell, $matches)) {
-                        // Not a code we understand; skip this block.
+                        // not a known encoded value; skip it
                         $row++;
                         continue;
                     }
 
-                    // We don't actually need session_group_id here, but it's captured as $matches[1].
-                    $sessionId = (string) ((int) $matches[2]); // CourseSession.id
+                    // CourseSession.id is captured as last group
+                    $sessionId = (string) ((int) $matches[2]);
 
-                    // Determine the full vertical span (contiguous identical cells)
+                    // Determine vertical span of identical contiguous cells
                     $startRow = $row;
                     $span     = 1;
-
                     $r = $row + 1;
                     while ($r < $rowCount) {
-                        $next = trim((string) ($table[$r][$col] ?? ''));
+                        $next = trim((string) ($table[$r][$sheetCol] ?? ''));
                         if ($next === $cell) {
                             $span++;
                             $r++;
@@ -225,14 +269,13 @@ class TimetableEditingPaneController extends Controller
                     }
 
                     // Editor rows are 0-based timeslot indices:
-                    //   spreadsheet row 1 => topRow 0, row 2 => topRow 1, etc.
+                    // spreadsheet row 1 => topRow 0, row 2 => topRow 1, etc.
                     $topRow = $startRow - 1;
                     $blocks = $span;
 
-                    // In your design, a given CourseSession appears at most once per (term,day),
-                    // so it's safe to store one placement per sessionId per viewKey.
+                    // Store placement: col is canonical (editor) index
                     $viewPlacements[$sessionId] = [
-                        'col'    => $col - 1, // remove the time column offset
+                        'col'    => $canonicalCol,
                         'topRow' => $topRow,
                         'blocks' => $blocks,
                     ];
@@ -248,6 +291,7 @@ class TimetableEditingPaneController extends Controller
 
         return $placementsByView;
     }
+
 
     public function index(Timetable $timetable, Request $request)
     {
@@ -355,6 +399,21 @@ class TimetableEditingPaneController extends Controller
         // Build placements from XLSX using encoded course_session_id
         $initialPlacementsByView = $this->buildInitialPlacementsFromXlsx($timetable);
 
+
+        $rooms = TimetableRoom::where('timetable_id', $timetable->id)
+            ->join('rooms as r', 'r.id', '=', 'timetable_rooms.room_id')
+            ->orderByRaw("
+                CASE
+                    WHEN LOWER(r.room_type) = 'comlab' THEN 0
+                    WHEN LOWER(r.room_type) = 'lecture' THEN 1
+                    ELSE 2
+                END
+            ")
+            ->orderBy('r.room_name', 'asc')
+            ->select('timetable_rooms.*', 'r.room_name', 'r.room_type')
+            ->get();
+
+
         Logger::log(
             'timetable_editor_open',
             'timetable prototype editor opened',
@@ -364,10 +423,12 @@ class TimetableEditingPaneController extends Controller
             ]
         );
 
+
         return view('timetabling.timetable-editing-pane.editor', [
-            'timetable'               => $timetable,
-            'sessionGroups'           => $sessionGroups,
+            'timetable' => $timetable,
+            'sessionGroups' => $sessionGroups,
             'initialPlacementsByView' => $initialPlacementsByView,
+            'rooms' => $rooms,
         ]);
     }
 
@@ -403,26 +464,32 @@ class TimetableEditingPaneController extends Controller
                 ->get();
 
             $codeBySessionId = [];
-
             foreach ($sessionGroups as $group) {
-                // null-safe: if academicProgram is missing, don't blow up; mark as UNK
                 $programAbbr = $group->academicProgram?->program_abbreviation ?? 'UNK';
                 $yearLevel   = $group->year_level ?? '';
 
                 foreach ($group->courseSessions as $session) {
                     $sessionId = (string) $session->id;
-
-                    // {program_abbreviation}_{year_level}_{session_group_id}_{course_session_id}
                     $codeBySessionId[$sessionId] =
                         "{$programAbbr}_{$yearLevel}_{$group->id}_{$session->id}";
                 }
             }
 
-            // Helper: convert 1-based column index => letter (A..Z), enough for typical room counts
-            $colIndexToLetter = function (int $index): string {
-                // Handle only A-Z; if you ever have more than 26 columns, we can extend this later.
-                return chr(ord('A') + $index - 1);
-            };
+            // 3b) canonical room list for this timetable (must match editor's order)
+            $rooms = DB::table('timetable_rooms as tr')
+                ->join('rooms as r', 'r.id', '=', 'tr.room_id')
+                ->where('tr.timetable_id', $timetable->id)
+                ->orderByRaw("
+                    CASE
+                        WHEN LOWER(r.room_type) = 'comlab' THEN 0
+                        WHEN LOWER(r.room_type) = 'lecture' THEN 1
+                        ELSE 2
+                    END
+                ")
+                ->orderBy('r.room_name')
+                ->pluck('room_name')
+                ->toArray();
+
 
             // 4) Overwrite each sheet's data cells from placementsByView
             for ($sheetIndex = 0; $sheetIndex < $sheetCount; $sheetIndex++) {
@@ -436,21 +503,38 @@ class TimetableEditingPaneController extends Controller
 
                 $rowCount = count($table);
                 if ($rowCount < 2) {
-                    // no data rows
-                    continue;
+                    continue; // no data rows
                 }
                 $colCount = count($table[0] ?? []);
 
+                // ---- Build header map: normalized room name => Excel column index (1-based) ----
+                $header = $table[0];
+                $sheetRoomNameToCol = []; // normalized => excelColIndex (1-based)
+                for ($c = 1; $c < $colCount; $c++) {
+                    $raw = trim((string) ($header[$c] ?? ''));
+                    if ($raw === '') continue;
+                    $norm = strtolower(preg_replace('/\s+/', ' ', $raw));
+                    // PhpSpreadsheet 1-based columns: add 1 to array index
+                    $sheetRoomNameToCol[$norm] = $c + 1;
+                }
+
+                // Map canonical room name (editor order) => excel column index (1-based)
+                $canonicalRoomToCol = [];
+                foreach ($rooms as $idx => $roomName) {
+                    $norm = strtolower(preg_replace('/\s+/', ' ', trim($roomName)));
+                    if (isset($sheetRoomNameToCol[$norm])) {
+                        $canonicalRoomToCol[$norm] = $sheetRoomNameToCol[$norm];
+                    }
+                }
+                // -------------------------------------------------------------------------------
+
                 // 4a) Clear data area to "Vacant"
-                // row 0 = header; rows 1..N-1 are timeslots
-                // col 0 = Time; cols 1..M-1 are rooms
                 for ($row = 1; $row < $rowCount; $row++) {
                     for ($col = 1; $col < $colCount; $col++) {
                         $excelRowIndex = $row + 1;        // PhpSpreadsheet rows are 1-based
-                        $excelColIndex = $col + 1;        // PhpSpreadsheet cols are 1-based
-                        $colLetter     = $colIndexToLetter($excelColIndex);
+                        $excelColIndex = $col + 1;        // array index -> excel col
+                        $colLetter     = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($excelColIndex);
                         $cellAddress   = $colLetter . $excelRowIndex; // e.g. "B2"
-
                         $sheet->setCellValue($cellAddress, 'Vacant');
                     }
                 }
@@ -466,7 +550,6 @@ class TimetableEditingPaneController extends Controller
 
                 foreach ($placementsByView[$viewKey] as $sessionId => $placement) {
                     $sessionId = (string) $sessionId;
-
                     if (!isset($codeBySessionId[$sessionId])) {
                         // Session not part of this timetable (defensive)
                         Log::warning('saveFromEditor: sessionId not found in codeBySessionId', [
@@ -477,18 +560,40 @@ class TimetableEditingPaneController extends Controller
                     }
 
                     $code   = $codeBySessionId[$sessionId];
-                    $col    = (int) ($placement['col'] ?? 0);     // 0-based among rooms
+                    $col    = (int) ($placement['col'] ?? 0);     // 0-based among rooms (editor canonical index)
                     $topRow = (int) ($placement['topRow'] ?? 0);  // 0-based among timeslots
                     $blocks = max(1, (int) ($placement['blocks'] ?? 1));
 
-                    // Data column 0 => Excel col index 2 (B); row 0 => Excel row index 2
-                    $excelColIndex = $col + 2;   // B = 2
-                    $excelRowTop   = $topRow + 2;
-                    $colLetter     = $colIndexToLetter($excelColIndex);
+                    // Editor's col is index into $rooms array
+                    if (!isset($rooms[$col])) {
+                        Log::warning('saveFromEditor: room index out of range for placement', [
+                            'timetable_id' => $timetable->id,
+                            'session_id' => $sessionId,
+                            'col_index' => $col,
+                        ]);
+                        continue;
+                    }
+
+                    $roomName = $rooms[$col];
+                    $roomNorm = strtolower(preg_replace('/\s+/', ' ', trim($roomName)));
+
+                    if (!isset($canonicalRoomToCol[$roomNorm])) {
+                        // The room in the editor isn't present in the sheet header (deleted/renamed) — skip writing.
+                        Log::warning('saveFromEditor: canonical room not found in sheet header', [
+                            'timetable_id' => $timetable->id,
+                            'session_id' => $sessionId,
+                            'room' => $roomName,
+                        ]);
+                        continue;
+                    }
+
+                    $excelColIndex = $canonicalRoomToCol[$roomNorm]; // 1-based excel column index
+                    $excelRowTop   = $topRow + 2; // topRow 0 -> excel row 2
 
                     for ($offset = 0; $offset < $blocks; $offset++) {
                         $excelRowIndex = $excelRowTop + $offset;
-                        $cellAddress   = $colLetter . $excelRowIndex; // e.g. "C5"
+                        $colLetter     = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($excelColIndex);
+                        $cellAddress   = $colLetter . $excelRowIndex;
                         $sheet->setCellValue($cellAddress, $code);
                     }
                 }
@@ -496,13 +601,22 @@ class TimetableEditingPaneController extends Controller
 
             // 5) Save XLSX back to disk
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+            // ensure writable (explicit check will give clearer error)
+            if (!is_writable(dirname($xlsxPath))) {
+                Log::error('saveFromEditor: output directory not writable', ['path' => dirname($xlsxPath)]);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot write timetable file: directory is not writable.'
+                ], 500);
+            }
+
             $writer->save($xlsxPath);
 
             return response()->json([
                 'status'  => 'ok',
-                'message' => 'Timetable changes have been saved.',
+                'message' => 'Timetable changes saved.',
             ]);
-
         } catch (\Throwable $e) {
             Log::error('Error in saveFromEditor', [
                 'timetable_id' => $timetable->id ?? null,
@@ -515,8 +629,7 @@ class TimetableEditingPaneController extends Controller
             if (str_contains($msg, 'Resource temporarily unavailable') || str_contains($msg, 'Permission denied')) {
                 return response()->json([
                     'status'  => 'error',
-                    'message' => 'Cannot save the Excel file because it is locked or not writable. ' .
-                        'Close the XLSX in Excel / any viewer and make sure the file is writable, then try again.',
+                    'message' => 'Cannot save the Excel file because it is locked or not writable. Close the XLSX in Excel / any viewer and make sure the file is writable, then try again.',
                 ], 500);
             }
 
@@ -525,8 +638,8 @@ class TimetableEditingPaneController extends Controller
                 'message' => $msg,
             ], 500);
         }
-
     }
+
 
 
 
