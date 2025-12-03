@@ -113,14 +113,23 @@ class TimetableController extends Controller
             'timetable_name' => $timetable->timetable_name
         ];
 
-        // Delete the timetable from the database
-        $timetable->delete();
-
         // Delete the corresponding XLSX file if it exists
         $filePath = "exports/timetables/{$timetable->id}.xlsx";
-        if (Storage::exists($filePath)) {
-            Storage::delete($filePath);
+
+        // Prefer the local disk (storage/app root) — matches storage_path('app/...')
+        if (Storage::disk('local')->exists($filePath)) {
+            Storage::disk('local')->delete($filePath);
+        } else {
+            // fallback: try direct filesystem path (what the seeder cleans)
+            $fullPath = storage_path("app/{$filePath}");
+            if (file_exists($fullPath)) {
+                @unlink($fullPath);
+            }
         }
+
+
+        // Delete the timetable from the database
+        $timetable->delete();
 
         //Log
         Logger::log('delete', 'timetable', $timetableData);

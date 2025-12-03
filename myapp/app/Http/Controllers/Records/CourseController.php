@@ -6,6 +6,7 @@ use App\Helpers\Logger;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Course;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CourseController extends Controller
 {
@@ -184,7 +185,7 @@ class CourseController extends Controller
 
             try {
                 // Load spreadsheet
-                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($xlsxPath);
+                $spreadsheet = IOFactory::load($xlsxPath);
                 $sheetCount  = $spreadsheet->getSheetCount();
                 $madeChange  = false;
 

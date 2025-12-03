@@ -50,6 +50,7 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
     Route::get('/timetables/{timetable}/editor', [TimetableEditingPaneController::class, 'editor'])
         ->name('timetables.timetable-editing-pane.editor');
+
     Route::post(
         '/timetables/{timetable}/editor/save',
         [TimetableEditingPaneController::class, 'saveFromEditor']
@@ -71,7 +72,10 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::resource('timetables.timetable-professors', TimetableProfessorController::class)->only('index','create','store');
         Route::delete('/timetables/{timetable}/timetable-professors/{professor}',[TimetableProfessorController::class, 'destroy'])
             ->name('timetables.timetable-professors.destroy');
-    Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store','destroy');
+
+    Route::resource('timetables.timetable-rooms', TimetableRoomController::class)->only('index','create','store');
+        Route::delete('/timetables/{timetable}/timetable-rooms/{room}',[TimetableRoomController::class, 'destroy'])
+            ->name('timetables.timetable-rooms.destroy');
 
     Route::resource('timetables.generate-timetable', GenerateTimetableController::class);
     Route::get('timetables/{timetable}/generate', [GenerateTimetableController::class, 'index'])->name('timetables.generate');

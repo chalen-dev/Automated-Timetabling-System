@@ -8,6 +8,8 @@ use App\Models\Records\Room;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Throwable;
 
 class TimetableRoomController extends Controller
 {
@@ -105,19 +107,91 @@ class TimetableRoomController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Timetable $timetable, TimetableRoom $timetableRoom)
+    public function destroy(Timetable $timetable, Room $room)
     {
-        $room = Room::find($timetableRoom->id);
+        // Keep a copy of the room name for matching BEFORE detaching
+        $roomName = trim((string) $room->room_name);
 
-        $timetable->rooms()->detach($timetableRoom->id);
+        // Detach room from timetable (preserve existing DB behavior)
+        $timetable->rooms()->detach($room->id);
 
-      Logger::log('delete', 'timetable rooms', [
-          'timetable_id' => $timetable->id,
-          'timetable_name' => $timetable->timetable_name,
-          'room_id' => $room->id,
-          'room_name' => $room->room_name,
-      ]);
+        $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+        $errorMessage = null;
+        $madeChange = false;
 
-        return redirect()->route('timetables.timetable-rooms.index', $timetable);
+        try {
+            if (file_exists($xlsxPath)) {
+                if (!is_writable($xlsxPath) && !is_writable(dirname($xlsxPath))) {
+                    $errorMessage = "Timetable file or directory is not writable: {$xlsxPath}";
+                } else {
+                    $spreadsheet = IOFactory::load($xlsxPath);
+                    $sheetCount = $spreadsheet->getSheetCount();
+
+                    $normalize = function ($s) {
+                        $s = strtolower(trim((string) $s));
+                        return preg_replace('/\s+/', ' ', $s);
+                    };
+
+                    $targetNorm = $normalize($roomName);
+
+                    for ($si = 0; $si < $sheetCount; $si++) {
+                        $sheet = $spreadsheet->getSheet($si);
+                        $table = $sheet->toArray(null, true, true, false);
+                        if (empty($table) || !isset($table[0]) || !is_array($table[0])) {
+                            continue;
+                        }
+
+                        $header = $table[0];
+                        $colCount = count($header);
+
+                        // header index 0 is Time column; rooms start at index 1
+                        for ($c = 1; $c < $colCount; $c++) {
+                            $raw = trim((string) ($header[$c] ?? ''));
+                            if ($raw === '') {
+                                continue;
+                            }
+
+                            if ($normalize($raw) === $targetNorm) {
+                                // array index -> Excel col index (1-based)
+                                $excelIndex = $c + 1;
+
+                                // remove one column at $excelIndex (1 = A)
+                                $sheet->removeColumnByIndex($excelIndex, 1);
+
+                                $madeChange = true;
+                                // header changed; stop scanning this sheet
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($madeChange) {
+                        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                        $writer->save($xlsxPath);
+                    }
+                }
+            } else {
+                $errorMessage = "Timetable XLSX not found: {$xlsxPath}";
+            }
+        } catch (Throwable $e) {
+            // Capture error message to display to user; do not use Logger/\Log
+            $errorMessage = "Error while updating timetable file: " . $e->getMessage();
+        }
+
+        // Use session flash messages for user-visible errors / success
+        if ($errorMessage) {
+            return redirect()
+                ->route('timetables.timetable-rooms.index', $timetable)
+                ->with('error', $errorMessage);
+        }
+
+        $successMsg = 'Room detached from timetable' . ($madeChange ? ' and spreadsheet column removed.' : '.');
+        return redirect()
+            ->route('timetables.timetable-rooms.index', $timetable)
+            ->with('success', $successMsg);
     }
+
+
+
+
 }
