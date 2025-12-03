@@ -354,46 +354,32 @@
 
         const sessionGroups = window.sessionGroupsData || [];
 
-        // --- Academic term helpers for courses/sessions ---
-        // Accepts a CourseSession object (preferred) but also works
-        // if you accidentally pass just the Course.
-        // Returns { raw, badgeLabel, termIndex }
-        // termIndex: 0 => 1st term, 1 => 2nd term, null => semestral / always allowed
         function getCourseTermInfo(sessionOrCourse) {
             if (!sessionOrCourse) {
                 return { raw: '', badgeLabel: '', termIndex: null };
             }
 
-            // If it's a CourseSession, pull from session.academic_term first,
-            // then fall back to session.course.academic_term.
+            // Prefer CourseSession.academic_term then Course.academic_term
             let rawVal;
-            if ('course' in sessionOrCourse || 'academic_term' in sessionOrCourse) {
-                const session = sessionOrCourse;
-                const course  = session.course || {};
-                rawVal = (session.academic_term || course.academic_term || '');
+            if ('academic_term' in sessionOrCourse) {
+                rawVal = sessionOrCourse.academic_term || '';
+            } else if (sessionOrCourse.course && sessionOrCourse.course.academic_term) {
+                rawVal = sessionOrCourse.course.academic_term || '';
             } else {
-                // Fallback: plain Course object passed in
-                const course = sessionOrCourse;
-                rawVal = (course.academic_term || '');
+                rawVal = '';
             }
 
-            rawVal = rawVal.toString().toLowerCase().trim();
+            rawVal = String(rawVal).toLowerCase().trim();
 
-            let badgeLabel = '';
-            let termIndex  = null; // semestral / always allowed by default
-
-            if (rawVal.startsWith('1')) {
-                badgeLabel = '1ST';
-                termIndex  = 0;
-            } else if (rawVal.startsWith('2')) {
-                badgeLabel = '2ND';
-                termIndex  = 1;
-            } else if (rawVal.includes('sem')) {
-                badgeLabel = 'SEM';
-                termIndex  = null;
+            // We only expect: "1st", "2nd", "semestral"
+            if (rawVal === '1st' || rawVal === '1') {
+                return { raw: rawVal, badgeLabel: '1ST', termIndex: 0 };
             }
-
-            return { raw: rawVal, badgeLabel, termIndex };
+            if (rawVal === '2nd' || rawVal === '2') {
+                return { raw: rawVal, badgeLabel: '2ND', termIndex: 1 };
+            }
+            // default -> semestral / always allowed
+            return { raw: rawVal, badgeLabel: 'SEM', termIndex: null };
         }
 
 
@@ -605,8 +591,6 @@
                     console.error('Error saving session_color', err);
                 });
         }
-
-
 
         function openGroupColorPicker(wrapperEl) {
             colorActiveWrapper = wrapperEl;
@@ -877,8 +861,6 @@
             renderCanvas();
         }
 
-
-
         function initTermDayControls() {
             // term buttons
             const termButtons = document.querySelectorAll('.timetable-editor .term-button');
@@ -1122,8 +1104,6 @@
             }
         }
 
-
-
         function handleAlignmentMouseEnter(e) {
             const td = e.currentTarget;
             const sessionId = td.dataset.sessionId;
@@ -1142,13 +1122,9 @@
             }
         }
 
-
-
-
         function handleAlignmentMouseLeave() {
             clearAlignmentRowHighlight();
         }
-
 
         document.addEventListener('DOMContentLoaded', function () {
             // 1) Accept initial placements from backend, if present
@@ -1387,8 +1363,8 @@
 
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
-                                            <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                            <div class="text-sm text-gray-800">${courseLabel}</div>
+                                        <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                        <div class="text-sm text-gray-800">${courseLabel}</div>
                                         `,
                                         blocks,
                                         groupIndex,
@@ -1398,11 +1374,12 @@
 
                                         // term info for both tray + canvas
                                         termIndex: termInfo.termIndex,             // 0 = 1st, 1 = 2nd, null = semestral
-                                        termBadgeLabel: termInfo.badgeLabel || '', // e.g. "1ST", "2ND", "SEM"
+                                        termBadgeLabel: termInfo.badgeLabel || 'SEM', // force 'SEM' when not 1st/2nd
                                         termKey:
                                             termInfo.termIndex === 0
                                                 ? '1st'
                                                 : (termInfo.termIndex === 1 ? '2nd' : 'sem'),
+
 
                                         // total class days for this course
                                         totalClassDays: totalClassDays
@@ -1428,28 +1405,28 @@
                                     const completed = x >= y;
                                     const completedClass = completed ? ' completed' : '';
                                     classdaysBadgeHTML = `
-                                        <div class="classdays-badge${completedClass}">
-                                            ${x}/${y}
-                                        </div>
-                                    `;
+                                <div class="classdays-badge${completedClass}">
+                                    ${x}/${y}
+                                </div>
+                                `;
                                 }
 
                                 // term badge HTML (bottom)
                                 const termBadgeHTML = termInfo.badgeLabel
                                     ? `
-                                        <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
-                                            ${termInfo.badgeLabel}
-                                        </div>
-                                      `
+                                <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
+                                    ${termInfo.badgeLabel}
+                                </div>
+                              `
                                     : '';
 
                                 // label inside tray cell (centered text)
                                 td.innerHTML = `
-                                    ${classdaysBadgeHTML}
-                                    <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
-                                    <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
-                                    <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
-                                `;
+                            ${classdaysBadgeHTML}
+                            <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
+                            <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
+                            <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
+                        `;
 
                                 const currentKey = getCurrentViewKey();
                                 const viewPlacements = placementsByView[currentKey] || {};
@@ -1459,7 +1436,11 @@
                                 const isTermAllowed =
                                     termIndex === null || termIndex === activeTermIndex;
 
-                                // --- state priority: term-disabled > locked > used > normal ---
+                                // Determine exhaustion (max class days used in this term)
+                                const isExhausted = (metaForSession.totalClassDays && metaForSession.totalClassDays > 0)
+                                    && (placedCount >= metaForSession.totalClassDays);
+
+                                // --- state priority: term-disabled > locked > used > exhausted > normal ---
                                 if (!isTermAllowed) {
                                     td.classList.add('tray-term-disabled');
                                     td.draggable = false;
@@ -1475,6 +1456,10 @@
                                 } else if (isPlacedInCurrentView) {
                                     td.classList.add('tray-used');
                                     td.draggable = false;
+                                } else if (isExhausted) {
+                                    td.classList.add('tray-days-exhausted');
+                                    td.draggable = false;
+                                    td.title = 'This course has reached its maximum class days for the active term.';
                                 } else {
                                     if (groupColor) {
                                         td.style.backgroundColor = groupColor;
@@ -1524,6 +1509,7 @@
             }
             // --------------------------------------------------
         }
+
 
         // ---------- CANVAS INIT & RENDERING ----------
 
@@ -1696,9 +1682,6 @@
             });
         }
 
-
-
-
         // ---------- PREVIEW HELPERS ----------
 
         function clearCanvasPreviews() {
@@ -1859,8 +1842,6 @@
             }
         }
 
-
-
         function handleCellContextMenu(e) {
             e.preventDefault();
             hideContextMenu();
@@ -1886,7 +1867,6 @@
 
             showContextMenu(e.clientX, e.clientY, { sessionId, from });
         }
-
 
         // ---------- DRAG HELPERS ----------
 

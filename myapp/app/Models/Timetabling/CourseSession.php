@@ -10,7 +10,7 @@ class CourseSession extends Model
     protected $fillable = [
         'session_group_id',
         'course_id',
-        'academic_term'
+        'academic_term' // 1st, 2nd, semestral
     ];
 
     public function course(){
