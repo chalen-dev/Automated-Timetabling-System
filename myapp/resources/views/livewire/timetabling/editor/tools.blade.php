@@ -19,9 +19,13 @@
                 >
                     Save changes
                 </button>
-                <button class="w-full px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-left">
+                <a
+                    href="{{ route('timetables.export_formatted', $timetable->id) }}"
+                    class="w-full block px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-left"
+                >
                     Download XLSX
-                </button>
+                </a>
+
             </div>
         </div>
 

@@ -50,12 +50,14 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::resource('timetables.timetable-editing-pane', TimetableEditingPaneController::class)->only('index');
     Route::get('/timetables/{timetable}/editor', [TimetableEditingPaneController::class, 'editor'])
         ->name('timetables.timetable-editing-pane.editor');
+    // route to generate and download formatted spreadsheet
+    Route::get('/timetables/{timetable}/export-formatted', [TimetableEditingPaneController::class, 'exportFormattedSpreadsheet'])
+        ->name('timetables.export_formatted');
 
     Route::post(
         '/timetables/{timetable}/editor/save',
         [TimetableEditingPaneController::class, 'saveFromEditor']
     )->name('timetables.editor.save');
-
 
     Route::resource('timetables.session-groups', SessionGroupController::class);
     Route::patch(

@@ -10,8 +10,15 @@ use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Throwable;
 
 
 class TimetableEditingPaneController extends Controller
@@ -639,6 +646,320 @@ class TimetableEditingPaneController extends Controller
             ], 500);
         }
     }
+
+    public function exportFormattedSpreadsheet(Timetable $timetable)
+    {
+        $inputPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+
+        if (!file_exists($inputPath)) {
+            return redirect()->back()->with('error', 'Source timetable XLSX not found for id: ' . $timetable->id);
+        }
+
+        try {
+            $reader = IOFactory::createReaderForFile($inputPath);
+            $reader->setReadDataOnly(true);
+            $src = $reader->load($inputPath);
+
+            $target = new Spreadsheet();
+            while ($target->getSheetCount() > 0) {
+                $target->removeSheetByIndex(0);
+            }
+
+            $sheetCount = $src->getSheetCount();
+
+            for ($s = 0; $s < $sheetCount; $s++) {
+                $srcSheet = $src->getSheet($s);
+                $sheetTitle = $srcSheet->getTitle() ?: ('Sheet' . ($s + 1));
+
+                $dstSheet = new Worksheet($target, $sheetTitle);
+                $target->addSheet($dstSheet, $s);
+
+                $highestRow = (int)$srcSheet->getHighestRow();
+                $highestColIndex = Coordinate::columnIndexFromString($srcSheet->getHighestColumn());
+                $lastColLetter = Coordinate::stringFromColumnIndex($highestColIndex);
+
+                // Top headers
+                $titleRange = "A1:{$lastColLetter}1";
+                $subtitleRange = "A2:{$lastColLetter}2";
+
+                $mainTitle = trim($timetable->timetable_name . ' ' . $timetable->semester . ' semester (' . $timetable->academic_year . ')');
+                $dstSheet->setCellValue('A1', $mainTitle);
+                $dstSheet->mergeCells($titleRange);
+                $dstSheet->getStyle($titleRange)->getFont()->setBold(true)->setSize(16);
+                $dstSheet->getStyle($titleRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+                $dstSheet->setCellValue('A2', $sheetTitle);
+                $dstSheet->mergeCells($subtitleRange);
+                $dstSheet->getStyle($subtitleRange)->getFont()->setBold(true)->setSize(12);
+                $dstSheet->getStyle($subtitleRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+                // Copy source values starting at dst row 3 (so src row 1 -> dst row 3)
+                $dstRowOffset = 2;
+                for ($r = 1; $r <= $highestRow; $r++) {
+                    for ($c = 1; $c <= $highestColIndex; $c++) {
+                        $colLetter = Coordinate::stringFromColumnIndex($c);
+                        $srcCell = $srcSheet->getCell($colLetter . $r);
+                        $val = $srcCell ? $srcCell->getValue() : null;
+
+                        // ** CHANGE: write blank instead of the string "Vacant" **
+                        if ($val === null || trim((string)$val) === '') {
+                            $val = ''; // blank cell
+                        }
+
+                        $dstCellCoord = $colLetter . ($r + $dstRowOffset);
+                        $dstSheet->setCellValue($dstCellCoord, (string)$val);
+                    }
+                }
+
+                // set timeslots header (first column header row in copied table)
+                $dstSheet->setCellValue('A' . (1 + $dstRowOffset), 'timeslots');
+                $dstSheet->getStyle('A' . (1 + $dstRowOffset))->getFont()->setBold(true);
+
+                $allRange = 'A' . (1 + $dstRowOffset) . ':' . $lastColLetter . ($highestRow + $dstRowOffset);
+                $dstSheet->getStyle($allRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $dstSheet->getStyle($allRange)->getAlignment()->setWrapText(true);
+                $dstSheet->getStyle($allRange)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+
+                // Merge only course-session blocks (vertical contiguous identical values that are "course-like")
+                for ($c = 1; $c <= $highestColIndex; $c++) {
+                    $colLetter = Coordinate::stringFromColumnIndex($c);
+
+                    $runValue = null;
+                    $runStart = 1 + $dstRowOffset;
+
+                    for ($dstR = (1 + $dstRowOffset); $dstR <= ($highestRow + $dstRowOffset + 1); $dstR++) {
+                        if ($dstR <= $highestRow + $dstRowOffset) {
+                            $cellVal = $dstSheet->getCell($colLetter . $dstR)->getValue();
+                            $cellValStr = $cellVal === null ? null : trim((string)$cellVal);
+                        } else {
+                            $cellValStr = null; // flush run
+                        }
+
+                        if ($cellValStr !== null && $cellValStr === '') $cellValStr = null;
+
+                        // is this cell a "course-like" encoded string? (non-empty and has underscores / parts)
+                        $isCourseLike = false;
+                        if ($cellValStr !== null) {
+                            $partsCheck = explode('_', $cellValStr);
+                            if (count($partsCheck) >= 3) {
+                                $isCourseLike = true;
+                            }
+                        }
+
+                        if ($runValue === null) {
+                            if ($cellValStr !== null && $isCourseLike) {
+                                $runValue = $cellValStr;
+                                $runStart = $dstR;
+                            } else {
+                                $runValue = null;
+                                $runStart = $dstR + 1;
+                            }
+                            continue;
+                        }
+
+                        // continuing run?
+                        if ($cellValStr === $runValue) {
+                            continue;
+                        }
+
+                        // run ended at dstR - 1
+                        $runEnd = $dstR - 1;
+                        $runLen = $runEnd - $runStart + 1;
+
+                        if ($runValue !== null && $runLen > 1) {
+                            $mergeRange = "{$colLetter}{$runStart}:{$colLetter}{$runEnd}";
+                            $dstSheet->mergeCells($mergeRange);
+
+                            // parse encoded value to locate sessionGroupId and sessionId (robust)
+                            $parts = explode('_', $runValue);
+                            $sessionGroupId = null;
+                            $sessionIdPart = null;
+                            if (count($parts) >= 2) {
+                                $sessionGroupId = $parts[count($parts) - 2] ?? null;
+                                $sessionIdPart = $parts[count($parts) - 1] ?? null;
+                            }
+
+                            // build display text: top line (sessionGroup title) and bottom (course title)
+                            $displayMain = $runValue;  // fallback plain encoded string
+                            $displayTop = null;
+                            $displayBottom = null;
+
+                            if ($sessionIdPart) {
+                                // attempt to load CourseSession and related models
+                                $cs = \App\Models\Timetabling\CourseSession::with(['course', 'sessionGroup.academicProgram'])->find($sessionIdPart);
+                                if ($cs) {
+                                    $sg = $cs->sessionGroup;
+                                    $prog = $sg && $sg->academicProgram ? $sg->academicProgram->program_abbreviation : null;
+                                    $sessionName = $sg->session_name ?? '';
+                                    $yearLevel = $sg->year_level !== null ? $sg->year_level : '';
+                                    $displayTop = trim(($prog ?: 'Unknown') . ' ' . $sessionName . ' ' . ($yearLevel !== '' ? $yearLevel . ' Year' : ''));
+                                    $course = $cs->course;
+                                    $displayBottom = $course ? ($course->course_title ?: $course->course_name ?: 'Course #' . $cs->course_id) : ('Course #' . $cs->course_id);
+                                    $displayMain = $displayTop . "\n" . $displayBottom;
+                                } elseif ($sessionGroupId) {
+                                    // fallback: try to fetch session group only
+                                    $sg = \App\Models\Timetabling\SessionGroup::with('academicProgram')->find($sessionGroupId);
+                                    if ($sg) {
+                                        $prog = $sg->academicProgram ? $sg->academicProgram->program_abbreviation : null;
+                                        $displayTop = trim(($prog ?: 'Unknown') . ' ' . ($sg->session_name ?? '') . ' ' . ($sg->year_level !== null ? $sg->year_level . ' Year' : ''));
+                                        $displayMain = $displayTop . "\n" . ($runValue);
+                                    }
+                                }
+                            }
+
+                            // apply background color for session group if available (try sessionGroupId or cs->sessionGroup)
+                            $hex = null;
+                            if (!empty($sessionGroupId)) {
+                                $sg2 = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                if ($sg2 && !empty($sg2->session_color)) {
+                                    $hex = ltrim($sg2->session_color, '#');
+                                }
+                            }
+                            // if still null, try using cs->sessionGroup
+                            if (empty($hex) && isset($cs) && $cs && $cs->sessionGroup && !empty($cs->sessionGroup->session_color)) {
+                                $hex = ltrim($cs->sessionGroup->session_color, '#');
+                            }
+
+                            if (!empty($hex) && strlen($hex) === 6) {
+                                $excelColor = 'FF' . strtoupper($hex);
+                                $dstSheet->getStyle($mergeRange)->getFill()
+                                    ->setFillType(Fill::FILL_SOLID)
+                                    ->getStartColor()->setARGB($excelColor);
+                            }
+
+                            // Use RichText to set top bold + bottom italic on the merged cell
+                            $rich = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
+                            if ($displayTop !== null) {
+                                $runTop = $rich->createTextRun($displayTop . "\n");
+                                $runTop->getFont()->setBold(true);
+                                $runTop->getFont()->setSize(11);
+                            } else {
+                                // fallback to runValue as plain bold top
+                                $rTop = $rich->createTextRun($runValue . "\n");
+                                $rTop->getFont()->setBold(true);
+                                $rTop->getFont()->setSize(11);
+                            }
+                            if ($displayBottom !== null) {
+                                $runBottom = $rich->createTextRun($displayBottom);
+                                $runBottom->getFont()->setItalic(true);
+                                $runBottom->getFont()->setSize(10);
+                            } else {
+                                // if no course title found, append the encoded
+                                $runBottom = $rich->createTextRun($runValue);
+                                $runBottom->getFont()->setItalic(true);
+                                $runBottom->getFont()->setSize(10);
+                            }
+
+                            // write rich text into the top-left cell of the merged range
+                            $dstSheet->getCell($colLetter . $runStart)->setValue($rich);
+
+                            // center & wrap
+                            $dstSheet->getStyle($mergeRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                            $dstSheet->getStyle($mergeRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                            $dstSheet->getStyle($mergeRange)->getFont()->setBold(false); // per-run formatting already set
+                            $dstSheet->getStyle($mergeRange)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                        } elseif ($runValue !== null && $runLen === 1) {
+                            // single course-like cell (no merge) -> style similarly and set rich text
+                            $cellCoord = $colLetter . $runStart;
+
+                            $parts = explode('_', $runValue);
+                            $sessionGroupId = count($parts) >= 2 ? $parts[count($parts) - 2] : null;
+                            $sessionIdPart = count($parts) >= 1 ? $parts[count($parts) - 1] : null;
+
+                            $displayTop = null;
+                            $displayBottom = null;
+                            if ($sessionIdPart) {
+                                $csSingle = \App\Models\Timetabling\CourseSession::with(['course', 'sessionGroup.academicProgram'])->find($sessionIdPart);
+                                if ($csSingle) {
+                                    $sg = $csSingle->sessionGroup;
+                                    $prog = $sg && $sg->academicProgram ? $sg->academicProgram->program_abbreviation : null;
+                                    $displayTop = trim(($prog ?: 'Unknown') . ' ' . ($sg->session_name ?? '') . ' ' . ($sg->year_level !== null ? $sg->year_level . ' Year' : ''));
+                                    $displayBottom = $csSingle->course ? ($csSingle->course->course_title ?: $csSingle->course->course_name) : ('Course #' . $csSingle->course_id);
+                                }
+                            }
+
+                            $rich = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
+                            if ($displayTop !== null) {
+                                $rt = $rich->createTextRun($displayTop . "\n");
+                                $rt->getFont()->setBold(true)->setSize(11);
+                            } else {
+                                $rt = $rich->createTextRun($runValue . "\n");
+                                $rt->getFont()->setBold(true)->setSize(11);
+                            }
+                            if ($displayBottom !== null) {
+                                $rb = $rich->createTextRun($displayBottom);
+                                $rb->getFont()->setItalic(true)->setSize(10);
+                            } else {
+                                $rb = $rich->createTextRun($runValue);
+                                $rb->getFont()->setItalic(true)->setSize(10);
+                            }
+
+                            $dstSheet->getCell($cellCoord)->setValue($rich);
+
+                            // color if available
+                            $hex = null;
+                            if (!empty($sessionGroupId)) {
+                                $sg2 = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                if ($sg2 && !empty($sg2->session_color)) {
+                                    $hex = ltrim($sg2->session_color, '#');
+                                }
+                            }
+                            if (!empty($hex) && strlen($hex) === 6) {
+                                $excelColor = 'FF' . strtoupper($hex);
+                                $dstSheet->getStyle($cellCoord)->getFill()
+                                    ->setFillType(Fill::FILL_SOLID)
+                                    ->getStartColor()->setARGB($excelColor);
+                            }
+
+                            $dstSheet->getStyle($cellCoord)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                            $dstSheet->getStyle($cellCoord)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                            $dstSheet->getStyle($cellCoord)->getFont()->setBold(false);
+                        }
+
+                        // reset run
+                        if ($cellValStr !== null && count(explode('_', $cellValStr)) >= 3) {
+                            $runValue = $cellValStr;
+                            $runStart = $dstR;
+                        } else {
+                            $runValue = null;
+                            $runStart = $dstR + 1;
+                        }
+                    } // dstR
+                } // col loop
+
+                // autosize
+                for ($c = 1; $c <= $highestColIndex; $c++) {
+                    $dstSheet->getColumnDimension(Coordinate::stringFromColumnIndex($c))->setAutoSize(true);
+                }
+                $dstSheet->getColumnDimension('A')->setWidth(14);
+            } // sheets loop
+
+            // ensure output folder exists
+            $outputDir = storage_path('app/exports/formatted-spreadsheets');
+            if (!is_dir($outputDir)) {
+                mkdir($outputDir, 0755, true);
+            }
+
+            $outputPath = $outputDir . DIRECTORY_SEPARATOR . $timetable->id . '-formatted.xlsx';
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($target);
+            $writer->save($outputPath);
+
+            return response()->download($outputPath, "{$timetable->timetable_name}-formatted.xlsx", [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ]);
+        } catch (Throwable $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
+        }
+    }
+
+
+
+
+
+
+
+
+
 
 
 

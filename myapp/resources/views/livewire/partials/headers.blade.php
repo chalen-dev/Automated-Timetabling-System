@@ -28,7 +28,14 @@
                 <div class="h-18 w-full flex items-center justify-between pl-9 pr-9 pt-6 pb-6 bg-white rounded-2xl">
                     <div>
                         <button class="flex items-center justify-center w-15 h-15">
-                            <a href="{{route('timetables.index')}}">
+                            <a
+                                @if (request()->routeIs('timetables.timetable-editing-pane.editor'))
+                                    href="{{ route('timetables.timetable-editing-pane.index', $timetable->id) }}"
+                                @else
+                                    href="{{route('timetables.index')}}"
+                                @endif
+
+                            >
                                 <i class="bi bi-arrow-left text-2xl font-bold"></i>
                             </a>
                         </button>
