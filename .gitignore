@@ -1,23 +1,29 @@
-# Ignore PhpStorm project files
-.idea/
-
-# Ignore environment and sensitive files
-.env
-.env.*
-
-# Laravel specific
-/myapp/vendor/
-/myapp/node_modules/
-/myapp/public/storage/
-/myapp/storage/*.key
-/myapp/storage/pail
-/myapp/public/hot
-/myapp/public/build
-
-# System files
-Thumbs.db
-.DS_Store
 *.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+venv/
+.idea/
 
 # PhpStorm
 *.iml
@@ -25,27 +31,3 @@ Thumbs.db
 workspace.xml
 tasks.xml
 php.xml
-/vendor/
-/node_modules/
-/public/storage
-/storage/*.key
-/storage/logs/
-/bootstrap/cache/*.php
-.env
-.DS_Store
-/vendor/
-/node_modules/
-/public/storage
-/storage/*.key
-/storage/logs/
-/bootstrap/cache/*.php
-.env
-.DS_Store
-/vendor/
-/node_modules/
-/public/storage
-/storage/*.key
-/storage/logs/
-/bootstrap/cache/*.php
-.env
-.DS_Store
