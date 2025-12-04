@@ -25,3 +25,11 @@ Thumbs.db
 workspace.xml
 tasks.xml
 php.xml
+/vendor/
+/node_modules/
+/public/storage
+/storage/*.key
+/storage/logs/
+/bootstrap/cache/*.php
+.env
+.DS_Store
