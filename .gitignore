@@ -41,3 +41,11 @@ php.xml
 /bootstrap/cache/*.php
 .env
 .DS_Store
+/vendor/
+/node_modules/
+/public/storage
+/storage/*.key
+/storage/logs/
+/bootstrap/cache/*.php
+.env
+.DS_Store
