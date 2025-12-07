@@ -33,7 +33,8 @@ class GenerateTimetableController extends Controller
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
         // Run Python script using venv (Windows or Linux)
-        $pythonScript = base_path('scripts/process_timetable.py');
+        //Change to .php for testing
+        $pythonScript = base_path('scripts/process_timetable.php');
         $pythonPath   = FilePath::getPythonPath();
 
         if (!file_exists($pythonPath)) {
