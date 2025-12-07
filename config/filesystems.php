@@ -32,20 +32,18 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('pages/private'),
-            'serve' => true,
+            'root' => storage_path('app'),
             'throw' => false,
-            'report' => false,
         ],
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('pages/public'),
+            'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
-            'report' => false,
         ],
+
 
         's3' => [
             'driver' => 's3',
@@ -59,7 +57,11 @@ return [
             'throw' => false,
             'report' => false,
         ],
-
+        'facultime' => [
+            'driver' => 'local',
+            'root'   => storage_path('app/exports/timetables'),
+            'throw'  => false,
+        ],
     ],
 
     /*
@@ -74,7 +76,7 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('pages/public'),
+        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

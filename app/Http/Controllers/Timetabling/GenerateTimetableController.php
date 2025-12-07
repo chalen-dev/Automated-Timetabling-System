@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class GenerateTimetableController extends Controller
 {
@@ -19,9 +20,10 @@ class GenerateTimetableController extends Controller
     public function generate(Request $request, Timetable $timetable)
     {
         $timetableId = $timetable->id;
+        $userId = auth()->id();
 
         // Directories in storage
-        $exportDir = storage_path('app/exports/input-csvs');       // CSVs
+        $exportDir = storage_path("app/exports/input-csvs/{$userId}"); //CSVs
         $outputDir = storage_path('app/exports/timetables');       // XLSX output
 
         // Ensure directories exist
@@ -79,14 +81,25 @@ class GenerateTimetableController extends Controller
         }
 
 
-        // XLSX file path in storage
+        // XLSX file path written by the script (local filesystem)
         $outputFile = $outputDir . DIRECTORY_SEPARATOR . "{$timetableId}.xlsx";
 
         if (!file_exists($outputFile)) {
             return redirect()->back()->with('error', "Timetable XLSX not found after generation.");
         }
 
-        $outputUrl = asset("storage/exports/timetables/{$timetableId}.xlsx");
+        /**
+         * Upload the XLSX to the facultime disk (local folder in dev, bucket in Laravel Cloud)
+         */
+        $diskPath = "timetables/{$timetableId}.xlsx"; // folder inside bucket
+
+        Storage::disk('facultime')->put(
+            $diskPath,
+            file_get_contents($outputFile)
+        );
+
+        // OPTIONAL: delete temp local file after upload
+        // @unlink($outputFile);
 
         return redirect()->back()->with('success', "Timetable generated successfully!");
     }
