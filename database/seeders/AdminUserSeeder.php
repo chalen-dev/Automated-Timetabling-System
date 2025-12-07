@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
-                'password' => '$2y$12$pKg/sd12505lr71CGOxf0OrHcq8InCBHdYccZTncIOS97GmDH25Dy',
+                'password' => '$2a$12$X/mWzEzcXHX2LxztYRlxweujBXbWgm2zjt0q3gBs2gRo1T2ZsuVC6',
                 'role' => 'admin',
             ]
         );
