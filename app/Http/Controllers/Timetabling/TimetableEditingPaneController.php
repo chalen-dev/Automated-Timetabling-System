@@ -10,6 +10,7 @@ use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Log;
@@ -303,14 +304,33 @@ class TimetableEditingPaneController extends Controller
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
-        $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+
+        // NEW: we will try to load from the facultime bucket first,
+        // and fall back to the old local path if needed.
+        $diskPath = "timetables/{$timetable->id}.xlsx";
+        $xlsxPath = null;
+        $tempFile = null;
+
+        // 1) Prefer bucket / facultime disk
+        if (Storage::disk('facultime')->exists($diskPath)) {
+            $tempFile = tempnam(sys_get_temp_dir(), 'tt_');
+            file_put_contents($tempFile, Storage::disk('facultime')->get($diskPath));
+            $xlsxPath = $tempFile;
+        } else {
+            // 2) Fallback: legacy local path (keeps old behaviour working)
+            $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            if (file_exists($legacyPath)) {
+                $xlsxPath = $legacyPath;
+            }
+        }
+
         $tableData = [];
         $error = null;
         $totalSheets = 0;
         $sheetName = null;
         $sheetDisplayName = null;
 
-        if (file_exists($xlsxPath)) {
+        if ($xlsxPath && file_exists($xlsxPath)) {
             try {
                 $spreadsheet = IOFactory::load($xlsxPath);
                 $totalSheets = $spreadsheet->getSheetCount();
@@ -353,6 +373,11 @@ class TimetableEditingPaneController extends Controller
             $error = "Timetable file not found.";
         }
 
+        // Clean up temp file if we created one
+        if ($tempFile && file_exists($tempFile)) {
+            @unlink($tempFile);
+        }
+
         $rowspanData = $this->calculateVerticalRowspan($tableData);
 
         $colors = [
@@ -383,9 +408,10 @@ class TimetableEditingPaneController extends Controller
             'totalSheets',
             'sheetName',
             'sheetDisplayName',
-            'sessionColorsByGroupId' // <-- pass to Blade
+            'sessionColorsByGroupId'
         ));
     }
+
 
     public function editor(Timetable $timetable)
     {
