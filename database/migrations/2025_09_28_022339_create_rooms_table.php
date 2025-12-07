@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('room_name');
             $table->enum('room_type', ['lecture', 'comlab', 'gym', 'main'])->default('lecture');
-            $table->enum('course_type_exclusive_to', ['none', 'pe', 'nstp', 'others'])->default('lecture');
+            $table->enum('course_type_exclusive_to', ['none', 'pe', 'nstp', 'others'])->default('none');
             $table->integer('room_capacity')->nullable();
             $table->timestamps();
         });
