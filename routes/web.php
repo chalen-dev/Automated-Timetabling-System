@@ -23,6 +23,7 @@ use App\Http\Controllers\Users\WelcomeController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Default Page
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
@@ -114,6 +115,10 @@ Route::middleware([Authenticate::class])->group(function () {
     // User Logs page
     Route::get('/admin/user-logs', [UserLogController::class, 'index'])
         ->name('admin.user-logs');
+
+    Route::get('/debug-timetables', function () {
+        return Storage::disk('facultime')->allFiles('timetables');
+    });
 
 });
 
