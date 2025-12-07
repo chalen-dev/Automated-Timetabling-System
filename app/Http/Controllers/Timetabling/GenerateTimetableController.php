@@ -91,7 +91,7 @@ class GenerateTimetableController extends Controller
         /**
          * Upload the XLSX to the facultime disk (local folder in dev, bucket in Laravel Cloud)
          */
-        $diskPath = "timetables/{$timetableId}.xlsx"; // folder inside bucket
+        $diskPath = "timetables/{$timetableId}.xlsx";
 
         Storage::disk('facultime')->put(
             $diskPath,

@@ -58,10 +58,11 @@ return [
             'report' => false,
         ],
         'facultime' => [
-            'driver' => 'local',
-            'root'   => storage_path('app/facultime'),
+            'driver' => 'local',                      // local in dev
+            'root'   => storage_path('app/facultime'),// bucket root in dev
             'throw'  => false,
         ],
+
     ],
 
     /*

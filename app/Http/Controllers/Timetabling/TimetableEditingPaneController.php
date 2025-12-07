@@ -311,18 +311,18 @@ class TimetableEditingPaneController extends Controller
         $xlsxPath = null;
         $tempFile = null;
 
-        // 1) Prefer bucket / facultime disk
         if (Storage::disk('facultime')->exists($diskPath)) {
             $tempFile = tempnam(sys_get_temp_dir(), 'tt_');
             file_put_contents($tempFile, Storage::disk('facultime')->get($diskPath));
             $xlsxPath = $tempFile;
         } else {
-            // 2) Fallback: legacy local path (keeps old behaviour working)
+            // fallback to legacy local path
             $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
             if (file_exists($legacyPath)) {
                 $xlsxPath = $legacyPath;
             }
         }
+
 
         $tableData = [];
         $error = null;
