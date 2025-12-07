@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('room_exclusive_days', function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
+
+        Schema::create('room_exclusive_days', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();
-
-            // Replace ENUM with string + CHECK constraint
-            $table->string('exclusive_day'); //values ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
-
+            $table->enum('exclusive_day', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])->default('monday');
             $table->timestamps();
         });
     }

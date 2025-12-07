@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('timetables', function (Blueprint $table) {
-            $table->id();
+        $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
 
+        Schema::create('timetables', function (Blueprint $table) use ($driver){
+            $table->id();
             // User_id Foreign Key on Users table
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->onDelete('cascade');
-
             $table->string('timetable_name');
-
-            // Replace ENUM with string + CHECK for SQLite
-            $table->string('semester'); //values ('1st','2nd')
-
+            $table->enum('semester', ['1st', '2nd'])->default('1st');
             $table->string('academic_year');
             $table->text('timetable_description')->nullable();
             $table->timestamps();

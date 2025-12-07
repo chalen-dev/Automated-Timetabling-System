@@ -8,13 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('session_groups', function (Blueprint $table) {
+        Schema::create('session_groups', function (Blueprint $table)  {
             $table->id();
             $table->string('session_name');
-
-            // Replace ENUM with string + check
-            $table->string('year_level'); //values ('1st','2nd','3rd','4th')
-
+            $table->enum('year_level', ['1st','2nd','3rd','4th'])->default('1st');
             $table->text('short_description')->nullable();
             $table->string('session_color')->nullable();
             $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();

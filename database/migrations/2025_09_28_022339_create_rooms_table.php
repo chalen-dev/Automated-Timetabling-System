@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
+
+        Schema::create('rooms', function (Blueprint $table) use ($driver){
             $table->id();
             $table->string('room_name');
-
-            // Replace ENUM with string + CHECK
-            $table->string('room_type'); //values ('lecture', 'comlab', 'gym', 'main')
-
-            $table->string('course_type_exclusive_to'); //values ('none', 'pe', 'nstp', 'others')
-
+            $table->enum('room_type', ['lecture', 'comlab', 'gym', 'main'])->default('lecture');
+            $table->enum('course_type_exclusive_to', ['none', 'pe', 'nstp', 'others'])->default('lecture');
             $table->integer('room_capacity')->nullable();
             $table->timestamps();
         });

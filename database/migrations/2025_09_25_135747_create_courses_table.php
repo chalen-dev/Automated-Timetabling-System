@@ -11,21 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
+
+        Schema::create('courses', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->string('course_title');
             $table->string('course_name');
-
-            $table->string('course_type'); //values ('major', 'minor', 'pe', 'nstp', 'other')
-
             $table->integer('class_hours');
             $table->integer('total_lecture_class_days');
             $table->integer('total_laboratory_class_days');
             $table->decimal('unit_load', 10, 1);
-
-            // Replaced ENUM with string + CHECK constraint
-            $table->string('duration_type')->default('none'); //values ('semestral', 'term', 'none')
-
+            $table->enum('course_type', ['major', 'minor', 'pe', 'nstp', 'other']);
+            $table->enum('duration_type', ['semestral', 'term', 'none'])->default('none');
             $table->timestamps();
         });
     }

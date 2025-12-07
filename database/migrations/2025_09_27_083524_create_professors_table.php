@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('professors', function (Blueprint $table) {
+        $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
+
+        Schema::create('professors', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-
-            // Replace ENUM with string + optional check
-            $table->string('professor_type')->default('regular'); //values ('regular', 'non-regular', 'none')
-
-            $table->string('gender'); //values ('male','female','none')
-
+            $table->enum('professor_type', ['regular', 'non-regular', 'none'])->default('regular');
+            $table->enum('gender', ['male', 'female', 'none'])->default('none');
             $table->decimal('max_unit_load', 10, 1);
             $table->integer('professor_age')->nullable();
             $table->string('position')->nullable();
