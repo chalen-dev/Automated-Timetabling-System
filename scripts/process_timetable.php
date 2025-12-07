@@ -15,8 +15,9 @@
 //
 // Output: {output_dir}/{timetable_id}.xlsx
 
-require 'vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -332,7 +333,7 @@ function build_overview_filtered($term, array $subset, array $assignments, array
     return $rows;
 }
 
-function write_sheet_from_rows(Spreadsheet $spreadsheet, $sheetName, array $rows)
+function write_sheet_from_rows(Spreadsheet $spreadsheet, $sheetName, array $rows): void
 {
     $sheet = new Worksheet($spreadsheet, $sheetName);
     $spreadsheet->addSheet($sheet);
@@ -347,7 +348,11 @@ function write_sheet_from_rows(Spreadsheet $spreadsheet, $sheetName, array $rows
     $rowIndex = 1;
     $colIndex = 1;
     foreach ($headers as $h) {
-        $sheet->setCellValueByColumnAndRow($colIndex, $rowIndex, $h);
+        // Convert numeric column index → letter (1 → A, 2 → B, etc.)
+        $columnLetter = Coordinate::stringFromColumnIndex($colIndex);
+        $cellRef = $columnLetter . $rowIndex;
+
+        $sheet->setCellValue($cellRef, $h);
         $colIndex++;
     }
 
@@ -355,13 +360,19 @@ function write_sheet_from_rows(Spreadsheet $spreadsheet, $sheetName, array $rows
     foreach ($rows as $row) {
         $rowIndex++;
         $colIndex = 1;
+
         foreach ($headers as $h) {
             $val = $row[$h] ?? '';
-            $sheet->setCellValueByColumnAndRow($colIndex, $rowIndex, $val);
+
+            $columnLetter = Coordinate::stringFromColumnIndex($colIndex);
+            $cellRef = $columnLetter . $rowIndex;
+
+            $sheet->setCellValue($cellRef, $val);
             $colIndex++;
         }
     }
 }
+
 
 // ---- Load CSVs ----
 echo "Loading CSVs from runtime folder...\n";

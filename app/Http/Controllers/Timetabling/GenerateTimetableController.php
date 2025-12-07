@@ -34,17 +34,15 @@ class GenerateTimetableController extends Controller
 
         // Run Python script using venv (Windows or Linux)
         //Change to .php for testing
-        $pythonScript = base_path('scripts/process_timetable.php');
-        $pythonPath   = FilePath::getPythonPath();
+        // Decide which script and interpreter to use
+        $scriptPath = base_path('scripts/process_timetable.php'); // for PHP testing
 
-        if (!file_exists($pythonPath)) {
-            // Optional fallback: try system python on PATH (e.g. on some hosts)
-            $pythonPath = 'python3'; // or 'python' depending on your server
-        }
+        // Use the current PHP binary
+        $interpreter = PHP_BINARY;
 
         // Build the command safely for both Windows and Linux
-        $command = escapeshellarg($pythonPath) . ' '
-            . escapeshellarg($pythonScript) . ' '
+        $command = escapeshellarg($interpreter) . ' '
+            . escapeshellarg($scriptPath) . ' '
             . escapeshellarg($exportDir) . ' '
             . escapeshellarg($outputDir) . ' '
             . escapeshellarg($timetableId) . ' 2>&1';
@@ -54,11 +52,10 @@ class GenerateTimetableController extends Controller
         exec($command, $output, $status);
         $outputText = implode("\n", $output);
 
-
         if ($status !== 0) {
-            // Show full Python error in scrollable box
             return redirect()->back()->with('error', "<pre>" . e($outputText) . "</pre>");
         }
+
 
         // XLSX file path in storage
         $outputFile = $outputDir . DIRECTORY_SEPARATOR . "{$timetableId}.xlsx";
