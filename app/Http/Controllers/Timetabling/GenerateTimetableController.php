@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Timetabling;
 
 use App\Helpers\AlgorithmQueries;
+use App\Helpers\FilePath;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use Illuminate\Http\Request;
@@ -31,19 +32,27 @@ class GenerateTimetableController extends Controller
         $this->generateQueryCSVs($timetableId, $exportDir);
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
-        // Run Python script using Windows venv
-        $pythonScript = base_path("scripts/process_timetable.py");
-        $pythonPath   = base_path("venv\\Scripts\\python.exe"); // Windows venv path
+        // Run Python script using venv (Windows or Linux)
+        $pythonScript = base_path('scripts/process_timetable.py');
+        $pythonPath   = FilePath::getPythonPath();
 
-        // Pass both input and output directories to Python
-        $command = "\"$pythonPath\" "
-            . escapeshellarg($pythonScript) . " "
-            . escapeshellarg($exportDir) . " "
-            . escapeshellarg($outputDir) . " "
-            . escapeshellarg($timetableId) . " 2>&1";
+        if (!file_exists($pythonPath)) {
+            // Optional fallback: try system python on PATH (e.g. on some hosts)
+            $pythonPath = 'python3'; // or 'python' depending on your server
+        }
 
+        // Build the command safely for both Windows and Linux
+        $command = escapeshellarg($pythonPath) . ' '
+            . escapeshellarg($pythonScript) . ' '
+            . escapeshellarg($exportDir) . ' '
+            . escapeshellarg($outputDir) . ' '
+            . escapeshellarg($timetableId) . ' 2>&1';
+
+        $output  = [];
+        $status  = 0;
         exec($command, $output, $status);
         $outputText = implode("\n", $output);
+
 
         if ($status !== 0) {
             // Show full Python error in scrollable box
@@ -61,8 +70,6 @@ class GenerateTimetableController extends Controller
 
         return redirect()->back()->with('success', "Timetable generated successfully!");
     }
-
-
 
     /**
      * Ensure the export directory exists
