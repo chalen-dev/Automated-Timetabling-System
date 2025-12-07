@@ -39,6 +39,7 @@ class GenerateTimetableController extends Controller
          * Determine the correct PHP CLI interpreter.
          * PHP_BINARY = php-fpm on Laravel Cloud (NOT usable)
          * So we prefer known CLI locations, then fallback to plain `php`
+         * for laravel cloud deployment fix
          */
         $possiblePhpBins = [
             '/usr/bin/php',
