@@ -32,15 +32,34 @@ class GenerateTimetableController extends Controller
         $this->generateQueryCSVs($timetableId, $exportDir);
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
-        // Run Python script using venv (Windows or Linux)
-        //Change to .php for testing
         // Decide which script and interpreter to use
-        $scriptPath = base_path('scripts/process_timetable.php'); // for PHP testing
+        $scriptPath = base_path('scripts/process_timetable.php'); // PHP-based scheduler
 
-        // Use the current PHP binary
-        $interpreter = PHP_BINARY;
+        /**
+         * Determine the correct PHP CLI interpreter.
+         * PHP_BINARY = php-fpm on Laravel Cloud (NOT usable)
+         * So we prefer known CLI locations, then fallback to plain `php`
+         */
+        $possiblePhpBins = [
+            '/usr/bin/php',
+            '/usr/local/bin/php',
+            '/opt/homebrew/bin/php',   // macOS (local dev if relevant)
+        ];
 
-        // Build the command safely for both Windows and Linux
+        $interpreter = null;
+
+        foreach ($possiblePhpBins as $bin) {
+            if (is_executable($bin)) {
+                $interpreter = $bin;
+                break;
+            }
+        }
+
+        // Final fallback: rely on PATH
+        if (!$interpreter) {
+            $interpreter = 'php';
+        }
+
         $command = escapeshellarg($interpreter) . ' '
             . escapeshellarg($scriptPath) . ' '
             . escapeshellarg($exportDir) . ' '
@@ -49,7 +68,9 @@ class GenerateTimetableController extends Controller
 
         $output  = [];
         $status  = 0;
+
         exec($command, $output, $status);
+
         $outputText = implode("\n", $output);
 
         if ($status !== 0) {
