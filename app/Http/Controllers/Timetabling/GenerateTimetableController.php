@@ -98,6 +98,7 @@ class GenerateTimetableController extends Controller
             file_get_contents($outputFile)
         );
 
+
         // OPTIONAL: delete temp local file after upload
         // @unlink($outputFile);
 

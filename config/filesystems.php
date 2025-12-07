@@ -59,7 +59,7 @@ return [
         ],
         'facultime' => [
             'driver' => 'local',
-            'root'   => storage_path('app/exports/timetables'),
+            'root'   => storage_path('app/facultime'),
             'throw'  => false,
         ],
     ],
