@@ -18,9 +18,9 @@ class UserController extends Controller
     {
         // Basic validation for everything except password
         $request->validate([
-            'name' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9_]+$/'],
-            'first_name' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z\s\'\-]+$/'],
-            'last_name' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z\s\'\-]+$/'],
+            'name' => ['required', 'string', 'max:20', 'regex:/^[\p{L}\s\'\-]+$/u'],
+            'first_name' => ['required', 'string', 'max:50', 'regex:/^[\p{L}\s\'\-]+$/u'],
+            'last_name'  => ['required', 'string', 'max:50', 'regex:/^[\p{L}\s\'\-]+$/u'],
             'email' => [
                 'required',
                 'string',
