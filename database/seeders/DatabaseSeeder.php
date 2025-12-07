@@ -37,14 +37,16 @@ class DatabaseSeeder extends Seeder
             Storage::disk('facultime')->deleteDirectory('timetables');
         }
 
-
+        /*
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+        */
 
         $this->call([
             AdminUserSeeder::class,
+            //UserSeeder::class,
             AcademicProgramSeeder::class,
             CourseSeeder::class,
             ProfessorSeeder::class,
