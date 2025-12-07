@@ -98,12 +98,17 @@ class GenerateTimetableController extends Controller
             file_get_contents($outputFile)
         );
 
-
+        $exists = Storage::disk('facultime')->exists($diskPath);
+        dd([
+            'disk'   => config('filesystems.disks.facultime'),
+            'path'   => $diskPath,
+            'exists' => $exists,
+        ]);
 
         // OPTIONAL: delete temp local file after upload
         // @unlink($outputFile);
 
-        return redirect()->back()->with('success', "Timetable generated successfully!");
+        //return redirect()->back()->with('success', "Timetable generated successfully!");
     }
 
     /**
