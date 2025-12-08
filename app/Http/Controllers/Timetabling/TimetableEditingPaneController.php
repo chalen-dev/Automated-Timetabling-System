@@ -502,22 +502,51 @@ class TimetableEditingPaneController extends Controller
                 throw new \RuntimeException('placementsByView must be an array.');
             }
 
-            // 2) Load existing XLSX (same path pattern as index/editor)
-            $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
-            if (!file_exists($xlsxPath)) {
+            // 2) Load existing XLSX (bucket first, then legacy local path)
+            $bucketPath = "timetables/{$timetable->id}.xlsx";
+            $tempFile   = null;
+            $xlsxPath   = null;
+
+            // Try from facultime bucket
+            if (Storage::disk('facultime')->exists($bucketPath)) {
+                try {
+                    $tempFile = tempnam(sys_get_temp_dir(), 'tt_');
+                    file_put_contents($tempFile, Storage::disk('facultime')->get($bucketPath));
+                    $xlsxPath = $tempFile;
+                } catch (\Throwable $e) {
+                    Log::error('saveFromEditor: failed to read XLSX from bucket', [
+                        'timetable_id' => $timetable->id,
+                        'disk'         => 'facultime',
+                        'path'         => $bucketPath,
+                        'error'        => $e->getMessage(),
+                    ]);
+                    $xlsxPath = null;
+                }
+            }
+
+            // Fallback to legacy local file if bucket copy missing/unreadable
+            if (!$xlsxPath) {
+                $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+                if (file_exists($legacyPath)) {
+                    $xlsxPath = $legacyPath;
+                }
+            }
+
+            if (!$xlsxPath || !file_exists($xlsxPath)) {
                 Log::error('Timetable XLSX not found for saveFromEditor', [
                     'timetable_id' => $timetable->id,
-                    'path'         => $xlsxPath,
+                    'bucket_path'  => $bucketPath,
                 ]);
 
                 return response()->json([
                     'status'  => 'error',
-                    'message' => 'Timetable XLSX not found.',
+                    'message' => 'Timetable XLSX not found (bucket & local).',
                 ], 404);
             }
 
             $spreadsheet = IOFactory::load($xlsxPath);
             $sheetCount  = $spreadsheet->getSheetCount();
+
 
             // 3) Build map: sessionId => "CS_3rd_5_33"
             $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
@@ -1028,11 +1057,54 @@ class TimetableEditingPaneController extends Controller
 
             $outputPath = $outputDir . DIRECTORY_SEPARATOR . $timetable->id . '-formatted.xlsx';
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($target);
+
+            // Save to local file (for debugging / local dev)
             $writer->save($outputPath);
 
-            return response()->download($outputPath, "{$timetable->timetable_name}-formatted.xlsx", [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ]);
+            // NEW: also upload the formatted XLSX to the facultime bucket
+            try {
+                $bucketPath = "formatted-timetables/{$timetable->id}-formatted.xlsx";
+
+                $uploaded = Storage::disk('facultime')->put(
+                    $bucketPath,
+                    file_get_contents($outputPath)
+                );
+
+                if ($uploaded) {
+                    Log::info('exportFormattedSpreadsheet: uploaded formatted XLSX to bucket', [
+                        'timetable_id' => $timetable->id,
+                        'disk'         => 'facultime',
+                        'path'         => $bucketPath,
+                    ]);
+                } else {
+                    Log::warning('exportFormattedSpreadsheet: failed to upload formatted XLSX to bucket', [
+                        'timetable_id' => $timetable->id,
+                        'disk'         => 'facultime',
+                        'path'         => $bucketPath,
+                    ]);
+                }
+
+                // Download directly from the bucket
+                return Storage::disk('facultime')->download(
+                    $bucketPath,
+                    "{$timetable->timetable_name}-formatted.xlsx",
+                    [
+                        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    ]
+                );
+            } catch (Throwable $e) {
+                Log::error('exportFormattedSpreadsheet: exception while uploading/downloading formatted XLSX from bucket', [
+                    'timetable_id' => $timetable->id,
+                    'disk'         => 'facultime',
+                    'error'        => $e->getMessage(),
+                ]);
+
+                // Fallback: if something goes wrong with the bucket, still serve the local file
+                return response()->download($outputPath, "{$timetable->timetable_name}-formatted.xlsx", [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                ]);
+            }
+
         } catch (Throwable $e) {
             return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
         }
