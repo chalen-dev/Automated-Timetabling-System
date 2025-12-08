@@ -148,6 +148,8 @@ class TimetableEditingPaneController extends Controller
         return $map;
     }
 
+
+
     /**
      * Build initial placementsByView from the timetable's XLSX file.
      *
@@ -163,12 +165,40 @@ class TimetableEditingPaneController extends Controller
      */
     private function buildInitialPlacementsFromXlsx(Timetable $timetable): array
     {
-        $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
-        if (!file_exists($xlsxPath)) {
-            return [];
+        // 1. Try reading from the bucket
+        $bucketPath = "timetables/{$timetable->id}.xlsx";
+        $tempFile = null;
+
+        if (Storage::disk('facultime')->exists($bucketPath)) {
+            try {
+                $tempFile = tempnam(sys_get_temp_dir(), 'tt_');
+                file_put_contents($tempFile, Storage::disk('facultime')->get($bucketPath));
+                $xlsxPath = $tempFile;
+            } catch (\Throwable $e) {
+                $xlsxPath = null;
+            }
+        } else {
+            $xlsxPath = null;
         }
 
+        // 2. Fallback to local legacy path
+        if (!$xlsxPath) {
+            $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            if (file_exists($legacyPath)) {
+                $xlsxPath = $legacyPath;
+            } else {
+                return []; // Nothing we can load
+            }
+        }
+
+        // 3. Load spreadsheet normally
         $spreadsheet = IOFactory::load($xlsxPath);
+
+        // Cleanup
+        if ($tempFile && file_exists($tempFile)) {
+            @unlink($tempFile);
+        }
+
         $sheetCount  = $spreadsheet->getSheetCount();
 
         $placementsByView = [];
@@ -298,6 +328,7 @@ class TimetableEditingPaneController extends Controller
         return $placementsByView;
     }
 
+
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -408,6 +439,7 @@ class TimetableEditingPaneController extends Controller
             'sessionColorsByGroupId'
         ));
     }
+
 
     public function editor(Timetable $timetable)
     {
@@ -628,6 +660,7 @@ class TimetableEditingPaneController extends Controller
                 }
             }
 
+            // 5) Save XLSX back to disk
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
             // ensure writable (explicit check will give clearer error)
@@ -639,44 +672,12 @@ class TimetableEditingPaneController extends Controller
                 ], 500);
             }
 
-            // save to local file (existing behavior)
             $writer->save($xlsxPath);
-
-            // NEW: also upload the updated XLSX into the facultime bucket
-            try {
-                $bucketPath = "timetables/{$timetable->id}.xlsx";
-
-                $uploaded = Storage::disk('facultime')->put(
-                    $bucketPath,
-                    file_get_contents($xlsxPath)
-                );
-
-                if ($uploaded) {
-                    Log::info('saveFromEditor: uploaded updated timetable XLSX to bucket', [
-                        'timetable_id' => $timetable->id,
-                        'disk'         => 'facultime',
-                        'path'         => $bucketPath,
-                    ]);
-                } else {
-                    Log::warning('saveFromEditor: failed to upload updated timetable XLSX to bucket', [
-                        'timetable_id' => $timetable->id,
-                        'disk'         => 'facultime',
-                        'path'         => $bucketPath,
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('saveFromEditor: exception while uploading timetable XLSX to bucket', [
-                    'timetable_id' => $timetable->id,
-                    'disk'         => 'facultime',
-                    'error'        => $e->getMessage(),
-                ]);
-            }
 
             return response()->json([
                 'status'  => 'ok',
                 'message' => 'Timetable changes saved.',
             ]);
-
         } catch (\Throwable $e) {
             Log::error('Error in saveFromEditor', [
                 'timetable_id' => $timetable->id ?? null,
