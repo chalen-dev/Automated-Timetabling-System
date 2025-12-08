@@ -764,10 +764,40 @@ class TimetableEditingPaneController extends Controller
 
     public function exportFormattedSpreadsheet(Timetable $timetable)
     {
-        $inputPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+        // Try to load source XLSX from the facultime bucket first
+        $bucketPath = "timetables/{$timetable->id}.xlsx";
+        $inputPath  = null;
+        $tempFile   = null;
 
-        if (!file_exists($inputPath)) {
-            return redirect()->back()->with('error', 'Source timetable XLSX not found for id: ' . $timetable->id);
+        if (Storage::disk('facultime')->exists($bucketPath)) {
+            try {
+                $tempFile = tempnam(sys_get_temp_dir(), 'tt_src_');
+                file_put_contents($tempFile, Storage::disk('facultime')->get($bucketPath));
+                $inputPath = $tempFile;
+            } catch (\Throwable $e) {
+                Log::error('exportFormattedSpreadsheet: failed to read source XLSX from bucket', [
+                    'timetable_id' => $timetable->id,
+                    'disk'         => 'facultime',
+                    'path'         => $bucketPath,
+                    'error'        => $e->getMessage(),
+                ]);
+                $inputPath = null;
+            }
+        }
+
+        // Fallback to legacy local file if bucket copy missing/unreadable
+        if (!$inputPath) {
+            $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            if (file_exists($legacyPath)) {
+                $inputPath = $legacyPath;
+            }
+        }
+
+        if (!$inputPath || !file_exists($inputPath)) {
+            return redirect()->back()->with(
+                'error',
+                'Source timetable XLSX not found for id: ' . $timetable->id
+            );
         }
 
         try {
