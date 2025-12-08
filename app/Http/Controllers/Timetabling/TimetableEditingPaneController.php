@@ -148,8 +148,6 @@ class TimetableEditingPaneController extends Controller
         return $map;
     }
 
-
-
     /**
      * Build initial placementsByView from the timetable's XLSX file.
      *
@@ -300,7 +298,6 @@ class TimetableEditingPaneController extends Controller
         return $placementsByView;
     }
 
-
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -411,7 +408,6 @@ class TimetableEditingPaneController extends Controller
             'sessionColorsByGroupId'
         ));
     }
-
 
     public function editor(Timetable $timetable)
     {
@@ -632,7 +628,6 @@ class TimetableEditingPaneController extends Controller
                 }
             }
 
-            // 5) Save XLSX back to disk
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
             // ensure writable (explicit check will give clearer error)
@@ -644,12 +639,44 @@ class TimetableEditingPaneController extends Controller
                 ], 500);
             }
 
+            // save to local file (existing behavior)
             $writer->save($xlsxPath);
+
+            // NEW: also upload the updated XLSX into the facultime bucket
+            try {
+                $bucketPath = "timetables/{$timetable->id}.xlsx";
+
+                $uploaded = Storage::disk('facultime')->put(
+                    $bucketPath,
+                    file_get_contents($xlsxPath)
+                );
+
+                if ($uploaded) {
+                    Log::info('saveFromEditor: uploaded updated timetable XLSX to bucket', [
+                        'timetable_id' => $timetable->id,
+                        'disk'         => 'facultime',
+                        'path'         => $bucketPath,
+                    ]);
+                } else {
+                    Log::warning('saveFromEditor: failed to upload updated timetable XLSX to bucket', [
+                        'timetable_id' => $timetable->id,
+                        'disk'         => 'facultime',
+                        'path'         => $bucketPath,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('saveFromEditor: exception while uploading timetable XLSX to bucket', [
+                    'timetable_id' => $timetable->id,
+                    'disk'         => 'facultime',
+                    'error'        => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'status'  => 'ok',
                 'message' => 'Timetable changes saved.',
             ]);
+
         } catch (\Throwable $e) {
             Log::error('Error in saveFromEditor', [
                 'timetable_id' => $timetable->id ?? null,
