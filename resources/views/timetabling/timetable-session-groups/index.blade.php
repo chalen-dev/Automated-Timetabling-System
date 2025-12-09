@@ -73,6 +73,12 @@
                                 Add Sessions
                             </a>
 
+                            <!-- Copy Button -->
+                            <a href="{{ route('timetables.session-groups.copy', [$timetable, $sessionGroup]) }}"
+                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150"
+                               title="Copy this Class Session (including its course sessions)">
+                                <i class="bi bi-files"></i>
+                            </a>
 
                             <!-- Show Button -->
                             <a href="{{ route('timetables.session-groups.show', [$timetable, $sessionGroup]) }}"

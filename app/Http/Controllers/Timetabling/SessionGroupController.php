@@ -29,6 +29,12 @@ class SessionGroupController extends Controller
         'semestral' => 'Semestral'
     ];
 
+    protected $session_time_options = [
+        'morning'   => 'Morning',
+        'afternoon' => 'Afternoon',
+        'evening'   => 'Evening',
+    ];
+
 
     public function index(Timetable $timetable, Request $request, SessionGroup $sessionGroup)
     {
@@ -76,13 +82,17 @@ class SessionGroupController extends Controller
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $year_level_options = $this->year_level_options;
+        $session_time_options = $this->session_time_options;
 
         Logger::log('create', 'session groups', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
         ]);
 
-        return view('timetabling.timetable-session-groups.create', compact('timetable', 'academic_program_options', 'year_level_options'));
+        return view(
+            'timetabling.timetable-session-groups.create',
+            compact('timetable', 'academic_program_options', 'year_level_options', 'session_time_options')
+        );
     }
 
     public function store(Request $request, Timetable $timetable)
@@ -95,12 +105,14 @@ class SessionGroupController extends Controller
                 Rule::unique('session_groups')->where(function ($query) use ($request, $timetable) {
                     return $query->where('timetable_id', $timetable->id)
                         ->where('academic_program_id', $request->academic_program_id)
-                        ->where('year_level', $request->year_level);
+                        ->where('year_level', $request->year_level)
+                        ->where('session_time', $request->session_time);
                 }),
             ],
-            'year_level' => 'required|string',
+            'year_level'          => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
-            'short_description' => 'nullable|string',
+            'short_description'   => 'nullable|string',
+            'session_time'        => ['required', Rule::in(array_keys($this->session_time_options))],
         ]);
 
         $validatedData['timetable_id'] = $timetable->id;
@@ -118,18 +130,21 @@ class SessionGroupController extends Controller
             ->with('success', 'Class Session created successfully.');
     }
 
-
     public function edit(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
         $year_level_options = $this->year_level_options;
+        $session_time_options = $this->session_time_options;
 
         Logger::log('edit', 'session groups', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
         ]);
 
-        return view('timetabling.timetable-session-groups.edit', compact('sessionGroup', 'timetable', 'academic_program_options', 'year_level_options'));
+        return view(
+            'timetabling.timetable-session-groups.edit',
+            compact('sessionGroup', 'timetable', 'academic_program_options', 'year_level_options', 'session_time_options')
+        );
     }
 
     public function update(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
@@ -140,16 +155,18 @@ class SessionGroupController extends Controller
                 'string',
                 'max:4',
                 Rule::unique('session_groups')
-                    ->ignore($sessionGroup->id) // Ignore the current row
+                    ->ignore($sessionGroup->id)
                     ->where(function ($query) use ($request, $timetable) {
                         return $query->where('timetable_id', $timetable->id)
                             ->where('academic_program_id', $request->academic_program_id)
-                            ->where('year_level', $request->year_level);
+                            ->where('year_level', $request->year_level)
+                            ->where('session_time', $request->session_time);
                     }),
             ],
-            'year_level' => 'required|string',
+            'year_level'          => 'required|string',
             'academic_program_id' => 'required|exists:academic_programs,id',
-            'short_description' => 'nullable|string',
+            'short_description'   => 'nullable|string',
+            'session_time'        => ['required', Rule::in(array_keys($this->session_time_options))],
         ]);
 
         $sessionGroup->update($validatedData);
@@ -186,7 +203,73 @@ class SessionGroupController extends Controller
         return view('timetabling.timetable-session-groups.show', compact('timetable', 'sessionGroup', 'sessionFullName'));
     }
 
-    // ---------- DESTROY ----------
+    public function copy(Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        $academic_program_options = AcademicProgram::all()->pluck('program_abbreviation', 'id')->toArray();
+        $year_level_options = $this->year_level_options;
+        $session_time_options = $this->session_time_options;
+
+        Logger::log('copy', 'session groups', [
+            'source_session_group_id' => $sessionGroup->id,
+            'source_session_name'     => $sessionGroup->session_name,
+            'timetable_id'            => $timetable->id,
+            'timetable_name'          => $timetable->timetable_name,
+        ]);
+
+        return view(
+            'timetabling.timetable-session-groups.copy',
+            compact('timetable', 'sessionGroup', 'academic_program_options', 'year_level_options', 'session_time_options')
+        );
+    }
+    public function storeCopy(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        // Validate like "store", but we’re creating a new row
+        $validatedData = $request->validate([
+            'session_name' => [
+                'required',
+                'string',
+                'max:4',
+                Rule::unique('session_groups')->where(function ($query) use ($request, $timetable) {
+                    return $query->where('timetable_id', $timetable->id)
+                        ->where('academic_program_id', $request->academic_program_id)
+                        ->where('year_level', $request->year_level)
+                        ->where('session_time', $request->session_time);
+                }),
+            ],
+            'year_level'          => 'required|string',
+            'academic_program_id' => 'required|exists:academic_programs,id',
+            'short_description'   => 'nullable|string',
+            'session_time'        => ['required', Rule::in(array_keys($this->session_time_options))],
+        ]);
+
+        $validatedData['timetable_id'] = $timetable->id;
+
+        // Base the new group’s color on source (or null if none)
+        $validatedData['session_color'] = $sessionGroup->session_color;
+
+        // Create the new Session Group
+        $newGroup = SessionGroup::create($validatedData);
+
+        // Copy all course sessions from the source group to the new one
+        $sessionGroup->load('courseSessions');
+
+        foreach ($sessionGroup->courseSessions as $courseSession) {
+            $newCourseSession = $courseSession->replicate(); // clone all attributes except id
+            $newCourseSession->session_group_id = $newGroup->id;
+            $newCourseSession->save();
+        }
+
+        Logger::log('store-copy', 'session groups', [
+            'source_session_group_id' => $sessionGroup->id,
+            'new_session_group_id'    => $newGroup->id,
+            'new_session_name'        => $newGroup->session_name,
+            'timetable_id'            => $timetable->id,
+            'timetable_name'          => $timetable->timetable_name,
+        ]);
+
+        return redirect()->route('timetables.session-groups.index', $timetable)
+            ->with('success', 'Class Session copied successfully (including its course sessions).');
+    }
     public function destroy(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $sessionGroupId   = $sessionGroup->id;
@@ -294,7 +377,6 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session and its Course Sessions deleted successfully.');
     }
-
     public function updateColor(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $data = $request->validate([
@@ -313,5 +395,6 @@ class SessionGroupController extends Controller
             'session_color' => $sessionGroup->session_color,
         ]);
     }
+
 
 }

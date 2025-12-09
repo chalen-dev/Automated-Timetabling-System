@@ -14,8 +14,8 @@ class SessionGroup extends Model
         'academic_program_id',
         'timetable_id',
         'short_description',
-        'session_color'
-
+        'session_color',
+        'session_time' //morning, afternoon, evening
     ];
 
     public function academicProgram()

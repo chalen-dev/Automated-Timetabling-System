@@ -13,10 +13,12 @@
                 <p>Session Letter</p>
                 <p>Academic Program</p>
                 <p>Year Level</p>
+                <p>Time</p>
             </div>
 
             <!-- Colons -->
             <div class="flex flex-col gap-[8px] w-[10px]">
+                <p>:</p>
                 <p>:</p>
                 <p>:</p>
                 <p>:</p>
@@ -27,6 +29,7 @@
                 <p>{{ $sessionGroup->session_name }}</p>
                 <p>{{ $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown' }}</p>
                 <p>{{ $sessionGroup->year_level }}</p>
+                <p class="capitalize">{{ $sessionGroup->session_time }}</p>
             </div>
         </div>
 

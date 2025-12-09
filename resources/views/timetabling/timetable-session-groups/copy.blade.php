@@ -1,13 +1,15 @@
 @extends('app')
 
-@section('title', 'Edit Class Session')
+@section('title', 'Copy Class Session')
 
 @section('content')
     <div class="flex flex-col gap-[25px] justify-center items-center bg-white rounded-2xl shadow-2xl max-w-[800px] mx-auto mt-[40px] p-[30px]">
-        <h1 class="font-bold text-[18px]">Edit Class Session</h1>
-        <form class="flex flex-col w-full gap-[25px]" action="{{ route('timetables.session-groups.update', [$timetable, $sessionGroup]) }}" method="POST">
+        <h1 class="font-bold text-[18px]">Copy Class Session</h1>
+
+        <form class="flex flex-col w-full gap-[25px]"
+              action="{{ route('timetables.session-groups.store-copy', [$timetable, $sessionGroup]) }}"
+              method="POST">
             @csrf
-            @method('PUT')
 
             <!-- Horizontal row for main fields -->
             <div class="flex gap-5 w-full">
@@ -55,16 +57,25 @@
                 :value="old('short_description', $sessionGroup->short_description)"
             />
 
+            <!-- Info text -->
+            <p class="text-xs text-gray-500">
+                When you confirm, a new Class Session will be created with the same Course Sessions as
+                <strong>{{ $sessionGroup->academicProgram->program_abbreviation ?? 'Program' }}
+                    {{ $sessionGroup->session_name }} {{ $sessionGroup->year_level }} Year</strong>.
+            </p>
+
             <!-- Buttons -->
             <div class="flex justify-between w-full mt-[15px]">
                 <a href="{{ route('timetables.session-groups.index', $timetable) }}">
-                    <button type="button" class="pt-[8px] pb-[8px] pl-[16px] pr-[16px] rounded-[10px] text-[14px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
+                    <button type="button"
+                            class="pt-[8px] pb-[8px] pl-[16px] pr-[16px] rounded-[10px] text-[14px] bg-[#aaa] text-[#fff] cursor-pointer font-[600]">
                         Back
                     </button>
                 </a>
 
-                <button type="submit" class="pt-[8px] pb-[8px] pl-[16px] pr-[16px] rounded-[10px] text-[14px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]">
-                    Confirm Changes
+                <button type="submit"
+                        class="pt-[8px] pb-[8px] pl-[16px] pr-[16px] rounded-[10px] text-[14px] bg-[#5e0b0b] text-[#fff] cursor-pointer font-[600]">
+                    Confirm Copy
                 </button>
             </div>
         </form>
