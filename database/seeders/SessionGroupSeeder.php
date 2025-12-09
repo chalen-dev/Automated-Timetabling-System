@@ -36,24 +36,32 @@ class SessionGroupSeeder extends Seeder
 
         $groups = [
             // CS
-            ['A', '1st', $programs[0]->id],
-            ['B', '1st', $programs[0]->id],
-            ['A', '2nd', $programs[0]->id],
-            ['B', '2nd', $programs[0]->id],
-            ['A', '3rd', $programs[0]->id],
-            ['B', '3rd', $programs[0]->id],
-            ['A', '4th', $programs[0]->id],
-            ['B', '4th', $programs[0]->id],
+            ['A', '1st', $programs[0]->id, 'morning'],
+            ['B', '1st', $programs[0]->id, 'afternoon'],
+            ['C', '1st', $programs[0]->id, 'evening'],
+            ['A', '2nd', $programs[0]->id, 'morning'],
+            ['B', '2nd', $programs[0]->id, 'afternoon'],
+            ['C', '2nd', $programs[0]->id, 'evening'],
+            ['A', '3rd', $programs[0]->id, 'morning'],
+            ['B', '3rd', $programs[0]->id, 'afternoon'],
+            ['C', '3rd', $programs[0]->id, 'evening'],
+            ['A', '4th', $programs[0]->id, 'morning'],
+            ['B', '4th', $programs[0]->id, 'afternoon'],
+            ['C', '4th', $programs[0]->id, 'evening'],
 
             // IT
-            ['A', '1st', $programs[1]->id],
-            ['B', '1st', $programs[1]->id],
-            ['A', '2nd', $programs[1]->id],
-            ['B', '2nd', $programs[1]->id],
-            ['A', '3rd', $programs[1]->id],
-            ['B', '3rd', $programs[1]->id],
-            ['A', '4th', $programs[1]->id],
-            ['B', '4th', $programs[1]->id],
+            ['A', '1st', $programs[1]->id, 'morning'],
+            ['B', '1st', $programs[1]->id, 'afternoon'],
+            ['C', '1st', $programs[1]->id, 'evening'],
+            ['A', '2nd', $programs[1]->id, 'morning'],
+            ['B', '2nd', $programs[1]->id, 'afternoon'],
+            ['C', '2nd', $programs[1]->id, 'evening'],
+            ['A', '3rd', $programs[1]->id, 'morning'],
+            ['B', '3rd', $programs[1]->id, 'afternoon'],
+            ['C', '3rd', $programs[1]->id, 'evening'],
+            ['A', '4th', $programs[1]->id, 'morning'],
+            ['B', '4th', $programs[1]->id, 'afternoon'],
+            ['C', '4th', $programs[1]->id, 'evening'],
         ];
 
         foreach ($groups as $g) {
@@ -62,10 +70,12 @@ class SessionGroupSeeder extends Seeder
                 'year_level' => $g[1],
                 'academic_program_id' => $g[2],
                 'timetable_id' => 1,
-                'session_color' => $colors[$colorIndex++],
+                'session_color' => $colors[$colorIndex % count($colors)],
+                'session_time' => $g[3],
             ];
-        }
 
+            $colorIndex++;
+        }
         SessionGroup::insertOrIgnore($data);
     }
 
