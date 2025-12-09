@@ -105,8 +105,7 @@ class SessionGroupController extends Controller
                 Rule::unique('session_groups')->where(function ($query) use ($request, $timetable) {
                     return $query->where('timetable_id', $timetable->id)
                         ->where('academic_program_id', $request->academic_program_id)
-                        ->where('year_level', $request->year_level)
-                        ->where('session_time', $request->session_time);
+                        ->where('year_level', $request->year_level);
                 }),
             ],
             'year_level'          => 'required|string',
@@ -159,8 +158,7 @@ class SessionGroupController extends Controller
                     ->where(function ($query) use ($request, $timetable) {
                         return $query->where('timetable_id', $timetable->id)
                             ->where('academic_program_id', $request->academic_program_id)
-                            ->where('year_level', $request->year_level)
-                            ->where('session_time', $request->session_time);
+                            ->where('year_level', $request->year_level);
                     }),
             ],
             'year_level'          => 'required|string',
@@ -232,8 +230,7 @@ class SessionGroupController extends Controller
                 Rule::unique('session_groups')->where(function ($query) use ($request, $timetable) {
                     return $query->where('timetable_id', $timetable->id)
                         ->where('academic_program_id', $request->academic_program_id)
-                        ->where('year_level', $request->year_level)
-                        ->where('session_time', $request->session_time);
+                        ->where('year_level', $request->year_level);
                 }),
             ],
             'year_level'          => 'required|string',

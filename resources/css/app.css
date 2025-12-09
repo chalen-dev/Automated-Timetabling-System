@@ -33,9 +33,14 @@ body::-webkit-scrollbar {
 
 
 body.bg-page {
-    background-image: url("/UMV.png");
+    background-image: url("../images/UMV.png");
     background-color: #4d0000;
-    background-size: cover;
+
+    /* New: control how it behaves */
+    background-repeat: no-repeat;       /* do not tile the image */
+    background-attachment: fixed;       /* keep it fixed while content scrolls */
+    background-position: center top;    /* keep it anchored at the top-center */
+    background-size: cover;             /* scale to cover the viewport */
 }
 
 
