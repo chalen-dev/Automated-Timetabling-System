@@ -13,7 +13,7 @@ class Label extends Component
 
     public function mount
     (
-        $name,
+        $name = '',
         $label = '',
         $is_required = false,
     ): void

@@ -179,13 +179,13 @@ function get_session_group_row($sgid) {
         }
 
 // Mapping of allowed start times for 2-hour lab sessions by session_time label
-        function lab2_allowed_starts_map() {
-            return [
-                'morning' => ['08:00', '10:00'],
-                'afternoon' => ['13:30', '15:30'],
-                'evening' => ['17:30', '19:30'],
-            ];
-        }
+function lab2_allowed_starts_map() {
+    return [
+        'morning' => ['08:00', '10:00'],
+        'afternoon' => ['13:30', '15:30'],
+        'evening' => ['17:30', '19:30'],
+    ];
+}
 
 
     }

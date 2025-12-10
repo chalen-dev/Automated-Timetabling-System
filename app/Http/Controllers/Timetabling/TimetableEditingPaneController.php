@@ -148,8 +148,6 @@ class TimetableEditingPaneController extends Controller
         return $map;
     }
 
-
-
     /**
      * Build initial placementsByView from the timetable's XLSX file.
      *
@@ -211,9 +209,6 @@ class TimetableEditingPaneController extends Controller
             CASE
                 WHEN LOWER(r.room_type) IN ('comlab','com lab','com-lab','lab','computer lab','computer_lab') THEN 1
                 WHEN LOWER(r.room_type) IN ('lecture','lec','lecture_hall') THEN 2
-                WHEN LOWER(r.room_type) IN ('avr','av','audio-visual','av_room') THEN 3
-                WHEN LOWER(r.room_type) IN ('gym','gymnasium') THEN 4
-                WHEN LOWER(r.room_type) IN ('main','main_hall') THEN 5
                 ELSE 10
             END
         ")

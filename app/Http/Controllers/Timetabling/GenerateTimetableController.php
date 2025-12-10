@@ -14,7 +14,7 @@ class GenerateTimetableController extends Controller
 {
     public function index(Timetable $timetable)
     {
-        return view('timetabling.generate-timetable.index', compact('timetable'));
+        return view('timetabling.generate.index', compact('timetable'));
     }
 
     public function generate(Request $request, Timetable $timetable)

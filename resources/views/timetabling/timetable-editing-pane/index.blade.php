@@ -5,60 +5,48 @@
     <div class="flex flex-col w-full p-4 pl-39 text-gray-800">
 
         @php
-            $prevSheet = $sheetIndex > 0 ? $sheetIndex - 1 : null;
-            $nextSheet = ($sheetIndex < $totalSheets - 1 && $sheetIndex < 11) ? $sheetIndex + 1 : null;
+            $activeTermIndex = $sheetIndex < 6 ? 0 : 1;
+            $activeDayIndex  = $sheetIndex % 6;
         @endphp
 
-            <!-- Sheet Navigation -->
-        <div class="flex justify-between items-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 tracking-wide">
-                    Sheet: {{ $sheetDisplayName ?? ('Sheet ' . ($sheetIndex + 1)) }}
-                </h2>
+        {{-- Term + Day selectors (like editor), flush with table (no extra bottom margin) --}}
+        <div class="flex flex-col bg-white rounded-t-lg border border-gray-200 border-b-0 shadow-md">
+            {{-- TERM SELECTOR --}}
+            <div class="flex flex-row justify-center w-full p-3 gap-6 bg-gray-100 border-b border-gray-200 rounded-t-lg">
+                <button
+                    type="button"
+                    data-term-index="0"
+                    class="view-term-button px-6 py-2 font-semibold rounded-lg shadow transition cursor-pointer
+                           {{ $activeTermIndex === 0 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    1st Term
+                </button>
 
-                <p class="text-sm text-gray-500 mt-1">
-                    Showing sheet {{ $sheetIndex + 1 }} of {{ min($totalSheets, 12) }}
-                </p>
+                <button
+                    type="button"
+                    data-term-index="1"
+                    class="view-term-button px-6 py-2 font-semibold rounded-lg shadow transition cursor-pointer
+                           {{ $activeTermIndex === 1 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    2nd Term
+                </button>
             </div>
 
-            <div class="flex gap-2">
-
-                {{-- Edit Timetable --}}
-                <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
-                   class="flex items-center gap-1 px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg shadow transition duration-150">
-                    Edit Timetable
-                </a>
-
-                {{-- Prev --}}
-                @if ($prevSheet !== null)
-                    <a id="prevBtn"
-                       href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $prevSheet]) }}"
-                       class="flex items-center gap-1 px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg shadow transition duration-150">
-                        <span class="text-lg">←</span> Previous
-                    </a>
-                @else
-                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
-                        <span class="text-lg">←</span> Previous
+            {{-- DAY SELECTOR --}}
+            <div class="grid grid-cols-6 w-full bg-white p-3 gap-2 border-t border-gray-200">
+                @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $index => $day)
+                    <button
+                        type="button"
+                        data-day-index="{{ $index }}"
+                        class="view-day-button py-2 text-center rounded-lg text-sm font-medium shadow-md cursor-pointer transition-all duration-200
+                               {{ $activeDayIndex === $index ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-red-700 hover:text-white hover:shadow-lg' }}">
+                        {{ $day }}
                     </button>
-                @endif
-
-                {{-- Next --}}
-                @if ($nextSheet !== null)
-                    <a id="nextBtn"
-                       href="{{ route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id, 'sheet' => $nextSheet]) }}"
-                       class="flex items-center gap-1 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow transition duration-150">
-                        Next <span class="text-lg">→</span>
-                    </a>
-                @else
-                    <button class="flex items-center gap-1 px-5 py-2 bg-gray-100 text-gray-400 font-medium rounded-lg shadow cursor-not-allowed">
-                        Next <span class="text-lg">→</span>
-                    </button>
-                @endif
+                @endforeach
             </div>
         </div>
 
         @if (!empty($tableData) && isset($tableData[0]))
-            <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+            {{-- Table attaches directly to selector (shared border, no gap) --}}
+            <div class="overflow-x-auto bg-white rounded-b-lg border border-gray-200 border-t-0 shadow-md">
                 <table class="min-w-full border-collapse table-auto text-xs md:text-sm">
                     <thead class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
                     <tr>
@@ -86,7 +74,6 @@
                             @foreach ($row as $colIndex => $cell)
 
                                 @php
-                                    // THIS MUST BE HERE — this is what your file was missing
                                     $span = $rowspanData[$colIndex][$rowIndex] ?? 1;
                                 @endphp
 
@@ -110,30 +97,25 @@
                                             if (count($parts) === 4) {
                                                 [$programAbbr, $sessionName, $sessionGroupId, $courseSessionId] = $parts;
 
-                                                // Load DB models
                                                 $sessionGroup  = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
                                                 $courseSession = \App\Models\Timetabling\CourseSession::find($courseSessionId);
 
-                                                // Build display name
                                                 if ($sessionGroup) {
                                                     $displayName =
                                                         ($sessionGroup->academicProgram->program_abbreviation ?? $programAbbr) . ' ' .
                                                         $sessionGroup->session_name . ' ' .
                                                         $sessionGroup->year_level . ' Year';
 
-                                                    // *** MAIN FEATURE: use DB session_color ***
                                                     if (!empty($sessionGroup->session_color)) {
                                                         $cellColor = $sessionGroup->session_color;
                                                     }
                                                 }
 
-                                                // Course title line
                                                 if ($courseSession && $courseSession->course) {
                                                     $courseTitle = $courseSession->course->course_title ?? '';
                                                 }
                                             }
 
-                                            // Fallback color
                                             if ($cellColor === null) {
                                                 $availableColors = $colors;
 
@@ -147,7 +129,6 @@
                                                 $cellColor = $availableColors[array_rand($availableColors)] ?? $colors[0];
                                             }
 
-                                            // Propagate color down merged cells
                                             for ($r = $rowIndex; $r < $rowIndex + $span; $r++) {
                                                 $cellColors[$r][$colIndex] = $cellColor;
                                             }
@@ -181,20 +162,84 @@
                 </table>
             </div>
         @else
-            <p class="text-gray-500">No timetable data available.</p>
+            <p class="text-gray-500 mt-4">No timetable data available.</p>
         @endif
     </div>
 
-    <script>
-        document.addEventListener('keydown', function (e) {
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
+    {{-- Floating Edit Timetable button (bottom-right, circular with tooltip) --}}
+    <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
+       class="fixed bottom-6 right-6 z-50 group">
+        <div
+            class="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-xl
+                   hover:bg-green-600 transition duration-150 cursor-pointer">
+            <i class="bi bi-pencil-square text-2xl"></i>
+        </div>
 
-            if (e.key === 'ArrowLeft' && prevBtn) {
-                window.location.href = prevBtn.href;
-            } else if (e.key === 'ArrowRight' && nextBtn) {
-                window.location.href = nextBtn.href;
+        {{-- Tooltip --}}
+        <div
+            class="absolute right-16 bottom-1/2 translate-y-1/2 opacity-0 pointer-events-none
+                   group-hover:opacity-100 group-hover:pointer-events-auto
+                   transition-opacity duration-150">
+            <div class="px-3 py-1 rounded-md bg-gray-900 text-white text-xs shadow-lg whitespace-nowrap">
+                Edit timetable
+            </div>
+        </div>
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const baseUrl = @json(route('timetables.timetable-editing-pane.index', ['timetable' => $timetable->id]));
+            const totalSheets = {{ (int) $totalSheets }};
+            let activeTermIndex = {{ (int) $activeTermIndex }};
+            let activeDayIndex  = {{ (int) $activeDayIndex }};
+
+            function goToView(termIndex, dayIndex) {
+                const sheetIndex = termIndex * 6 + dayIndex;
+                if (sheetIndex < 0 || sheetIndex >= totalSheets || sheetIndex >= 12) {
+                    return;
+                }
+                const url = baseUrl + '?sheet=' + sheetIndex;
+                window.location.href = url;
             }
+
+            document.querySelectorAll('.view-term-button').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(btn.getAttribute('data-term-index'), 10);
+                    if (isNaN(idx) || idx === activeTermIndex) return;
+                    activeTermIndex = idx;
+                    goToView(activeTermIndex, activeDayIndex);
+                });
+            });
+
+            document.querySelectorAll('.view-day-button').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(btn.getAttribute('data-day-index'), 10);
+                    if (isNaN(idx) || idx === activeDayIndex) return;
+                    activeDayIndex = idx;
+                    goToView(activeTermIndex, activeDayIndex);
+                });
+            });
+
+            // Optional keyboard navigation (left/right) across sheets
+            document.addEventListener('keydown', function (e) {
+                const currentSheet = activeTermIndex * 6 + activeDayIndex;
+
+                if (e.key === 'ArrowLeft') {
+                    const prev = currentSheet - 1;
+                    if (prev >= 0) {
+                        const term = prev < 6 ? 0 : 1;
+                        const day  = prev % 6;
+                        goToView(term, day);
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    const next = currentSheet + 1;
+                    if (next < totalSheets && next < 12) {
+                        const term = next < 6 ? 0 : 1;
+                        const day  = next % 6;
+                        goToView(term, day);
+                    }
+                }
+            });
         });
     </script>
 @endsection
