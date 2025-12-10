@@ -2,22 +2,24 @@
 @section('title', $timetable->timetable_name)
 
 @section('content')
-    <div class="flex flex-col w-full p-4 pl-39 text-gray-800">
+    <div class="flex flex-col w-full p-4 pl-39 text-gray-800 justify-center items-center">
 
         @php
             $activeTermIndex = $sheetIndex < 6 ? 0 : 1;
             $activeDayIndex  = $sheetIndex % 6;
         @endphp
 
-        {{-- Term + Day selectors (like editor), flush with table (no extra bottom margin) --}}
-        <div class="flex flex-col bg-white rounded-t-lg border border-gray-200 border-b-0 shadow-md">
+
+
+        @if (!empty($tableData) && isset($tableData[0]))
+            {{-- Term + Day selectors (like editor), flush with table (no extra bottom margin) --}}
             {{-- TERM SELECTOR --}}
             <div class="flex flex-row justify-center w-full p-3 gap-6 bg-gray-100 border-b border-gray-200 rounded-t-lg">
                 <button
                     type="button"
                     data-term-index="0"
                     class="view-term-button px-6 py-2 font-semibold rounded-lg shadow transition cursor-pointer
-                           {{ $activeTermIndex === 0 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                       {{ $activeTermIndex === 0 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                     1st Term
                 </button>
 
@@ -25,7 +27,7 @@
                     type="button"
                     data-term-index="1"
                     class="view-term-button px-6 py-2 font-semibold rounded-lg shadow transition cursor-pointer
-                           {{ $activeTermIndex === 1 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                       {{ $activeTermIndex === 1 ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                     2nd Term
                 </button>
             </div>
@@ -37,14 +39,11 @@
                         type="button"
                         data-day-index="{{ $index }}"
                         class="view-day-button py-2 text-center rounded-lg text-sm font-medium shadow-md cursor-pointer transition-all duration-200
-                               {{ $activeDayIndex === $index ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-red-700 hover:text-white hover:shadow-lg' }}">
+                           {{ $activeDayIndex === $index ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-red-700 hover:text-white hover:shadow-lg' }}">
                         {{ $day }}
                     </button>
                 @endforeach
             </div>
-        </div>
-
-        @if (!empty($tableData) && isset($tableData[0]))
             {{-- Table attaches directly to selector (shared border, no gap) --}}
             <div class="overflow-x-auto bg-white rounded-b-lg border border-gray-200 border-t-0 shadow-md">
                 <table class="min-w-full border-collapse table-auto text-xs md:text-sm">
@@ -162,29 +161,31 @@
                 </table>
             </div>
         @else
-            <p class="text-gray-500 mt-4">No timetable data available.</p>
+            <livewire:text.empty-table message="No timetable data found."  />
         @endif
     </div>
 
     {{-- Floating Edit Timetable button (bottom-right, circular with tooltip) --}}
-    <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
-       class="fixed bottom-6 right-6 z-50 group">
-        <div
-            class="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-xl
-                   hover:bg-green-600 transition duration-150 cursor-pointer">
-            <i class="bi bi-pencil-square text-2xl"></i>
-        </div>
-
-        {{-- Tooltip --}}
-        <div
-            class="absolute right-16 bottom-1/2 translate-y-1/2 opacity-0 pointer-events-none
-                   group-hover:opacity-100 group-hover:pointer-events-auto
-                   transition-opacity duration-150">
-            <div class="px-3 py-1 rounded-md bg-gray-900 text-white text-xs shadow-lg whitespace-nowrap">
-                Edit timetable
+    @if ($isNotEmpty)
+        <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
+           class="fixed bottom-6 right-6 z-50 group">
+            <div
+                class="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-xl
+                       hover:bg-green-600 transition duration-150 cursor-pointer">
+                <i class="bi bi-pencil-square text-2xl"></i>
             </div>
-        </div>
-    </a>
+
+            {{-- Tooltip --}}
+            <div
+                class="absolute right-16 bottom-1/2 translate-y-1/2 opacity-0 pointer-events-none
+                       group-hover:opacity-100 group-hover:pointer-events-auto
+                       transition-opacity duration-150">
+                <div class="px-3 py-1 rounded-md bg-gray-900 text-white text-xs shadow-lg whitespace-nowrap">
+                    Edit timetable
+                </div>
+            </div>
+        </a>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Timetabling;
 
 use App\Helpers\AlgorithmQueries;
 use App\Helpers\FilePath;
+use App\Helpers\Records;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
+use App\Models\Timetabling\CourseSession;
+use App\Models\Timetabling\SessionGroup;
+use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +18,21 @@ class GenerateTimetableController extends Controller
 {
     public function index(Timetable $timetable)
     {
-        return view('timetabling.generate.index', compact('timetable'));
+        $canGenerate = Records::isNotEmpty($timetable);
+        $hasSessionGroups = Records::isSessionGroupsNotEmpty($timetable);
+        $hasCourseSessions = Records::isCourseSessionsNotEmpty($timetable);
+        $hasTimetableRooms = Records::isTimetableRoomsNotEmpty($timetable);
+
+        return view(
+            'timetabling.generate.index',
+            compact(
+                'timetable',
+                'canGenerate',
+                'hasSessionGroups',
+                'hasCourseSessions',
+                'hasTimetableRooms'
+            )
+        );
     }
 
     public function generate(Request $request, Timetable $timetable)
@@ -108,8 +126,8 @@ class GenerateTimetableController extends Controller
             'exists' => $exists,
         ]);
         */
-        // OPTIONAL: delete temp local file after upload
-        // @unlink($outputFile);
+        // delete temp local file after upload
+        @unlink($outputFile);
 
         return redirect()->back()->with('success', "Timetable generated successfully!");
     }

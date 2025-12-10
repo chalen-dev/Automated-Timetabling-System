@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Timetabling;
 
 use App\Helpers\Logger;
+use App\Helpers\Records;
 use App\Http\Controllers\Controller;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\SessionGroup;
@@ -415,6 +416,9 @@ class TimetableEditingPaneController extends Controller
             ->pluck('session_color', 'id')
             ->toArray();
 
+        //Determine if records are empty
+        $isNotEmpty = Records::isNotEmpty($timetable);
+
         Logger::log('timetable_edit', 'timetable editing pane', [
             'timetable_id'   => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -431,7 +435,8 @@ class TimetableEditingPaneController extends Controller
             'totalSheets',
             'sheetName',
             'sheetDisplayName',
-            'sessionColorsByGroupId'
+            'sessionColorsByGroupId',
+            'isNotEmpty'
         ));
     }
 
