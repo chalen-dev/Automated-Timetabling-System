@@ -41,7 +41,7 @@ class TimetableCanvas extends Component
 
         // Generate timeslots (7:00 AM – 9:30 PM, every 30 minutes)
         $start = strtotime('07:00');
-        $end   = strtotime('21:30');
+        $end   = strtotime('21:00');
 
         while ($start <= $end) {
             $this->timeslots[] = date('g:i A', $start);

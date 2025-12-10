@@ -53,7 +53,16 @@ class GenerateTimetableController extends Controller
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
         // Decide which script and interpreter to use
-        $scriptPath = base_path('scripts/process_timetable.php'); // PHP-based scheduler
+        // If "Confine Laboratory Subjects" checkbox is checked, use the lab-confined script
+        $confineLabs = $request->boolean('confineLaboratorySubjects');
+
+
+        $scriptFile = $confineLabs
+            ? 'process_timetable_lab_confined.php'
+            : 'process_timetable.php';
+        $scriptPath = base_path("scripts/{$scriptFile}"); // PHP-based scheduler
+
+        //$scriptPath = base_path("scripts/process_timetable_lab_confined.php");
 
         /**
          * Determine the correct PHP CLI interpreter.
@@ -202,7 +211,8 @@ class GenerateTimetableController extends Controller
         $end = strtotime($endTime);
         $slots = [];
 
-        for ($time = $start; $time <= $end; $time += $intervalMinutes * 60) {
+        // Use < $end instead of <= $end so the last *start* is 21:00, not 21:30
+        for ($time = $start; $time < $end; $time += $intervalMinutes * 60) {
             $slots[] = date('g:i a', $time);
         }
 

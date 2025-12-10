@@ -1,3 +1,6 @@
+
+{{-- tools.blade.php --}}
+
 <div
     x-data="{ open: false }"
     @click.outside="open = false"
@@ -17,7 +20,7 @@
                     class="px-4 py-2 rounded-md bg-green-600 text-white text-sm hover:bg-green-700"
                     onclick="window.saveTimetableToExcel()"
                 >
-                    Save changes
+                    Save changes (Ctrl + S)
                 </button>
                 <a
                     href="{{ route('timetables.export_formatted', $timetable->id) }}"

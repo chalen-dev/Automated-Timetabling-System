@@ -1,3 +1,5 @@
+{{-- legend.blade.php --}}
+
 <div
     x-data="{ open: false }"
     @click.outside="open = false"

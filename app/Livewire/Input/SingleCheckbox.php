@@ -15,7 +15,7 @@ class SingleCheckbox extends Component
     (
         $name,
         $label = '',
-        $value = 0,
+        $value = 1,
         $class = '',
         $checkboxStyle = ''
     ) : void

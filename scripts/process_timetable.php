@@ -164,7 +164,7 @@ function session_time_bounds($label) {
     $map = [
         'morning'   => ['start' => '07:00', 'end' => '12:00'],
         'afternoon' => ['start' => '12:30', 'end' => '17:30'],
-        'evening'   => ['start' => '17:30', 'end' => '19:30'],
+        'evening'   => ['start' => '17:30', 'end' => '21:30'],
     ];
     return isset($map[$l]) ? $map[$l] : null;
 }
@@ -674,22 +674,31 @@ foreach (["1st", "2nd"] as $term) {
                     $sess_time_label = $sg_row['session_time'] ?? '';
                     $bounds = session_time_bounds($sess_time_label);
                     if ($bounds !== null) {
-                        // convert candidate start/end to HH:MM using slot_dt (existing helper)
+
+                        global $totalSlots, $slotMinutes;
+
                         $slotStartDt = slot_dt($start);
-                        $slotEndDt   = slot_dt($start + $nSlots); // end boundary (exclusive)
 
-                        // normalize to HH:MM robustly whether slot_dt returned DateTime or string
-                        if ($slotStartDt instanceof DateTime) {
+                        // Compute the actual end boundary like spans_lunch does
+                        $endIndex = min($start + $nSlots, $totalSlots) - 1;
+                        $slotEndBase = slot_dt($endIndex);
+
+                        if ($slotStartDt instanceof DateTime && $slotEndBase instanceof DateTime) {
+                            // Start HH:MM
                             $start_hm = $slotStartDt->format('H:i');
-                        } else {
-                            $start_hm = date('H:i', strtotime((string)$slotStartDt));
-                        }
 
-                        if ($slotEndDt instanceof DateTime) {
+                            // End HH:MM = base slot time + slotMinutes
+                            $slotEndDt = clone $slotEndBase;
+                            $slotEndDt->modify('+' . $slotMinutes . ' minutes');
                             $end_hm = $slotEndDt->format('H:i');
                         } else {
-                            $end_hm = date('H:i', strtotime((string)$slotEndDt));
+                            // Fallback, in case times are strings for some reason
+                            $start_hm = date('H:i', strtotime((string)$slotStartDt));
+
+                            $end_ts = strtotime((string)$slotEndBase . ' +' . $slotMinutes . ' minutes');
+                            $end_hm = date('H:i', $end_ts);
                         }
+
 
                         // enforce: start >= bounds['start'] AND end <= bounds['end']
                         if (strtotime($start_hm) < strtotime($bounds['start']) ||
