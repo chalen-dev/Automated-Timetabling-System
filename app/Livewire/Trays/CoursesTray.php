@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Timetabling\Editor;
+namespace App\Livewire\Trays;
 
 use App\Models\Timetabling\SessionGroup;
 use Livewire\Component;
@@ -17,6 +17,6 @@ class CoursesTray extends Component
 
     public function render()
     {
-        return view('livewire.timetabling.editor.courses-tray');
+        return view('livewire.trays.courses-tray');
     }
 }

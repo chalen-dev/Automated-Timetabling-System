@@ -157,29 +157,6 @@ function spans_lunch($start, $nSlots)
     return true;
 }
 
-// Map session_time label to start/end HH:MM bounds
-function session_time_bounds($label) {
-    if (empty($label)) return null;
-    $l = strtolower(trim((string)$label));
-    $map = [
-        'morning'   => ['start' => '07:00', 'end' => '12:00'],
-        'afternoon' => ['start' => '12:30', 'end' => '17:30'],
-        'evening'   => ['start' => '17:30', 'end' => '19:30'],
-    ];
-    return isset($map[$l]) ? $map[$l] : null;
-}
-
-// Look up the session_group row by session_group_id
-function get_session_group_row($sgid) {
-    global $sg_df;
-    if (empty($sgid) || !is_array($sg_df)) return null;
-    foreach ($sg_df as $r) {
-        if (isset($r['session_group_id']) && (string)$r['session_group_id'] === (string)$sgid) {
-            return $r;
-        }
-    }
-    return null;
-}
 function room_can_host($rm, $courseType, $roomTypeNeeded, $day)
 {
     global $roomsMeta;
@@ -579,22 +556,6 @@ foreach (["1st", "2nd"] as $term) {
     }
 }
 
-// --- Reorder sessions: schedule non-PE/NSTP first, then PE/NSTP last ---
-// This ensures PE and NSTP course types are assigned after other subjects.
-$cs_non_pe = [];
-$cs_pe = [];
-foreach ($cs as $r) {
-    $ct = strtolower(trim((string)($r['course_type_norm'] ?? $r['course_type'] ?? '')));
-    if ($ct === 'pe' || $ct === 'nstp') {
-        $cs_pe[] = $r;
-    } else {
-        $cs_non_pe[] = $r;
-    }
-}
-$cs_ordered = array_merge($cs_non_pe, $cs_pe);
-// Use $cs_ordered in scheduling below instead of $cs
-
-
 // apply exclusive_days: room only allowed on that day
 foreach ($roomsMeta as $rm => $md) {
     $ex = $md['exclusive_days'] ?? '';
@@ -665,44 +626,6 @@ foreach (["1st", "2nd"] as $term) {
             if (spans_lunch($start, $nSlots)) {
                 continue;
             }
-
-            // session_time window enforcement for non-PE/NSTP only
-            $ctypeNorm = strtolower(trim((string)$courseType));
-            if ($ctypeNorm !== 'pe' && $ctypeNorm !== 'nstp') {
-                $sg_row = get_session_group_row($sgid);
-                if ($sg_row !== null) {
-                    $sess_time_label = $sg_row['session_time'] ?? '';
-                    $bounds = session_time_bounds($sess_time_label);
-                    if ($bounds !== null) {
-                        // convert candidate start/end to HH:MM using slot_dt (existing helper)
-                        $slotStartDt = slot_dt($start);
-                        $slotEndDt   = slot_dt($start + $nSlots); // end boundary (exclusive)
-
-                        // normalize to HH:MM robustly whether slot_dt returned DateTime or string
-                        if ($slotStartDt instanceof DateTime) {
-                            $start_hm = $slotStartDt->format('H:i');
-                        } else {
-                            $start_hm = date('H:i', strtotime((string)$slotStartDt));
-                        }
-
-                        if ($slotEndDt instanceof DateTime) {
-                            $end_hm = $slotEndDt->format('H:i');
-                        } else {
-                            $end_hm = date('H:i', strtotime((string)$slotEndDt));
-                        }
-
-                        // enforce: start >= bounds['start'] AND end <= bounds['end']
-                        if (strtotime($start_hm) < strtotime($bounds['start']) ||
-                            strtotime($end_hm)   > strtotime($bounds['end'])) {
-                            // reject this candidate start time for this session_group
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            // --- end session_time check ---
-
 
             // candidate lecture days
             $lect_days = [];

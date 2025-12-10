@@ -10,7 +10,7 @@
         <div class="flex flex-row gap-[15px] w-full">
             <!-- Labels -->
             <div class="flex flex-col gap-[8px] min-w-[150px] whitespace-nowrap">
-                <p>Session Letter</p>
+                <p>Session Code</p>
                 <p>Academic Program</p>
                 <p>Year Level</p>
                 <p>Time</p>

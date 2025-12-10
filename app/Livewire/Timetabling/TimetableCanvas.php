@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Timetabling\Editor;
+namespace App\Livewire\Timetabling;
 
-use Livewire\Component;
 use App\Models\Records\Timetable;
+use Livewire\Component;
 
 class TimetableCanvas extends Component
 {
@@ -67,7 +67,7 @@ class TimetableCanvas extends Component
                 ->get();
         }
 
-        return view('livewire.timetabling.editor.timetable-canvas', [
+        return view('livewire.timetabling.timetable-canvas', [
             'rooms' => $this->rooms,
             'timeslots' => $this->timeslots,
             'timetable' => $this->timetable,

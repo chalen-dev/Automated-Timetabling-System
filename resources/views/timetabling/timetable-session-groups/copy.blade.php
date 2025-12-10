@@ -14,7 +14,7 @@
             <!-- Horizontal row for main fields -->
             <div class="flex gap-5 w-full">
                 <livewire:input.text
-                    label="Session Letter"
+                    label="Session Code"
                     name="session_name"
                     :value="old('session_name', $sessionGroup->session_name)"
                     class="flex-1"

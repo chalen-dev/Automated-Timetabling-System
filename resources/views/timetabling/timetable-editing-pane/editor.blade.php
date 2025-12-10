@@ -6,15 +6,13 @@
 @section('content')
     <div class="w-full">
 
-        <livewire:timetabling.editor.legend/>
+        <livewire:trays.legend/>
 
-        <livewire:timetabling.editor.tools/>
+        <livewire:trays.tools/>
 
-        <livewire:timetabling.editor.courses-tray/>
+        <livewire:trays.courses-tray/>
 
-        <livewire:timetabling.editor.timetable-canvas :timetable="$timetable" :rooms="$rooms" />
-
-
+        <livewire:timetabling.timetable-canvas :timetable="$timetable" :rooms="$rooms" />
 
     </div>
 @endsection
@@ -1183,7 +1181,7 @@
                 wrapper.dataset.currentColor = group.session_color || '';
                 wrapper.dataset.updateUrl = group.update_color_url || '';
 
-                // header: PROGRAM_ABBR SESSION_NAME YEAR Year
+                // header: PROGRAM_ABBR SESSION_NAME YEAR Year (Session Time)
                 const header = document.createElement('div');
                 header.className = 'tray-group-header flex items-center justify-between px-4 py-2 bg-gray-100 border-b';
 
@@ -1193,6 +1191,7 @@
                 const programAbbr = program.program_abbreviation || 'Unknown';
                 const sessionName = group.session_name || '';
                 const yearLevel = group.year_level != null ? String(group.year_level) : '';
+                const sessionTime = (group.session_time || '').toString();
 
                 let groupTitle = programAbbr;
                 if (sessionName) {
@@ -1200,6 +1199,10 @@
                 }
                 if (yearLevel) {
                     groupTitle += ' ' + yearLevel + ' Year';
+                }
+                if (sessionTime) {
+                    const prettyTime = sessionTime.charAt(0).toUpperCase() + sessionTime.slice(1);
+                    groupTitle += ' (' + prettyTime + ')';
                 }
 
                 const groupTitleFull = groupTitle.trim();
@@ -1363,9 +1366,9 @@
 
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
-                                        <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                        <div class="text-sm text-gray-800">${courseLabel}</div>
-                                        `,
+                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
+                                    <div class="text-sm text-gray-800">${courseLabel}</div>
+                                `,
                                         blocks,
                                         groupIndex,
                                         groupTitle: groupTitleFull,
@@ -1373,19 +1376,17 @@
                                         color: groupColor || null,
 
                                         // term info for both tray + canvas
-                                        termIndex: termInfo.termIndex,             // 0 = 1st, 1 = 2nd, null = semestral
-                                        termBadgeLabel: termInfo.badgeLabel || 'SEM', // force 'SEM' when not 1st/2nd
+                                        termIndex: termInfo.termIndex,               // 0 = 1st, 1 = 2nd, null = semestral
+                                        termBadgeLabel: termInfo.badgeLabel || 'SEM',
                                         termKey:
                                             termInfo.termIndex === 0
                                                 ? '1st'
                                                 : (termInfo.termIndex === 1 ? '2nd' : 'sem'),
 
-
                                         // total class days for this course
                                         totalClassDays: totalClassDays
                                     };
                                 } else if (courseMetaById[sess.id].totalClassDays == null) {
-                                    // in case meta was created earlier without this field
                                     courseMetaById[sess.id].totalClassDays = totalClassDays;
                                 }
 
@@ -1408,7 +1409,7 @@
                                 <div class="classdays-badge${completedClass}">
                                     ${x}/${y}
                                 </div>
-                                `;
+                            `;
                                 }
 
                                 // term badge HTML (bottom)
@@ -1440,7 +1441,7 @@
                                 const isExhausted = (metaForSession.totalClassDays && metaForSession.totalClassDays > 0)
                                     && (placedCount >= metaForSession.totalClassDays);
 
-                                // --- state priority: term-disabled > locked > used > exhausted > normal ---
+                                // state priority: term-disabled > locked > used > exhausted > normal
                                 if (!isTermAllowed) {
                                     td.classList.add('tray-term-disabled');
                                     td.draggable = false;

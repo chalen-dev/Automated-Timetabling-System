@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Timetabling\Editor;
+namespace App\Livewire\Trays;
 
 use Livewire\Component;
 
@@ -8,6 +8,6 @@ class Legend extends Component
 {
     public function render()
     {
-        return view('livewire.timetabling.editor.legend');
+        return view('livewire.trays.legend');
     }
 }

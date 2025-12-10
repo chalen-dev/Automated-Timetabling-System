@@ -57,6 +57,9 @@
                                         {{ $sessionGroup->academicProgram->program_abbreviation ?? 'Unknown' }}
                                         {{ $sessionGroup->session_name }}
                                         {{ $sessionGroup->year_level }} Year
+                                        @if($sessionGroup->session_time)
+                                            ({{ ucfirst($sessionGroup->session_time) }})
+                                        @endif
                                     </p>
                                 </div>
 

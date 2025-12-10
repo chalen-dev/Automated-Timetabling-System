@@ -52,12 +52,20 @@ class AlgorithmQueries
                                     "
                 ,
 
-                'session-groups' => "SELECT sg.id AS session_group_id, t.id AS timetable_id, t.timetable_name,
-                                        ap.program_name AS academic_program, sg.session_name, sg.year_level
-                                 FROM session_groups sg
-                                 JOIN academic_programs ap ON ap.id = sg.academic_program_id
-                                 JOIN timetables t ON t.id = sg.timetable_id
-                                 WHERE t.id = :timetableId"
+                'session-groups' => "
+                    SELECT
+                        sg.id AS session_group_id,
+                        t.id AS timetable_id,
+                        t.timetable_name,
+                        ap.program_name AS academic_program,
+                        sg.session_name,
+                        sg.year_level,
+                        sg.session_time
+                    FROM session_groups sg
+                    JOIN academic_programs ap ON ap.id = sg.academic_program_id
+                    JOIN timetables t ON t.id = sg.timetable_id
+                    WHERE t.id = :timetableId
+                "
                 ,
 
                 'course-sessions' => "SELECT sg.id AS session_group_id, sg.session_name, sg.year_level, ap.program_name AS academic_program,
@@ -130,7 +138,8 @@ class AlgorithmQueries
                         t.timetable_name,
                         ap.program_name AS academic_program,
                         sg.session_name,
-                        sg.year_level
+                        sg.year_level,
+                        sg.session_time
                     FROM session_groups sg
                     JOIN academic_programs ap ON ap.id = sg.academic_program_id
                     JOIN timetables t ON t.id = sg.timetable_id
