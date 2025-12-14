@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('room_exclusive_academic_programs')) {
+            return;
+        }
         Schema::create('room_exclusive_academic_programs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('room_id')->constrained()->onDelete('cascade');

@@ -13,6 +13,9 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
 
+        if (Schema::hasTable('timetables')) {
+            return;
+        }
         Schema::create('timetables', function (Blueprint $table) use ($driver){
             $table->id();
             // User_id Foreign Key on Users table

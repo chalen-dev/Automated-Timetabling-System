@@ -13,6 +13,10 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
 
+        if (Schema::hasTable('courses')) {
+            return;
+        }
+
         Schema::create('courses', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->string('course_title');

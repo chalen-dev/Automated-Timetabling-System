@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('session_groups')) {
+            return;
+        }
         Schema::create('session_groups', function (Blueprint $table)  {
             $table->id();
             $table->string('session_name');

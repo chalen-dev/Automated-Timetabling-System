@@ -13,6 +13,9 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName(); // mysql, sqlite, etc.
 
+        if (Schema::hasTable('room_exclusive_days')) {
+            return;
+        }
         Schema::create('room_exclusive_days', function (Blueprint $table) use ($driver) {
             $table->id();
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();

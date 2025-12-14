@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('course_sessions')) {
+            return;
+        }
         Schema::create('course_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('session_group_id')->references('id')->on('session_groups')->onDelete('cascade');
