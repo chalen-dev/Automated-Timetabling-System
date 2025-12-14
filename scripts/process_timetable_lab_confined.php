@@ -186,6 +186,138 @@ function session_time_bounds($label)
     return $map[$l] ?? null;
 }
 
+/**
+ * Return slot index for the first slot whose time >= HH:MM
+ */
+function slot_index_at_or_after($hhmm)
+{
+    global $timesDt, $totalSlots;
+
+    foreach ($timesDt as $i => $dt) {
+        if ($dt instanceof DateTime && $dt->format('H:i') >= $hhmm) {
+            return $i;
+        }
+    }
+    return null;
+}
+
+/**
+ * Primary session slot range [start, endExclusive]
+ */
+function session_primary_slot_range($sessionTime)
+{
+    if (!$sessionTime) return null;
+
+    $bounds = session_time_bounds($sessionTime);
+    if (!$bounds) return null;
+
+    $start = slot_index_at_or_after($bounds['start']);
+    $end   = slot_index_at_or_after($bounds['end']);
+
+    return ($start !== null && $end !== null)
+        ? [$start, $end]
+        : null;
+}
+
+/**
+ * Overflow start slot (next session only)
+ */
+function session_overflow_start($sessionTime)
+{
+    $map = [
+        'morning'   => '12:30',
+        'afternoon' => '17:30',
+        'evening'   => null, // no overflow
+    ];
+
+    $sessionTime = strtolower((string)$sessionTime);
+    if (!isset($map[$sessionTime]) || !$map[$sessionTime]) {
+        return null;
+    }
+
+    return slot_index_at_or_after($map[$sessionTime]);
+}
+
+/**
+ * Strategy A:
+ * Primary window is exhausted if NO room on NO day has ANY free slot
+ */
+function is_primary_window_globally_exhausted($term, $sessionTime)
+{
+    global $availability, $roomCols, $DAYS;
+
+    $range = session_primary_slot_range($sessionTime);
+    if (!$range) return false;
+
+    [$start, $end] = $range;
+
+    foreach ($DAYS as $day) {
+        foreach ($roomCols as $rm) {
+            for ($s = $start; $s < $end; $s++) {
+                if (!empty($availability[$term][$day][$rm][$s])) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * Candidate start slots for NON-LAB courses with overflow
+ */
+function compute_candidate_starts_with_overflow(array $row, string $term)
+{
+    global $totalSlots;
+
+    $nSlots = (int)$row['required_slots'];
+    $sgid   = $row['session_group_id'] ?? null;
+    $sg     = get_session_group_row($sgid);
+    $st     = strtolower((string)($sg['session_time'] ?? ''));
+
+    $starts = [];
+
+    // ---- PRIMARY WINDOW ----
+    $range = session_primary_slot_range($st);
+    if ($range) {
+        [$ws, $we] = $range;
+        for ($s = $ws; $s + $nSlots <= $we; $s++) {
+            $starts[] = $s;
+        }
+    }
+
+    // ---- OVERFLOW LOGIC ----
+    if (!is_primary_window_globally_exhausted($term, $st)) {
+        return $starts; // no overflow allowed
+    }
+
+    // ---- FORWARD OVERFLOW (morning, afternoon) ----
+    if ($st === 'morning' || $st === 'afternoon') {
+        $overflowStart = session_overflow_start($st);
+        if ($overflowStart !== null) {
+            for ($s = $overflowStart; $s <= $totalSlots - $nSlots; $s++) {
+                $starts[] = $s;
+            }
+        }
+    }
+
+    // ---- BACKWARD OVERFLOW (evening) ----
+    if ($st === 'evening') {
+        // previous session ends at 17:30
+        $prevEnd = slot_index_at_or_after('17:30');
+        if ($prevEnd !== null) {
+            // walk backwards, closest to evening first
+            for ($s = $prevEnd - $nSlots; $s >= 0; $s--) {
+                $starts[] = $s;
+            }
+        }
+    }
+
+    return $starts;
+}
+
+
+
 // Discrete lab 2-hour start times by session_time
 function lab_allowed_start_times_strings($label)
 {
@@ -760,62 +892,97 @@ foreach (["1st", "2nd"] as $term) {
 
         $placed = false;
 
-        // Candidate starts
         $candidateStarts = [];
 
+        $ctype = strtolower(trim((string)$courseType));
+        $isPE   = ($ctype === 'pe');
+        $isNSTP = ($ctype === 'nstp');
+
+        /*
+        |--------------------------------------------------------------------------
+        | LAB COURSES (ABSOLUTE)
+        |--------------------------------------------------------------------------
+        */
         if ($isLabCourse) {
-            $sg_row          = get_session_group_row($sgid);
+            $sg_row = get_session_group_row($sgid);
             $sess_time_label = $sg_row['session_time'] ?? '';
             $candidateStarts = lab_allowed_start_slots($sess_time_label, $nSlots);
 
-            // ABSOLUTE: if no allowed start for this session_time, we NEVER try other times.
             if (empty($candidateStarts)) {
                 $unassigned[] = [
                     'course_session_id' => $csid,
-                    'code'              => $code,
-                    'term'              => $term,
-                    'reason'            => 'lab_no_allowed_start_for_session_time',
+                    'code' => $code,
+                    'term' => $term,
+                    'reason' => 'lab_no_allowed_start_for_session_time',
                 ];
                 continue;
             }
-        } else {
-            $candidateStarts = range(0, $totalSlots - $nSlots);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PE / NSTP (ASSIGNED LAST, SESSION-OPPOSITE)
+        |--------------------------------------------------------------------------
+        */
+        elseif ($isPE || $isNSTP) {
+
+            $sg_row = get_session_group_row($sgid);
+            $st = strtolower((string)($sg_row['session_time'] ?? ''));
+
+            // Define preferred session order
+            if ($st === 'morning') {
+                $preferred = ['afternoon', 'evening'];
+            } elseif ($st === 'afternoon') {
+                $preferred = ['morning', 'evening'];
+            } else { // evening
+                $preferred = ['afternoon', 'morning'];
+            }
+
+            // NSTP cannot be evening
+            if ($isNSTP) {
+                $preferred = array_values(array_filter(
+                    $preferred,
+                    fn($x) => $x !== 'evening'
+                ));
+            }
+
+            foreach ($preferred as $p) {
+                $range = session_primary_slot_range($p);
+                if (!$range) continue;
+
+                [$ws, $we] = $range;
+
+                for ($s = $ws; $s + $nSlots <= $we; $s++) {
+                    $candidateStarts[] = $s;
+                }
+            }
+
+            // absolute fallback: anywhere except evening for NSTP
+            if (empty($candidateStarts)) {
+                for ($s = 0; $s <= $totalSlots - $nSlots; $s++) {
+                    $startTime = slot_dt($s)->format('H:i');
+                    if ($isNSTP && strtotime($startTime) >= strtotime('17:30')) {
+                        continue;
+                    }
+                    $candidateStarts[] = $s;
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMAL NON-LAB COURSES
+        |--------------------------------------------------------------------------
+        */
+        else {
+            $candidateStarts = compute_candidate_starts_with_overflow($row, $term);
+        }
+
+
 
         foreach ($candidateStarts as $start) {
 
             if (spans_lunch($start, $nSlots)) continue;
-
-            // Non-lab: enforce coarse session_time bounds for non-PE/NSTP
-            $ctypeNorm = strtolower(trim((string)$courseType));
-            if (!$isLabCourse && $ctypeNorm !== 'pe' && $ctypeNorm !== 'nstp') {
-                $sg_row = get_session_group_row($sgid);
-                if ($sg_row !== null) {
-                    $sess_time_label = $sg_row['session_time'] ?? '';
-                    $bounds          = session_time_bounds($sess_time_label);
-                    if ($bounds !== null) {
-                        $slotStartDt = slot_dt($start);
-                        $endIndex    = min($start + $nSlots, $totalSlots) - 1;
-                        $slotEndBase = slot_dt($endIndex);
-
-                        if ($slotStartDt instanceof DateTime && $slotEndBase instanceof DateTime) {
-                            $start_hm = $slotStartDt->format('H:i');
-                            $slotEndDt = clone $slotEndBase;
-                            $slotEndDt->modify('+' . get_slot_minutes() . ' minutes');
-                            $end_hm = $slotEndDt->format('H:i');
-                        } else {
-                            $start_hm = date('H:i', strtotime((string)$slotStartDt));
-                            $end_ts   = strtotime((string)$slotEndBase . ' +' . get_slot_minutes() . ' minutes');
-                            $end_hm   = date('H:i', $end_ts);
-                        }
-
-                        if (strtotime($start_hm) < strtotime($bounds['start']) ||
-                            strtotime($end_hm)   > strtotime($bounds['end'])) {
-                            continue;
-                        }
-                    }
-                }
-            }
 
             // candidate lecture days
             $lect_days = [];
