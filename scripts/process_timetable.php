@@ -24,8 +24,18 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 // ---- CONFIG / ARGS ----
 if ($argc < 4) {
-    fwrite(STDERR, "Usage: php {$argv[0]} <input_dir> <output_dir> <timetable_id>\n");
+    fwrite(STDERR,
+        "Usage: php {$argv[0]} <input_dir> <output_dir> <timetable_id> [--confine-labs=1]\n"
+    );
     exit(1);
+
+}
+$confineLabs = false;
+
+foreach ($argv as $arg) {
+    if ($arg === '--confine-labs=1') {
+        $confineLabs = true;
+    }
 }
 
 $inputDir = rtrim($argv[1], "/");
@@ -305,7 +315,8 @@ function get_session_group_row($sgid) {
     }
     return null;
 }
-function room_can_host($rm, $courseType, $roomTypeNeeded, $day)
+
+function room_can_host($rm, $courseType, $roomTypeNeeded, $day, $program)
 {
     global $roomsMeta;
 
@@ -329,6 +340,14 @@ function room_can_host($rm, $courseType, $roomTypeNeeded, $day)
         }
     }
 
+    $exPrograms = $md['exclusive_programs'] ?? [];
+    if (!empty($exPrograms)) {
+        $prog = strtoupper(trim((string)$program));
+        if ($prog === '' || !in_array($prog, $exPrograms, true)) {
+            return false;
+        }
+    }
+
     $exday = $md['exclusive_days'] ?? '';
     if ($exday !== '' && strtolower($exday) !== 'nan') {
         if (strtolower($exday) !== strtolower($day)) {
@@ -339,12 +358,13 @@ function room_can_host($rm, $courseType, $roomTypeNeeded, $day)
     return true;
 }
 
-function available_rooms($term, $day, $roomTypeNeeded, $courseType, $start, $nSlots)
+function available_rooms($term, $day, $roomTypeNeeded, $courseType, $start, $nSlots, $program)
+
 {
     global $roomCols, $availability;
     $rlist = [];
     foreach ($roomCols as $rm) {
-        if (!room_can_host($rm, $courseType, $roomTypeNeeded, $day)) {
+        if (!room_can_host($rm, $courseType, $roomTypeNeeded, $day, $program)) {
             continue;
         }
         $ok = true;
@@ -360,7 +380,6 @@ function available_rooms($term, $day, $roomTypeNeeded, $courseType, $start, $nSl
     }
     return $rlist;
 }
-
 function sg_has_conflict($term, $sgid, $day, $start, $nSlots)
 {
     global $sessionGroupOccupancy, $totalSlots;
@@ -613,10 +632,23 @@ foreach ($roomCols as $rm) {
         $rtype = strtolower(trim((string)($m['room_type'] ?? 'lecture')));
         $ctex = strtolower(trim((string)($m['course_type_exclusive_to'] ?? 'none')));
         $exd = strtolower(trim((string)($m['exclusive_days'] ?? '')));
+        $exProgramsRaw = trim((string)($m['exclusive_programs'] ?? ''));
+        $exPrograms = [];
+
+        if ($exProgramsRaw !== '') {
+            foreach (preg_split('/[,;]+/', $exProgramsRaw) as $p) {
+                $p = strtoupper(trim($p));
+                if ($p !== '') {
+                    $exPrograms[] = $p;
+                }
+            }
+        }
+
         $roomsMeta[$rm] = [
             "room_type" => $rtype ?: "lecture",
             "course_type_exclusive_to" => $ctex ?: "none",
             "exclusive_days" => $exd,
+            "exclusive_programs" => $exPrograms, // NEW
         ];
     } else {
         $roomsMeta[$rm] = [
@@ -647,6 +679,19 @@ for ($i = 0; $i < count($cs); $i++) {
     $total_days = $lab_days + $lect_days;
 
     $class_hours = (float)($row['class_hours'] ?? 0.0);
+
+    if ($confineLabs && $lab_days > 0) {
+        if (abs($class_hours - 2.0) > 1e-6) {
+            $unassigned[] = [
+                'course_session_id' => (int)($row['course_session_id'] ?? 0),
+                'code'              => pretty_code($row),
+                'term'              => 'both',
+                'reason'            => 'lab_course_must_be_2_hours',
+            ];
+            continue;
+        }
+    }
+
     $required_slots_float = ($slotHours > 0) ? ($class_hours / $slotHours) : 0.0;
     $required_slots_round = (int)round($required_slots_float);
     $exact = (abs($required_slots_float - $required_slots_round) < 1e-6);
@@ -776,6 +821,31 @@ foreach (["1st", "2nd"] as $term) {
         $nSlots = (int)($row['required_slots'] ?? 0);
         $sgid = $row['session_group_id'] ?? null;
 
+        $sg_row = get_session_group_row($sgid);
+        $sg_program = strtoupper(trim((string)($sg_row['academic_program'] ?? '')));
+
+        $courseProgramsRaw = trim((string)($row['course_programs'] ?? ''));
+
+        if ($courseProgramsRaw !== '') {
+            $allowed = [];
+            foreach (preg_split('/[,;]+/', $courseProgramsRaw) as $p) {
+                $p = strtoupper(trim($p));
+                if ($p !== '') {
+                    $allowed[] = $p;
+                }
+            }
+
+            if (!in_array($sg_program, $allowed, true)) {
+                $unassigned[] = [
+                    'course_session_id' => $csid,
+                    'code' => $code,
+                    'term' => $term,
+                    'reason' => 'course_not_allowed_for_session_program',
+                ];
+                continue;
+            }
+        }
+
         if ($nSlots <= 0 || ($neededLect + $neededLab) === 0) {
             $unassigned[] = [
                 "course_session_id" => $csid,
@@ -790,13 +860,49 @@ foreach (["1st", "2nd"] as $term) {
         $ctype = strtolower(trim((string)$courseType));
         $isPE   = ($ctype === 'pe');
         $isNSTP = ($ctype === 'nstp');
+        $isLabCourse = ($neededLab > 0);
+
 
         /*
-|--------------------------------------------------------------------------
-| PE / NSTP — ASSIGNED LAST, SESSION-OPPOSITE
-|--------------------------------------------------------------------------
-*/
-        if ($isPE || $isNSTP) {
+        |--------------------------------------------------------------------------
+        | LAB COURSES — CONFINED START TIMES
+        |--------------------------------------------------------------------------
+        */
+        if ($confineLabs && $isLabCourse) {
+
+            $sg_row = get_session_group_row($sgid);
+            $st = strtolower((string)($sg_row['session_time'] ?? ''));
+
+            $allowedTimes = [];
+
+            if ($st === 'morning') {
+                $allowedTimes = ['08:00', '10:00'];
+            } elseif ($st === 'afternoon') {
+                $allowedTimes = ['13:30', '15:30'];
+            } elseif ($st === 'evening') {
+                $allowedTimes = ['17:30', '19:30'];
+            }
+
+            $candidateStarts = [];
+
+            foreach ($allowedTimes as $hm) {
+                foreach ($timesDt as $i => $dt) {
+                    if ($dt->format('H:i') === $hm) {
+                        if ($i + $nSlots <= $totalSlots) {
+                            $candidateStarts[] = $i;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PE / NSTP — ASSIGNED LAST, SESSION-OPPOSITE
+        |--------------------------------------------------------------------------
+        */
+        elseif ($isPE || $isNSTP) {
 
             $sg_row = get_session_group_row($sgid);
             $st = strtolower((string)($sg_row['session_time'] ?? ''));
@@ -842,12 +948,13 @@ foreach (["1st", "2nd"] as $term) {
 
         /*
         |--------------------------------------------------------------------------
-        | NORMAL NON-LAB COURSES
+        | NORMAL COURSES (INCLUDING LABS WHEN NOT CONFINED)
         |--------------------------------------------------------------------------
         */
         else {
             $candidateStarts = compute_candidate_starts_with_overflow($row, $term);
         }
+
 
 
         foreach ($candidateStarts as $start) {
@@ -859,7 +966,7 @@ foreach (["1st", "2nd"] as $term) {
             // candidate lecture days
             $lect_days = [];
             foreach ($DAYS as $d) {
-                $r = available_rooms($term, $d, "lecture", $courseType, $start, $nSlots);
+                $r = available_rooms($term, $d, "lecture", $courseType, $start, $nSlots, $sg_program);
                 if (!empty($r)) {
                     $lect_days[] = $d;
                 }
@@ -868,9 +975,9 @@ foreach (["1st", "2nd"] as $term) {
             // candidate lab days
             $lab_days = [];
             foreach ($DAYS as $d) {
-                $r = available_rooms($term, $d, "comlab", $courseType, $start, $nSlots);
+                $r = available_rooms($term, $d, "comlab", $courseType, $start, $nSlots, $sg_program);
                 if (empty($r)) {
-                    $r = available_rooms($term, $d, "lab", $courseType, $start, $nSlots);
+                    $r = available_rooms($term, $d, "lab", $courseType, $start, $nSlots, $sg_program);
                 }
                 if (!empty($r)) {
                     $lab_days[] = $d;
@@ -910,8 +1017,8 @@ foreach (["1st", "2nd"] as $term) {
                         $sem_ok = true;
                         // lecture days
                         foreach ($lcombo as $d) {
-                            $r1 = available_rooms("1st", $d, "lecture", $courseType, $start, $nSlots);
-                            $r2 = available_rooms("2nd", $d, "lecture", $courseType, $start, $nSlots);
+                            $r1 = available_rooms("1st", $d, "lecture", $courseType, $start, $nSlots, $sg_program);
+                            $r2 = available_rooms("2nd", $d, "lecture", $courseType, $start, $nSlots, $sg_program);
                             if (empty($r1) || empty($r2)) {
                                 $sem_ok = false;
                                 break;
@@ -922,13 +1029,13 @@ foreach (["1st", "2nd"] as $term) {
                         }
                         // lab days
                         foreach ($labcombo as $d) {
-                            $r1 = available_rooms("1st", $d, "comlab", $courseType, $start, $nSlots);
+                            $r1 = available_rooms("1st", $d, "comlab", $courseType, $start, $nSlots, $sg_program);
                             if (empty($r1)) {
-                                $r1 = available_rooms("1st", $d, "lab", $courseType, $start, $nSlots);
+                                $r1 = available_rooms("1st", $d, "lab", $courseType, $start, $nSlots, $sg_program);
                             }
-                            $r2 = available_rooms("2nd", $d, "comlab", $courseType, $start, $nSlots);
+                            $r2 = available_rooms("2nd", $d, "comlab", $courseType, $start, $nSlots, $sg_program);
                             if (empty($r2)) {
-                                $r2 = available_rooms("2nd", $d, "lab", $courseType, $start, $nSlots);
+                                $r2 = available_rooms("2nd", $d, "lab", $courseType, $start, $nSlots, $sg_program);
                             }
                             if (empty($r1) || empty($r2)) {
                                 $sem_ok = false;
@@ -946,7 +1053,7 @@ foreach (["1st", "2nd"] as $term) {
 
                     // lecture rooms
                     foreach ($lcombo as $d) {
-                        $rlist = available_rooms($term, $d, "lecture", $courseType, $start, $nSlots);
+                        $rlist = available_rooms($term, $d, "lecture", $courseType, $start, $nSlots, $sg_program);
                         if (empty($rlist)) {
                             $ok = false;
                             break;
@@ -964,9 +1071,9 @@ foreach (["1st", "2nd"] as $term) {
 
                     // lab rooms
                     foreach ($labcombo as $d) {
-                        $rlist = available_rooms($term, $d, "comlab", $courseType, $start, $nSlots);
+                        $rlist = available_rooms($term, $d, "comlab", $courseType, $start, $nSlots, $sg_program);
                         if (empty($rlist)) {
-                            $rlist = available_rooms($term, $d, "lab", $courseType, $start, $nSlots);
+                            $rlist = available_rooms($term, $d, "lab", $courseType, $start, $nSlots, $sg_program);
                         }
                         if (empty($rlist)) {
                             $ok = false;
@@ -989,12 +1096,12 @@ foreach (["1st", "2nd"] as $term) {
                         foreach ($chosen_blocks as $blk) {
                             $d = $blk['day'];
                             if ($blk['is_lab']) {
-                                $rlist2 = available_rooms("2nd", $d, "comlab", $courseType, $start, $nSlots);
+                                $rlist2 = available_rooms("2nd", $d, "comlab", $courseType, $start, $nSlots, $sg_program);
                                 if (empty($rlist2)) {
-                                    $rlist2 = available_rooms("2nd", $d, "lab", $courseType, $start, $nSlots);
+                                    $rlist2 = available_rooms("2nd", $d, "lab", $courseType, $start, $nSlots, $sg_program);
                                 }
                             } else {
-                                $rlist2 = available_rooms("2nd", $d, "lecture", $courseType, $start, $nSlots);
+                                $rlist2 = available_rooms("2nd", $d, "lecture", $courseType, $start, $nSlots, $sg_program);
                             }
                             if (empty($rlist2)) {
                                 $ok = false;

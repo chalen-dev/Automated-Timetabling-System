@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Records\Course;
+use App\Models\Records\CourseAcademicPrograms;
 use App\Models\Users\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -49,9 +51,11 @@ class DatabaseSeeder extends Seeder
             //UserSeeder::class,
             AcademicProgramSeeder::class,
             CourseSeeder::class,
+            CourseAcademicProgramSeeder::class,
             ProfessorSeeder::class,
             RoomSeeder::class,
             RoomExclusiveDaySeeder::class,
+            RoomExclusiveAcademicProgramSeeder::class,
             SpecializationSeeder::class,
             TimetableSeeder::class,
             SessionGroupSeeder::class,

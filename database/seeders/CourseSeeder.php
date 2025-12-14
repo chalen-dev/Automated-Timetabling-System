@@ -19,6 +19,8 @@ class CourseSeeder extends Seeder
                 'total_laboratory_class_days' => 2,
                 'unit_load' => 4.5,
                 'duration_type' => 'term'
+
+                //academic_programs => [1, 2] //CS or It or something
             ],
             [
                 'course_title' => 'GE 15',

@@ -31,6 +31,10 @@
         position: relative;
     }
 
+    .timetable-editor td.course-cell {
+        line-height: 1.15;
+    }
+
     /* Draw a full rectangular border inside the merged course cell */
     .timetable-editor td.course-cell::after {
         content: "";
@@ -56,7 +60,7 @@
         left: 50%;
         bottom: 4px;
         transform: translateX(-50%);
-        font-size: 11px;
+        font-size: 10px;
         line-height: 1;
         padding: 3px 14px;   /* widened */
         border-radius: 9999px;
@@ -197,7 +201,7 @@
         top: 4px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 11px;
+        font-size: 10px;
         line-height: 1;
         padding: 2px 8px;
         border-radius: 9999px;
@@ -1366,9 +1370,9 @@
 
                                     courseMetaById[sess.id] = {
                                         labelHTML: `
-                                    <div class="text-xs font-semibold text-gray-600">${groupTitleFull}</div>
-                                    <div class="text-sm text-gray-800">${courseLabel}</div>
-                                `,
+                                            <div class="text-[10px] font-semibold text-gray-600 leading-tight">${groupTitleFull}</div>
+                                            <div class="text-xs text-gray-800 leading-tight">${courseLabel}</div>
+                                        `,
                                         blocks,
                                         groupIndex,
                                         groupTitle: groupTitleFull,
@@ -1406,28 +1410,28 @@
                                     const completed = x >= y;
                                     const completedClass = completed ? ' completed' : '';
                                     classdaysBadgeHTML = `
-                                <div class="classdays-badge${completedClass}">
-                                    ${x}/${y}
-                                </div>
-                            `;
+                                        <div class="classdays-badge${completedClass}">
+                                            ${x}/${y}
+                                        </div>
+                                    `;
                                 }
 
                                 // term badge HTML (bottom)
                                 const termBadgeHTML = termInfo.badgeLabel
                                     ? `
-                                <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
-                                    ${termInfo.badgeLabel}
-                                </div>
-                              `
+                                        <div class="mt-1 inline-flex items-center justify-center px-3 py-0.5 border border-gray-300 rounded-full text-[11px] uppercase tracking-wide bg-white/80 term-badge">
+                                            ${termInfo.badgeLabel}
+                                        </div>
+                                      `
                                     : '';
 
                                 // label inside tray cell (centered text)
                                 td.innerHTML = `
-                            ${classdaysBadgeHTML}
-                            <div class="text-xs font-semibold text-gray-600 text-center">${groupTitleFull}</div>
-                            <div class="text-sm text-gray-800 text-center">${courseLabel}</div>
-                            <div class="mt-1 flex justify-center">${termBadgeHTML}</div>
-                        `;
+                                    ${classdaysBadgeHTML}
+                                    <div class="text-[10px] font-semibold text-gray-600 text-center leading-tight">${groupTitleFull}</div>
+                                    <div class="text-xs text-gray-800 text-center leading-tight">${courseLabel}</div>
+                                    <div class="mt-0.5 flex justify-center">${termBadgeHTML}</div>
+                                `;
 
                                 const currentKey = getCurrentViewKey();
                                 const viewPlacements = placementsByView[currentKey] || {};

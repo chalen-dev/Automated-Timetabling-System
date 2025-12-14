@@ -9,7 +9,7 @@
             $activeDayIndex  = $sheetIndex % 6;
         @endphp
 
-
+        <livewire:trays.unassigned-courses-tray :timetable="$timetable" />
 
         @if (!empty($tableData) && isset($tableData[0]))
             {{-- Term + Day selectors (like editor), flush with table (no extra bottom margin) --}}
@@ -105,6 +105,12 @@
                                                         $sessionGroup->session_name . ' ' .
                                                         $sessionGroup->year_level . ' Year';
 
+                                                    // NEW: append session_time like in editor (Morning/Afternoon/Evening)
+                                                    if (!empty($sessionGroup->session_time)) {
+                                                        $prettyTime = ucfirst((string) $sessionGroup->session_time);
+                                                        $displayName .= ' (' . $prettyTime . ')';
+                                                    }
+
                                                     if (!empty($sessionGroup->session_color)) {
                                                         $cellColor = $sessionGroup->session_color;
                                                     }
@@ -135,17 +141,21 @@
                                     @endphp
 
                                     @if ($span > 0)
-                                        <td class="border border-gray-200 px-3 py-2 text-center text-sm"
+                                        <td class="border border-gray-200 px-2 py-2 text-center text-[11px] leading-tight"
                                             rowspan="{{ $span }}"
                                             @if($cellColor) style="background-color: {{ $cellColor }};" @endif>
 
                                             @if (strtolower(trim($cell)) === 'vacant')
-                                                <span class="text-gray-400 italic">Vacant</span>
+                                                <span class="text-gray-400 italic text-[11px]">Vacant</span>
                                             @else
-                                                <div class="font-semibold">{{ $displayName }}</div>
+                                                <div class="font-semibold text-[11px] leading-tight">
+                                                    {{ $displayName }}
+                                                </div>
 
                                                 @if (!empty($courseTitle))
-                                                    <div class="text-xs italic mt-1">{{ $courseTitle }}</div>
+                                                    <div class="italic mt-0.5 text-[10px] leading-tight">
+                                                        {{ $courseTitle }}
+                                                    </div>
                                                 @endif
                                             @endif
                                         </td>
@@ -243,4 +253,6 @@
             });
         });
     </script>
+
 @endsection
+

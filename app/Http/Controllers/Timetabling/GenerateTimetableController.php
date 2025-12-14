@@ -57,9 +57,7 @@ class GenerateTimetableController extends Controller
         $confineLabs = $request->boolean('confineLaboratorySubjects');
 
 
-        $scriptFile = $confineLabs
-            ? 'process_timetable_lab_confined.php'
-            : 'process_timetable.php';
+        $scriptFile = 'process_timetable.php';
         $scriptPath = base_path("scripts/{$scriptFile}"); // PHP-based scheduler
 
         //$scriptPath = base_path("scripts/process_timetable_lab_confined.php");
@@ -94,7 +92,9 @@ class GenerateTimetableController extends Controller
             . escapeshellarg($scriptPath) . ' '
             . escapeshellarg($exportDir) . ' '
             . escapeshellarg($outputDir) . ' '
-            . escapeshellarg($timetableId) . ' 2>&1';
+            . escapeshellarg($timetableId)
+            . ($confineLabs ? ' --confine-labs=1' : '')
+            . ' 2>&1';
 
         $output  = [];
         $status  = 0;
