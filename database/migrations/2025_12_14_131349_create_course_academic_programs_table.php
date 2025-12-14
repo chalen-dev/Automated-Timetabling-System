@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('room_exclusive_academic_programs', function (Blueprint $table) {
+        Schema::create('course_academic_programs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('room_id')->constrained()->onDelete('cascade');
-            $table->foreignId('academic_program_id')->constrained()->onDelete('cascade');
-            $table->unique(['room_id', 'academic_program_id']);
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->foreignId('academic_program_id')->constrained('academic_programs')->cascadeOnDelete();
+            $table->unique(['course_id', 'academic_program_id']);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('room_exclusive_academic_programs');
+        Schema::dropIfExists('course_academic_programs');
     }
 };

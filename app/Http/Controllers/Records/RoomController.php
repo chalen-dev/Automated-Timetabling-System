@@ -31,7 +31,10 @@ class RoomController extends Controller
     {
         $search = $request->input('search');
 
-        $rooms = Room::with('roomExclusiveDays')
+        $rooms = Room::with([
+            'roomExclusiveDays',
+            'exclusiveAcademicPrograms',
+        ])
             ->when($search, function($query, $search) {
                 $query->where(function($q) use ($search) {
                     $q->where('room_name', 'like', "%{$search}%")
@@ -39,6 +42,10 @@ class RoomController extends Controller
                 })
                     ->orWhereHas('roomExclusiveDays', function($q) use ($search) {
                         $q->where('exclusive_day', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('exclusiveAcademicPrograms', function ($q) use ($search) {
+                        $q->where('program_name', 'like', "%{$search}%")
+                            ->orWhere('program_abbreviation', 'like', "%{$search}%");
                     });
             })
             ->get();

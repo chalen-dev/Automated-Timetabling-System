@@ -2,6 +2,7 @@
 
 namespace App\Models\Users;
 
+use App\Models\Records\AcademicProgram;
 use App\Models\Records\Timetable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'academic_program_id',
     ];
 
     /**
@@ -82,5 +84,10 @@ class User extends Authenticatable
     public function timetables()
     {
         return $this->hasMany(Timetable::class);
+    }
+
+    public function academicProgram()
+    {
+        return $this->belongsTo(AcademicProgram::class);
     }
 }

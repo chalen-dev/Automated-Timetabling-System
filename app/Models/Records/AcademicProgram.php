@@ -21,4 +21,19 @@ class AcademicProgram extends Model
     public function sessionGroups(){
         return $this->hasMany(SessionGroup::class);
     }
+
+    public function roomExclusiveAcademicPrograms(){
+        return $this->hasMany(RoomExclusiveAcademicPrograms::class);
+    }
+
+    // Direct many-to-many back to Room
+    public function exclusiveRooms()
+    {
+        return $this->belongsToMany(
+            Room::class,
+            'room_exclusive_academic_programs',
+            'academic_program_id',
+            'room_id'
+        )->withTimestamps();
+    }
 }

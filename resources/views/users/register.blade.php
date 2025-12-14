@@ -14,10 +14,10 @@
             </p>
         </div>
         <div>
-            <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center items-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
+            <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
                 @csrf
 
-                <h1 class="font-bold p-3">Sign Up to Facultime</h1>
+                <h1 class="font-bold p-3 text-center">Sign Up to Facultime</h1>
 
                 <livewire:input.auth.text
                     label="USERNAME"
@@ -55,6 +55,14 @@
                     isRequired
                 />
 
+                <livewire:input.select
+                    label="ACADEMIC PROGRAM"
+                    name="academic_program_id"
+                    :options="$academicPrograms->pluck('program_abbreviation', 'id')->toArray()"
+                    :value="old('academic_program_id')"
+                    isRequired
+                />
+
                 <livewire:input.auth.password-text
                     label="PASSWORD"
                     elementId="register_password"
@@ -77,7 +85,7 @@
                 />
 
                 <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full hover:cursor-pointer">Register ➝</button>
-                <p>Already a member? <a href="{{ url('login') }}" class="underline hover:font-bold text-[#5E0B0B]">Login here</a></p>
+                <p class="text-center">Already a member? <a href="{{ url('login') }}" class="underline hover:font-bold text-[#5E0B0B]">Login here</a></p>
             </form>
         </div>
     </div>

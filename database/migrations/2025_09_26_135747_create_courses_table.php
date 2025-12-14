@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('unit_load', 10, 1);
             $table->enum('course_type', ['major', 'minor', 'pe', 'nstp', 'other']);
             $table->enum('duration_type', ['semestral', 'term', 'none'])->default('none');
+            $table->foreignId('academic_program_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -21,4 +21,20 @@ class Course extends Model
     public function courseSessions(){
         return $this->hasMany(CourseSession::class);
     }
+
+    public function courseAcademicPrograms()
+    {
+        return $this->hasMany(CourseAcademicPrograms::class);
+    }
+
+    public function academicPrograms()
+    {
+        return $this->belongsToMany(
+            AcademicProgram::class,
+            'course_academic_programs',
+            'course_id',
+            'academic_program_id'
+        )->withTimestamps();
+    }
+
 }

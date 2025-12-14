@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Records\AcademicProgramController;
+use App\Http\Controllers\Records\CourseAcademicProgramsController;
 use App\Http\Controllers\Records\CourseController;
 use App\Http\Controllers\Records\ProfessorController;
 use App\Http\Controllers\Records\RoomController;
+use App\Http\Controllers\Records\RoomExclusiveAcademicProgramsController;
 use App\Http\Controllers\Records\RoomExclusiveDayController;
 use App\Http\Controllers\Records\SpecializationController;
 use App\Http\Controllers\Records\TimetableController;
@@ -107,6 +109,9 @@ Route::middleware([Authenticate::class])->group(function () {
 
     // Courses
     Route::resource('courses', CourseController::class);
+    // Courses - Academic Programs (parallel to room-exclusive-academic-programs)
+    Route::resource('courses.course-academic-programs', CourseAcademicProgramsController::class)
+        ->only('index', 'create', 'store', 'destroy');
 
     // Professors
     Route::resource('professors', ProfessorController::class);
@@ -119,6 +124,8 @@ Route::middleware([Authenticate::class])->group(function () {
     // Rooms
     Route::resource('rooms', RoomController::class);
     Route::resource('rooms.room-exclusive-days', RoomExclusiveDayController::class)
+        ->only('index', 'create', 'store', 'destroy');
+    Route::resource('rooms.room-exclusive-academic-programs', RoomExclusiveAcademicProgramsController::class)
         ->only('index', 'create', 'store', 'destroy');
 
     //User Profile

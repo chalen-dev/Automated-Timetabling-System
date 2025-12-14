@@ -11,7 +11,7 @@
                 <h1 class="text-xl font-bold mb-0 text-white">Rooms</h1>
                 <livewire:input.search-bar
                     :action="route('rooms.index')"
-                    placeholder="Search rooms, course, or days..."
+                    placeholder="Search rooms, course, days, or programs..."
                 />
             </div>
 
@@ -29,6 +29,7 @@
                 <th class="px-6 py-3 font-semibold">Room Type</th>
                 <th class="px-6 py-3 font-semibold">Room Capacity</th>
                 <th class="px-6 py-3 font-semibold">Class Days</th>
+                <th class="px-6 py-3 font-semibold">Exclusive Academic Programs</th>
                 <th class="px-6 py-3 font-semibold text-center">Action</th>
             </tr>
             </thead>
@@ -48,12 +49,28 @@
                             : 'No Specific Day/s'
                         }}
                     </td>
+                    <td class="px-6 py-3">
+                        {{
+                            $room->exclusiveAcademicPrograms->isNotEmpty()
+                            ? $room->exclusiveAcademicPrograms
+                                ->pluck('program_abbreviation')
+                                ->filter()
+                                ->implode(', ')
+                            : 'No Exclusive Programs'
+                        }}
+                    </td>
                     <td class="px-6 py-3 text-center">
                         <div class="flex flex-row gap-2 justify-center items-center">
                             <!-- Set Specific Days Button -->
                             <a href="{{ route('rooms.room-exclusive-days.index', $room) }}"
                                class="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-semibold shadow hover:bg-gray-300 hover:text-gray-900 active:bg-gray-400 transition-all duration-150">
                                 Set Specific Days
+                            </a>
+
+                            <!-- Set Exclusive Programs Button -->
+                            <a href="{{ route('rooms.room-exclusive-academic-programs.index', $room) }}"
+                               class="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-semibold shadow hover:bg-gray-300 hover:text-gray-900 active:bg-gray-400 transition-all duration-150">
+                                Set Exclusive Programs
                             </a>
 
                             <!-- Show Button -->
@@ -81,7 +98,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center py-6 text-gray-500">
+                    <td colspan="6" class="text-center py-6 text-gray-500">
                         No rooms found.
                     </td>
                 </tr>

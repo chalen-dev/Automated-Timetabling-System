@@ -24,6 +24,21 @@ class AcademicProgramSeeder extends Seeder
                 'program_abbreviation' => 'IT',
                 'program_description' => 'IT Program'
             ],
+            [
+                'program_name' => 'Bachelors of Science in Computer Engineering',
+                'program_abbreviation' => 'CpE',
+                'program_description' => 'Computer Engineering Program'
+            ],
+            [
+                'program_name' => 'Bachelors of Science in Electrical Engineering',
+                'program_abbreviation' => 'EE',
+                'program_description' => 'Electrical Engineering Program'
+            ],
+            [
+                'program_name' => 'Bachelors of Science in Electronics Engineering',
+                'program_abbreviation' => 'ECE',
+                'program_description' => 'Electronics Engineering Program'
+            ],
         ];
 
         AcademicProgram::insertOrIgnore($data);

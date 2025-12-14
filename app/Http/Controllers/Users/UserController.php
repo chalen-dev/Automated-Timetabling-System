@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Models\Records\AcademicProgram;
 use App\Models\Users\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,10 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function showRegisterForm(){
-        return view('users.register');
+        $academicPrograms = AcademicProgram::all();
+        return view('users.register',[
+            'academicPrograms' => $academicPrograms
+        ]);
     }
 
     public function register(Request $request)
@@ -26,9 +30,10 @@ class UserController extends Controller
                 'string',
                 'email',
                 'unique:users',
-                'regex:/^[a-z]\.[a-z]+\.([0-9]{6})\.tc@umindanao\.edu\.ph$/'
+                'regex:/^[a-z]\.[a-z]+\.([0-9]{6})\.tc@umindanao\.edu\.ph$/',
             ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'academic_program_id' => ['required', 'exists:academic_programs,id'],
         ]);
 
         $password = $request->password;
@@ -58,6 +63,7 @@ class UserController extends Controller
                 'email' => trim($request->email),
                 'password' => Hash::make($password),
                 'role' => 'pending',
+                'academic_program_id' => $request->academic_program_id,
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['register_error' => $e->getMessage()])->withInput();

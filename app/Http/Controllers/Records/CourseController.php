@@ -31,11 +31,19 @@ class CourseController extends Controller
     {
         $search = $request->input('search');
 
-        $courses = Course::when($search, function($query, $search) {
-            $query->where('course_title', 'like', "%{$search}%")
-                ->orWhere('course_name', 'like', "%{$search}%")
-                ->orWhere('course_type', 'like', "%{$search}%");
-        })->get();
+        $courses = Course::with('academicPrograms')
+            ->when($search, function($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('course_title', 'like', "%{$search}%")
+                        ->orWhere('course_name', 'like', "%{$search}%")
+                        ->orWhere('course_type', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('academicPrograms', function ($q) use ($search) {
+                        $q->where('program_name', 'like', "%{$search}%")
+                            ->orWhere('program_abbreviation', 'like', "%{$search}%");
+                    });
+            })
+            ->get();
 
         Logger::log('index', 'course', null);
 
