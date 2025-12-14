@@ -18,7 +18,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('room_id')->constrained()->onDelete('cascade');
             $table->foreignId('academic_program_id')->constrained()->onDelete('cascade');
-            $table->unique(['room_id', 'academic_program_id']);
+            $table->unique(
+                ['room_id', 'academic_program_id'],
+                'room_program_unique'
+            );
             $table->timestamps();
         });
     }
