@@ -33,7 +33,7 @@ body::-webkit-scrollbar {
 
 
 body.bg-page {
-    background-image: url("../images/UMV.png");
+    background-image: url("../../public/images/UMV.png");
     background-color: #4d0000;
 
     /* New: control how it behaves */
