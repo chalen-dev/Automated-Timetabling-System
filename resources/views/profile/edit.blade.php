@@ -6,7 +6,13 @@
     <div class="flex justify-center pt-16 pb-16 px-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[1000px] flex flex-col p-10 gap-8">
             <div class="flex items-center gap-6">
-                <img id="profilePreview" src="{{ $user->profile_photo_url }}" class="w-20 h-20 rounded-full object-cover shadow-md" alt="Profile Picture">
+                <img
+                    id="profilePreview"
+                    src="{{ $user->profile_photo_url }}"
+                    class="w-20 h-20 rounded-full object-cover shadow-md"
+                    style="width:5rem;height:5rem;"
+                    alt="Profile Picture"
+                />
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">Edit Profile</h1>
                     <p class="text-sm text-gray-500">Update your info and upload a profile photo.</p>
