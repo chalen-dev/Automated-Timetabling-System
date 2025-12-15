@@ -38,7 +38,7 @@
                 />
 
                 <div class="w-full text-right">
-                    <a href="{{ route('password.request') }}" class="text-xs underline text-[#5E0B0B] hover:font-bold">
+                    <a href="{{ route('password.request') }}" class="text-xs underline text-[#5E0B0B] hover:font-bold text-center">
                         Forgot password?
                     </a>
                 </div>
