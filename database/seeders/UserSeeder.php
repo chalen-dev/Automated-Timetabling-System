@@ -32,6 +32,12 @@ class UserSeeder extends Seeder
                 'password' => '$2y$12$XUyPPub0oy/Mr2hoBVhioef8B8lA5fUpX.CDCSjhexree0qmhjEYK',
                 'role' => 'admin',
             ],
+            [
+                'name' => 'Chael',
+                'email' => 'c.lusaya.142396.tc@umindanao.edu.ph',
+                'password' => '$2y$12$0Ac9aiAL21Yn3e3Ntz2eDOZqTlZGpwZbLgIEPeWfVdYHj0H6hfXZG',
+                'role' => 'admin',
+            ],
         ];
         User::insertOrIgnore($data);
     }

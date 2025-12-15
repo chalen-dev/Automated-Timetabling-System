@@ -33,7 +33,7 @@
                     <input
                         type="email"
                         name="email"
-                        value="{{ old('email') }}"
+                        value="{{ old('email', request('email')) }}"
                         class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                         placeholder="your.email@domain.com"
                         required

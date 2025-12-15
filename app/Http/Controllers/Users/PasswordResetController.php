@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ForgotPasswordMail;
+use App\Models\Users\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends Controller
@@ -20,11 +22,31 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $status = Password::sendResetLink($request->only('email'));
+        $email = (string) $request->input('email');
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('success', 'Password reset link sent to your email.')
-            : back()->withErrors(['email' => __($status)]);
+        // Always respond the same to prevent email enumeration
+        $successMsg = 'If that email exists in our system, a password reset link has been sent.';
+
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            return back()->with('success', $successMsg);
+        }
+
+        // Generate reset token using Laravel password broker
+        $token = Password::broker()->createToken($user);
+
+        $resetUrl = url(route('password.reset', ['token' => $token], false))
+            . '?email=' . urlencode($user->email);
+
+        try {
+            Mail::to($user->email)->send(new ForgotPasswordMail($resetUrl));
+        } catch (\Throwable $e) {
+            return back()->withErrors([
+                'email' => 'Failed to send reset email. Please try again later.',
+            ]);
+        }
+
+        return back()->with('success', $successMsg);
     }
 
     public function edit(string $token)
@@ -43,7 +65,7 @@ class PasswordResetController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
-                $user->password = Hash::make($request->password);
+                $user->password = bcrypt($request->password);
                 $user->save();
             }
         );
