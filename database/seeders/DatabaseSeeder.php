@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $timetablePath = storage_path('app/exports/timetables');
         $inputCsvsPath = storage_path('app/exports/input-csvs');
+        $profilesPath  = storage_path('app/public/profiles');
 
         // Delete all files inside the folder, but keep the folder
         if (File::exists($timetablePath)) {
@@ -30,6 +31,10 @@ class DatabaseSeeder extends Seeder
 
         if (File::exists($inputCsvsPath)) {
             File::cleanDirectory($inputCsvsPath);
+        }
+
+        if (File::exists($profilesPath)) {
+            File::cleanDirectory($profilesPath);
         }
 
         // Delete all files in the "timetables" folder on the facultime disk (bucket)

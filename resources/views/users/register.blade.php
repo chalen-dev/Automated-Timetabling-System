@@ -14,7 +14,8 @@
             </p>
         </div>
         <div>
-            <form action="{{ url('register') }}" method="post" class="flex flex-col w-90 justify-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
+            <!-- Changed width here to make the form wider (reduces overall height) -->
+            <form action="{{ url('register') }}" method="post" class="flex flex-col w-[480px] justify-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
                 @csrf
 
                 <h1 class="font-bold p-3 text-center">Sign Up to Facultime</h1>
@@ -28,23 +29,29 @@
                     isRequired
                 />
 
-                <livewire:input.auth.text
-                    label="FIRST NAME"
-                    type="text"
-                    name="first_name"
-                    placeholder=""
-                    :value="old('first_name')"
-                    isRequired
-                />
-
-                <livewire:input.auth.text
-                    label="LAST NAME"
-                    type="text"
-                    name="last_name"
-                    placeholder=""
-                    :value="old('last_name')"
-                    isRequired
-                />
+                <!-- Put First Name and Last Name side-by-side to use space -->
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <livewire:input.auth.text
+                            label="FIRST NAME"
+                            type="text"
+                            name="first_name"
+                            placeholder=""
+                            :value="old('first_name')"
+                            isRequired
+                        />
+                    </div>
+                    <div class="flex-1">
+                        <livewire:input.auth.text
+                            label="LAST NAME"
+                            type="text"
+                            name="last_name"
+                            placeholder=""
+                            :value="old('last_name')"
+                            isRequired
+                        />
+                    </div>
+                </div>
 
                 <livewire:input.auth.text
                     label="EMAIL"
@@ -63,26 +70,32 @@
                     isRequired
                 />
 
-                <livewire:input.auth.password-text
-                    label="PASSWORD"
-                    elementId="register_password"
-                    type="password"
-                    name="password"
-                    placeholder="At least 8 characters"
-                    :value="old('password')"
-                    isRequired
-                />
-
-                <livewire:input.auth.password-text
-                    label="CONFIRM PASSWORD"
-                    elementId="password_confirmation"
-                    toggleId="togglePasswordConfirmation"
-                    type="password"
-                    name="password_confirmation"
-                    placeholder=""
-                    :value="old('password_confirmation')"
-                    isRequired
-                />
+                <!-- Put Password and Confirm Password side-by-side -->
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <livewire:input.auth.password-text
+                            label="PASSWORD"
+                            elementId="register_password"
+                            type="password"
+                            name="password"
+                            placeholder="At least 8 characters"
+                            :value="old('password')"
+                            isRequired
+                        />
+                    </div>
+                    <div class="flex-1">
+                        <livewire:input.auth.password-text
+                            label="CONFIRM PASSWORD"
+                            elementId="password_confirmation"
+                            toggleId="togglePasswordConfirmation"
+                            type="password"
+                            name="password_confirmation"
+                            placeholder=""
+                            :value="old('password_confirmation')"
+                            isRequired
+                        />
+                    </div>
+                </div>
 
                 <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full hover:cursor-pointer">Register ➝</button>
                 <p class="text-center">Already a member? <a href="{{ url('login') }}" class="underline hover:font-bold text-[#5E0B0B]">Login here</a></p>

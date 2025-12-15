@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->default('user')->index();
             $table->foreignId('academic_program_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('profile_photo_path')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

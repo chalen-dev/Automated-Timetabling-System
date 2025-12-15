@@ -12,7 +12,7 @@
 
             <div class="flex items-center justify-between mb-3">
                 <div class="text-white font-semibold">
-                    Timetable Overview (Grouped by Session Group)
+                    Timetable Overview (Grouped by Class Sessions)
                 </div>
 
                 <div class="text-sm text-gray-500">

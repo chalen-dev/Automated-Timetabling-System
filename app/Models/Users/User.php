@@ -8,16 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int,string>
-     */
     protected $fillable = [
         'name',
         'first_name',
@@ -26,26 +22,27 @@ class User extends Authenticatable
         'password',
         'role',
         'academic_program_id',
+        'profile_photo_path',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int,string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string,string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function timetables()
+    {
+        return $this->hasMany(Timetable::class);
+    }
+
+    public function academicProgram()
+    {
+        return $this->belongsTo(AcademicProgram::class);
+    }
 
     /**
      * Get masked password (always 8 bullets)
@@ -62,13 +59,11 @@ class User extends Authenticatable
     {
         $email = $this->email;
         $parts = explode('@', $email);
-        $username = $parts[0];
-        $domain = $parts[1];
+        $username = $parts[0] ?? '';
+        $domain = $parts[1] ?? '';
 
-        // Mask username: first 2 chars visible
         $maskedUsername = substr($username, 0, 2) . str_repeat('•', max(strlen($username) - 2, 0));
 
-        // Mask domain: keep only last label visible
         $domainParts = explode('.', $domain);
         $maskedDomain = '';
         foreach ($domainParts as $i => $part) {
@@ -82,13 +77,47 @@ class User extends Authenticatable
         return $maskedUsername . '@' . $maskedDomain;
     }
 
-    public function timetables()
+    /**
+     * Canonical storage key:
+     * profiles/{user_id}/{user_id}.{ext}
+     */
+    public function profilePhotoKey(string $extension): string
     {
-        return $this->hasMany(Timetable::class);
+        $ext = strtolower(ltrim($extension, '.'));
+        if ($ext === '') {
+            $ext = 'png';
+        }
+
+        return 'profiles/' . $this->id . '/' . $this->id . '.' . $ext;
     }
 
-    public function academicProgram()
+    /**
+     * local => public disk
+     * deployed => facultime disk (bucket)
+     */
+    public function profilePhotoDisk(): string
     {
-        return $this->belongsTo(AcademicProgram::class);
+        return app()->environment('local') ? 'public' : 'facultime';
+    }
+
+    /**
+     * URL used by Blade: $user->profile_photo_url
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        $path = (string) ($this->profile_photo_path ?? '');
+        if ($path !== '') {
+            $disk = $this->profilePhotoDisk();
+
+            try {
+                if (Storage::disk($disk)->exists($path)) {
+                    return Storage::disk($disk)->url($path);
+                }
+            } catch (\Throwable $e) {
+                // fall through to placeholder
+            }
+        }
+
+        return asset('pfp-placeholder.jpg');
     }
 }

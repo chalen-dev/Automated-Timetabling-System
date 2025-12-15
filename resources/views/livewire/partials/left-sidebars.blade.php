@@ -29,11 +29,13 @@
                                 <span>Class Sessions</span>
                             </div>
                         </a>
-                        <a href="{{route('timetables.timetable-professors.index', $timetable)}}">
-                            <div class="{{ request()->routeIs('timetables.timetable-professors.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
+                        <!--
+                        <a href="{{-- route('timetables.timetable-professors.index', $timetable) --}}">
+                            <div class="{{-- request()->routeIs('timetables.timetable-professors.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' --}} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
                                 <span>Professors</span>
                             </div>
                         </a>
+                        -->
                         <a href="{{route('timetables.timetable-rooms.index', $timetable)}}">
                             <div class="{{ request()->routeIs('timetables.timetable-rooms.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
                                 <span>Rooms</span>
@@ -107,8 +109,9 @@
                             <span>Courses</span>
                         </div>
                     </a>
-                    <a href="{{route('professors.index')}}">
-                        <div class="{{request()->routeIs('professors.index', 'professors.create', 'professors.edit') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]'}} transition-transform duration-300 pl-10 flex flex-row justify-start items-center h-13 gap-2 rounded-2xl">
+                    <!--
+                    <a href="{{-- route('professors.index') --}}">
+                        <div class="{{-- request()->routeIs('professors.index', 'professors.create', 'professors.edit') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' --}} transition-transform duration-300 pl-10 flex flex-row justify-start items-center h-13 gap-2 rounded-2xl">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -124,6 +127,7 @@
                             <span>Professors</span>
                         </div>
                     </a>
+                    -->
                     <a href="{{ route('rooms.index') }}">
                         <div class="{{ request()->routeIs('rooms.index', 'rooms.create', 'rooms.edit') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} transition-transform duration-300 pl-10 flex flex-row justify-start items-center h-13 gap-2 rounded-2xl">
                             <svg
