@@ -49,13 +49,19 @@ class PasswordResetController extends Controller
         return back()->with('success', $successMsg);
     }
 
-    public function edit(string $token)
+    public function edit(string $token, Request $request)
     {
-        return view('users.reset-password', ['token' => $token]);
+        $email = (string) $request->query('email', '');
+
+        return view('users.reset-password', [
+            'token' => $token,
+            'email' => $email,
+        ]);
     }
 
     public function update(Request $request)
     {
+        // Keep email required, but it will come from a hidden input now
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],

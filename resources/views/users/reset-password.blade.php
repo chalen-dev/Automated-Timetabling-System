@@ -22,28 +22,20 @@
 
                 <input type="hidden" name="token" value="{{ $token }}"/>
 
+                {{-- NEW: email is hidden and comes from the reset link --}}
+                <input type="hidden" name="email" value="{{ old('email', $email ?? request('email')) }}"/>
+
                 @if (session('success'))
                     <div class="w-full text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">
                         {{ session('success') }}
                     </div>
                 @endif
 
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">
-                        EMAIL
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                        placeholder="your.email@domain.com"
-                        required
-                    />
-                    @error('email')
-                    <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
+                @error('email')
+                <div class="w-full text-xs text-red-600">
+                    {{ $message }}
                 </div>
+                @enderror
 
                 <div class="w-full">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">
