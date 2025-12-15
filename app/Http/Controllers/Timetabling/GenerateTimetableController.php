@@ -52,9 +52,7 @@ class GenerateTimetableController extends Controller
         $this->generateQueryCSVs($timetableId, $exportDir);
         $this->generateTimetableTemplate($timetableId, $exportDir);
 
-        // Decide which script and interpreter to use
-        // If "Confine Laboratory Subjects" checkbox is checked, use the lab-confined script
-        $confineLabs = $request->boolean('confineLaboratorySubjects');
+
 
 
         $scriptFile = 'process_timetable.php';
@@ -87,6 +85,9 @@ class GenerateTimetableController extends Controller
         if (!$interpreter) {
             $interpreter = 'php';
         }
+        // Decide which script and interpreter to use
+        // If "Confine Laboratory Subjects" checkbox is checked, use the lab-confined script
+        $confineLabs = $request->boolean('confineLaboratorySubjects');
 
         $command = escapeshellarg($interpreter) . ' '
             . escapeshellarg($scriptPath) . ' '

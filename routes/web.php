@@ -14,8 +14,11 @@ use App\Http\Controllers\Timetabling\CourseSessionController;
 use App\Http\Controllers\Timetabling\GenerateTimetableController;
 use App\Http\Controllers\Timetabling\SessionGroupController;
 use App\Http\Controllers\Timetabling\TimetableEditingPaneController;
+use App\Http\Controllers\Timetabling\TimetableOverviewController;
 use App\Http\Controllers\Timetabling\TimetableProfessorController;
 use App\Http\Controllers\Timetabling\TimetableRoomController;
+use App\Http\Controllers\Users\EmailVerificationController;
+use App\Http\Controllers\Users\PasswordResetController;
 use App\Http\Controllers\Users\ProfileController;
 use App\Http\Controllers\Users\UserController;
 use App\Http\Controllers\Users\UserLogController;
@@ -37,6 +40,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [UserController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [UserController::class, 'login'])->name('login');
 
+    Route::get('/forgot-password', [PasswordResetController::class, 'create'])
+        ->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])
+        ->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])
+        ->name('password.update');
 });
 
 // Authenticated Routes
@@ -45,6 +57,17 @@ Route::middleware([Authenticate::class])->group(function () {
 
     // Top-level timetables resource
     Route::resource('timetables', TimetableController::class);
+
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware('signed')
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
     // All routes that are nested under a specific timetable
     Route::prefix('timetables/{timetable}')
@@ -105,6 +128,9 @@ Route::middleware([Authenticate::class])->group(function () {
                 ->name('generate');
             Route::post('generate', [GenerateTimetableController::class, 'generate'])
                 ->name('generate.post');
+
+            Route::get('overview', [TimetableOverviewController::class, 'index'])
+                ->name('timetable-overview.index');
         });
 
     // Courses

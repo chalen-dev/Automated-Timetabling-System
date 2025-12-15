@@ -63,8 +63,10 @@ $roomsMeta = [];
 $availability = [];
 $sessionGroupOccupancy = [];
 $assignments = [];
+$unassigned = [];        // INIT HERE (was later)
 $lunchStartDt = null;
 $lunchEndDt = null;
+$labViolations = [];     // collect lab validation failures
 
 // -------- Helpers --------
 
@@ -822,7 +824,11 @@ foreach (["1st", "2nd"] as $term) {
         $sgid = $row['session_group_id'] ?? null;
 
         $sg_row = get_session_group_row($sgid);
-        $sg_program = strtoupper(trim((string)($sg_row['academic_program'] ?? '')));
+        $sg_program = strtoupper(trim((string)(
+            $sg_row['program_abbreviation']
+            ?? $row['program_abbreviation']
+            ?? ''
+        )));
 
         $courseProgramsRaw = trim((string)($row['course_programs'] ?? ''));
 
@@ -870,6 +876,7 @@ foreach (["1st", "2nd"] as $term) {
         */
         if ($confineLabs && $isLabCourse) {
 
+            // ABSOLUTE LAB CONFINEMENT — NOTHING ELSE MAY OVERRIDE THIS
             $sg_row = get_session_group_row($sgid);
             $st = strtolower((string)($sg_row['session_time'] ?? ''));
 
@@ -887,14 +894,14 @@ foreach (["1st", "2nd"] as $term) {
 
             foreach ($allowedTimes as $hm) {
                 foreach ($timesDt as $i => $dt) {
-                    if ($dt->format('H:i') === $hm) {
-                        if ($i + $nSlots <= $totalSlots) {
-                            $candidateStarts[] = $i;
-                        }
+                    if ($dt->format('H:i') === $hm && $i + $nSlots <= $totalSlots) {
+                        $candidateStarts[] = $i;
                         break;
                     }
                 }
             }
+
+            // 🔒 HARD STOP — labs must NEVER fall through
         }
 
         /*
@@ -952,7 +959,9 @@ foreach (["1st", "2nd"] as $term) {
         |--------------------------------------------------------------------------
         */
         else {
+            // NORMAL courses ONLY
             $candidateStarts = compute_candidate_starts_with_overflow($row, $term);
+
         }
 
 

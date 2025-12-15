@@ -56,7 +56,7 @@ class UserController extends Controller
 
         // Create user
         try {
-            User::create([
+            $user = User::create([
                 'name' => $request->name,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -65,11 +65,16 @@ class UserController extends Controller
                 'role' => 'pending',
                 'academic_program_id' => $request->academic_program_id,
             ]);
+
+            // NEW: send verification email
+            $user->sendEmailVerificationNotification();
+
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['register_error' => $e->getMessage()])->withInput();
         }
 
-        return redirect()->route('login.form')->with('success', 'User registered successfully.');
+        return redirect()->route('login.form')
+            ->with('success', 'User registered successfully. Please verify your email.');
     }
 
 

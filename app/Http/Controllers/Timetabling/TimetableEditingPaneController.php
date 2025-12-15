@@ -324,7 +324,6 @@ class TimetableEditingPaneController extends Controller
         return $placementsByView;
     }
 
-
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -440,7 +439,6 @@ class TimetableEditingPaneController extends Controller
         ));
     }
 
-
     public function editor(Timetable $timetable)
     {
         $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
@@ -495,6 +493,8 @@ class TimetableEditingPaneController extends Controller
 
     public function saveFromEditor(Timetable $timetable, Request $request)
     {
+        $tempFile = null;
+
         try {
             // 1) Get placements from request (be permissive, don't rely on validate's redirect)
             $placementsByView = $request->input('placementsByView', []);
@@ -502,19 +502,17 @@ class TimetableEditingPaneController extends Controller
                 throw new \RuntimeException('placementsByView must be an array.');
             }
 
-            // 2) Load existing XLSX (bucket first, then legacy local path)
             $bucketPath = "timetables/{$timetable->id}.xlsx";
-            $tempFile   = null;
             $xlsxPath   = null;
 
-            // Try from facultime bucket
+            // Try from facultime bucket (only for reading initial file)
             if (Storage::disk('facultime')->exists($bucketPath)) {
                 try {
                     $tempFile = tempnam(sys_get_temp_dir(), 'tt_');
                     file_put_contents($tempFile, Storage::disk('facultime')->get($bucketPath));
                     $xlsxPath = $tempFile;
                 } catch (\Throwable $e) {
-                    Log::error('saveFromEditor: failed to read XLSX from bucket', [
+                    Log::warning('saveFromEditor: failed to read XLSX from bucket, will try local', [
                         'timetable_id' => $timetable->id,
                         'disk'         => 'facultime',
                         'path'         => $bucketPath,
@@ -524,7 +522,7 @@ class TimetableEditingPaneController extends Controller
                 }
             }
 
-            // Fallback to legacy local file if bucket copy missing/unreadable
+            // Fallback to local legacy path for reading
             if (!$xlsxPath) {
                 $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
                 if (file_exists($legacyPath)) {
@@ -533,11 +531,6 @@ class TimetableEditingPaneController extends Controller
             }
 
             if (!$xlsxPath || !file_exists($xlsxPath)) {
-                Log::error('Timetable XLSX not found for saveFromEditor', [
-                    'timetable_id' => $timetable->id,
-                    'bucket_path'  => $bucketPath,
-                ]);
-
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Timetable XLSX not found (bucket & local).',
@@ -547,8 +540,7 @@ class TimetableEditingPaneController extends Controller
             $spreadsheet = IOFactory::load($xlsxPath);
             $sheetCount  = $spreadsheet->getSheetCount();
 
-
-            // 3) Build map: sessionId => "CS_3rd_5_33"
+            // 3) Build map: sessionId => encoded string "PROG_YEAR_GROUPID_SESSIONID"
             $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
                 ->with(['academicProgram', 'courseSessions'])
                 ->get();
@@ -570,20 +562,18 @@ class TimetableEditingPaneController extends Controller
                 ->join('rooms as r', 'r.id', '=', 'tr.room_id')
                 ->where('tr.timetable_id', $timetable->id)
                 ->orderByRaw("
-                    CASE
-                        WHEN LOWER(r.room_type) = 'comlab' THEN 0
-                        WHEN LOWER(r.room_type) = 'lecture' THEN 1
-                        ELSE 2
-                    END
-                ")
+                CASE
+                    WHEN LOWER(r.room_type) = 'comlab' THEN 0
+                    WHEN LOWER(r.room_type) = 'lecture' THEN 1
+                    ELSE 2
+                END
+            ")
                 ->orderBy('r.room_name')
                 ->pluck('room_name')
                 ->toArray();
 
-
             // 4) Overwrite each sheet's data cells from placementsByView
             for ($sheetIndex = 0; $sheetIndex < $sheetCount; $sheetIndex++) {
-                // Map sheet index to (termIndex, dayIndex): 0..5 = 1st term, 6..11 = 2nd term
                 $termIndex = $sheetIndex < 6 ? 0 : 1;
                 $dayIndex  = $sheetIndex % 6;
                 $viewKey   = $termIndex . '-' . $dayIndex;
@@ -592,23 +582,18 @@ class TimetableEditingPaneController extends Controller
                 $table = $sheet->toArray(null, true, true, false);
 
                 $rowCount = count($table);
-                if ($rowCount < 2) {
-                    continue; // no data rows
-                }
+                if ($rowCount < 2) continue;
                 $colCount = count($table[0] ?? []);
 
-                // ---- Build header map: normalized room name => Excel column index (1-based) ----
                 $header = $table[0];
-                $sheetRoomNameToCol = []; // normalized => excelColIndex (1-based)
+                $sheetRoomNameToCol = [];
                 for ($c = 1; $c < $colCount; $c++) {
                     $raw = trim((string) ($header[$c] ?? ''));
                     if ($raw === '') continue;
                     $norm = strtolower(preg_replace('/\s+/', ' ', $raw));
-                    // PhpSpreadsheet 1-based columns: add 1 to array index
                     $sheetRoomNameToCol[$norm] = $c + 1;
                 }
 
-                // Map canonical room name (editor order) => excel column index (1-based)
                 $canonicalRoomToCol = [];
                 foreach ($rooms as $idx => $roomName) {
                     $norm = strtolower(preg_replace('/\s+/', ' ', trim($roomName)));
@@ -616,20 +601,18 @@ class TimetableEditingPaneController extends Controller
                         $canonicalRoomToCol[$norm] = $sheetRoomNameToCol[$norm];
                     }
                 }
-                // -------------------------------------------------------------------------------
 
-                // 4a) Clear data area to "Vacant"
+                // Clear data area to "Vacant"
                 for ($row = 1; $row < $rowCount; $row++) {
                     for ($col = 1; $col < $colCount; $col++) {
-                        $excelRowIndex = $row + 1;        // PhpSpreadsheet rows are 1-based
-                        $excelColIndex = $col + 1;        // array index -> excel col
+                        $excelRowIndex = $row + 1;
+                        $excelColIndex = $col + 1;
                         $colLetter     = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($excelColIndex);
-                        $cellAddress   = $colLetter . $excelRowIndex; // e.g. "B2"
+                        $cellAddress   = $colLetter . $excelRowIndex;
                         $sheet->setCellValue($cellAddress, 'Vacant');
                     }
                 }
 
-                // 4b) Fill from placements for this view, if any
                 if (
                     !isset($placementsByView[$viewKey]) ||
                     !is_array($placementsByView[$viewKey]) ||
@@ -640,45 +623,22 @@ class TimetableEditingPaneController extends Controller
 
                 foreach ($placementsByView[$viewKey] as $sessionId => $placement) {
                     $sessionId = (string) $sessionId;
-                    if (!isset($codeBySessionId[$sessionId])) {
-                        // Session not part of this timetable (defensive)
-                        Log::warning('saveFromEditor: sessionId not found in codeBySessionId', [
-                            'timetable_id' => $timetable->id,
-                            'session_id'   => $sessionId,
-                        ]);
-                        continue;
-                    }
+                    if (!isset($codeBySessionId[$sessionId])) continue;
 
                     $code   = $codeBySessionId[$sessionId];
-                    $col    = (int) ($placement['col'] ?? 0);     // 0-based among rooms (editor canonical index)
-                    $topRow = (int) ($placement['topRow'] ?? 0);  // 0-based among timeslots
+                    $col    = (int) ($placement['col'] ?? 0);
+                    $topRow = (int) ($placement['topRow'] ?? 0);
                     $blocks = max(1, (int) ($placement['blocks'] ?? 1));
 
-                    // Editor's col is index into $rooms array
-                    if (!isset($rooms[$col])) {
-                        Log::warning('saveFromEditor: room index out of range for placement', [
-                            'timetable_id' => $timetable->id,
-                            'session_id' => $sessionId,
-                            'col_index' => $col,
-                        ]);
-                        continue;
-                    }
+                    if (!isset($rooms[$col])) continue;
 
                     $roomName = $rooms[$col];
                     $roomNorm = strtolower(preg_replace('/\s+/', ' ', trim($roomName)));
 
-                    if (!isset($canonicalRoomToCol[$roomNorm])) {
-                        // The room in the editor isn't present in the sheet header (deleted/renamed) — skip writing.
-                        Log::warning('saveFromEditor: canonical room not found in sheet header', [
-                            'timetable_id' => $timetable->id,
-                            'session_id' => $sessionId,
-                            'room' => $roomName,
-                        ]);
-                        continue;
-                    }
+                    if (!isset($canonicalRoomToCol[$roomNorm])) continue;
 
-                    $excelColIndex = $canonicalRoomToCol[$roomNorm]; // 1-based excel column index
-                    $excelRowTop   = $topRow + 2; // topRow 0 -> excel row 2
+                    $excelColIndex = $canonicalRoomToCol[$roomNorm];
+                    $excelRowTop   = $topRow + 2;
 
                     for ($offset = 0; $offset < $blocks; $offset++) {
                         $excelRowIndex = $excelRowTop + $offset;
@@ -689,76 +649,228 @@ class TimetableEditingPaneController extends Controller
                 }
             }
 
-            // 5) Save XLSX back to disk
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            // ---------------------------
+            // Rebuild Overview_1st / Overview_2nd from placementsByView (unchanged)
+            // ---------------------------
+            try {
+                $dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-            // ensure writable (explicit check will give clearer error)
-            if (!is_writable(dirname($xlsxPath))) {
-                Log::error('saveFromEditor: output directory not writable', ['path' => dirname($xlsxPath)]);
+                $overviewAssignments = ['1st' => [], '2nd' => []];
+
+                foreach ($placementsByView as $viewKey => $viewPlacements) {
+                    if (!is_array($viewPlacements)) continue;
+
+                    $parts = explode('-', (string) $viewKey);
+                    if (count($parts) !== 2) continue;
+
+                    $termIdx = (int) $parts[0];
+                    $dayIdx  = (int) $parts[1];
+
+                    $termLabel = $termIdx === 0 ? '1st' : '2nd';
+                    $dayName   = $dayNames[$dayIdx] ?? null;
+                    if ($dayName === null) continue;
+
+                    foreach ($viewPlacements as $sessionId => $placement) {
+                        if (!is_array($placement)) continue;
+
+                        $colIndex = isset($placement['col']) ? (int) $placement['col'] : null;
+                        if ($colIndex === null) continue;
+
+                        $roomName = $rooms[$colIndex] ?? null;
+                        if (!$roomName) continue;
+
+                        $sid = (string) $sessionId;
+
+                        $overviewAssignments[$termLabel][$sid] ??= [];
+                        $overviewAssignments[$termLabel][$sid][$dayName] ??= [];
+
+                        if (!in_array($roomName, $overviewAssignments[$termLabel][$sid][$dayName], true)) {
+                            $overviewAssignments[$termLabel][$sid][$dayName][] = $roomName;
+                        }
+                    }
+                }
+
+                $sessionMap = [];
+                foreach ($sessionGroups as $g) {
+                    foreach ($g->courseSessions as $cs) {
+                        $sessionMap[(string) $cs->id] = $cs;
+                    }
+                }
+
+                $buildOverviewRowsForTerm = function (string $termLabel) use ($sessionMap, $overviewAssignments, $dayNames, $codeBySessionId) {
+                    $rows = [];
+
+                    foreach ($sessionMap as $sid => $cs) {
+                        $termRaw = '';
+                        if (!empty($cs->academic_term)) {
+                            $termRaw = (string) $cs->academic_term;
+                        } elseif (!empty($cs->course) && !empty($cs->course->academic_term)) {
+                            $termRaw = (string) $cs->course->academic_term;
+                        }
+                        $termNorm = strtolower(trim($termRaw));
+
+                        $include = false;
+                        if ($termLabel === '1st') {
+                            if ($termNorm === '1st' || $termNorm === 'semestral' || $termNorm === '') $include = true;
+                        } else {
+                            if ($termNorm === '2nd' || $termNorm === 'semestral' || $termNorm === '') $include = true;
+                        }
+                        if (!$include) continue;
+
+                        $code = $codeBySessionId[$sid] ?? ('CS_' . $sid);
+
+                        $title = '';
+                        if (!empty($cs->course)) {
+                            $title = $cs->course->course_title ?: $cs->course->course_name ?: ('Course #' . ($cs->course_id ?? $cs->id));
+                        } else {
+                            $title = $cs->course_title ?? ('Course #' . ($cs->course_id ?? $cs->id));
+                        }
+
+                        $rec = [
+                            'course_session' => $code,
+                            'course_session_id' => (int) $sid,
+                            'course_title' => $title,
+                        ];
+
+                        foreach ($dayNames as $d) {
+                            $roomsForDay = $overviewAssignments[$termLabel][$sid][$d] ?? [];
+                            if (empty($roomsForDay)) {
+                                $rec[$d] = 'vacant';
+                            } else {
+                                sort($roomsForDay, SORT_STRING);
+                                $rec[$d] = implode(';', array_values(array_unique($roomsForDay)));
+                            }
+                        }
+
+                        $rows[] = $rec;
+                    }
+
+                    return $rows;
+                };
+
+                $overview1Rows = $buildOverviewRowsForTerm('1st');
+                $overview2Rows = $buildOverviewRowsForTerm('2nd');
+
+                foreach (['Overview_1st' => $overview1Rows, 'Overview_2nd' => $overview2Rows] as $sheetName => $rows) {
+                    $old = $spreadsheet->getSheetByName($sheetName);
+                    if ($old !== null) {
+                        try {
+                            $spreadsheet->removeSheetByIndex($spreadsheet->getIndex($old));
+                        } catch (\Throwable $e) {
+                            Log::warning('saveFromEditor: could not remove old overview sheet', [
+                                'sheet' => $sheetName,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    $newSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetName);
+                    $spreadsheet->addSheet($newSheet);
+
+                    if (!empty($rows)) {
+                        $headers = array_keys($rows[0]);
+                        $rowIndex = 1;
+
+                        foreach ($headers as $colIndex => $h) {
+                            $newSheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex, $h);
+                        }
+
+                        foreach ($rows as $r) {
+                            $rowIndex++;
+                            foreach ($headers as $colIndex => $h) {
+                                $newSheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex, $r[$h] ?? '');
+                            }
+                        }
+                    } else {
+                        $newSheet->setCellValue('A1', 'course_session');
+                        $newSheet->setCellValue('A2', 'No sessions available for this overview.');
+                    }
+                }
+            } catch (\Throwable $ex) {
+                Log::error('saveFromEditor: failed to rebuild Overview sheets', [
+                    'timetable_id' => $timetable->id,
+                    'error' => $ex->getMessage(),
+                ]);
+            }
+
+            // 5) ALWAYS save to local canonical path
+            $localDir  = storage_path('app/exports/timetables');
+            $localPath = $localDir . DIRECTORY_SEPARATOR . $timetable->id . '.xlsx';
+
+            if (!is_dir($localDir)) {
+                @mkdir($localDir, 0755, true);
+            }
+
+            if (!is_dir($localDir) || !is_writable($localDir)) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Cannot write timetable file: directory is not writable.'
+                    'status'  => 'error',
+                    'message' => 'Cannot save: local exports/timetables directory is not writable.',
                 ], 500);
             }
 
-            // Save to local file (existing behavior)
-            $writer->save($xlsxPath);
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save($localPath);
 
-            // NEW: also upload the updated XLSX into the facultime bucket
+            // 6) Best-effort upload to bucket (do NOT block success)
+            $cloudOk = null; // null = not attempted, true/false = attempted result
+            $cloudErr = null;
+
             try {
-                $bucketPath = "timetables/{$timetable->id}.xlsx";
+                // only attempt upload if disk is configured/available
+                // (we treat failures as "bucket not available")
+                $stream = @fopen($localPath, 'rb');
+                if ($stream === false) {
+                    throw new \RuntimeException('Unable to open local XLSX for upload.');
+                }
 
-                $uploaded = Storage::disk('facultime')->put(
-                    $bucketPath,
-                    file_get_contents($xlsxPath)
-                );
+                try {
+                    $cloudOk = (bool) Storage::disk('facultime')->writeStream($bucketPath, $stream);
+                } finally {
+                    @fclose($stream);
+                }
 
-                if ($uploaded) {
-                    Log::info('saveFromEditor: uploaded updated timetable XLSX to bucket', [
+                if (!$cloudOk) {
+                    $cloudErr = 'Bucket upload returned false.';
+                    Log::warning('saveFromEditor: bucket upload failed (non-fatal)', [
                         'timetable_id' => $timetable->id,
-                        'disk'         => 'facultime',
-                        'path'         => $bucketPath,
-                    ]);
-                } else {
-                    Log::warning('saveFromEditor: failed to upload updated timetable XLSX to bucket', [
-                        'timetable_id' => $timetable->id,
-                        'disk'         => 'facultime',
-                        'path'         => $bucketPath,
+                        'disk' => 'facultime',
+                        'path' => $bucketPath,
                     ]);
                 }
             } catch (\Throwable $e) {
-                Log::error('saveFromEditor: exception while uploading timetable XLSX to bucket', [
+                $cloudOk = false;
+                $cloudErr = $e->getMessage();
+                Log::warning('saveFromEditor: bucket upload exception (non-fatal)', [
                     'timetable_id' => $timetable->id,
-                    'disk'         => 'facultime',
-                    'error'        => $e->getMessage(),
+                    'disk' => 'facultime',
+                    'path' => $bucketPath,
+                    'error' => $e->getMessage(),
                 ]);
+            }
+
+            $message = 'Timetable changes saved.';
+            if ($cloudOk === false) {
+                $message = 'Saved locally. Cloud sync unavailable: ' . ($cloudErr ?: 'Unknown error');
             }
 
             return response()->json([
                 'status'  => 'ok',
-                'message' => 'Timetable changes saved.',
+                'message' => $message,
             ]);
-
         } catch (\Throwable $e) {
             Log::error('Error in saveFromEditor', [
                 'timetable_id' => $timetable->id ?? null,
                 'error'        => $e->getMessage(),
-                'trace'        => $e->getTraceAsString(),
             ]);
-
-            $msg = $e->getMessage();
-
-            if (str_contains($msg, 'Resource temporarily unavailable') || str_contains($msg, 'Permission denied')) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Cannot save the Excel file because it is locked or not writable. Close the XLSX in Excel / any viewer and make sure the file is writable, then try again.',
-                ], 500);
-            }
 
             return response()->json([
                 'status'  => 'error',
-                'message' => $msg,
+                'message' => $e->getMessage(),
             ], 500);
+        } finally {
+            if ($tempFile && file_exists($tempFile)) {
+                @unlink($tempFile);
+            }
         }
     }
 
@@ -1139,19 +1251,5 @@ class TimetableEditingPaneController extends Controller
             return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
