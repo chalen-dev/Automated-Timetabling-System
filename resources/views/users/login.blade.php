@@ -10,7 +10,7 @@
                 WELCOME TO <span class="text-[#fbcc15]">FACULTIME!</span>
             </h1>
             <p class="text-lg text-white/90 leading-relaxed">
-                An automated timetabling system that helps schools create organized schedules by arranging teachers, rooms, and class times accurately, without conflicts, and with fewer manual steps.
+                An automated timetabling system that helps schools create organized schedules by arranging rooms, and class times accurately, without conflicts, and with fewer manual steps.
             </p>
         </div>
         <div class="mt-35 mb-45">
