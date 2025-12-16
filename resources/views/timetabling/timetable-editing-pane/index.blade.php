@@ -78,12 +78,21 @@
                         <button
                             type="button"
                             @click="openFilter = false"
-                            class="text-gray-500 hover:text-gray-800 text-lg leading-none"
                             aria-label="Close"
+                            class="
+                                w-8 h-8
+                                flex items-center justify-center
+                                rounded-full
+                                text-gray-500
+                                hover:text-gray-800
+                                hover:bg-gray-200
+                                transition
+                            "
                         >
                             &times;
                         </button>
                     </div>
+
                     {{-- Programs --}}
                     <div class="mb-3">
                         <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Programs</h4>
@@ -181,15 +190,32 @@
 
                             <div class="flex flex-wrap gap-3">
                                 @foreach($rooms as $room)
-                                    <label class="inline-flex items-center gap-1 text-xs">
+                                    <label class="cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            class="tt-room-filter"
+                                            class="tt-room-filter sr-only peer"
                                             data-room="{{ $room['name'] }}"
                                             checked
                                         >
-                                        {{ $room['name'] }}
+                                        <span
+                                            class="
+                                                inline-flex items-center justify-center
+                                                px-3 py-1.5
+                                                rounded-full
+                                                text-xs font-semibold
+                                                border
+                                                bg-gray-200 text-gray-800
+                                                hover:bg-gray-300
+                                                peer-checked:bg-red-700
+                                                peer-checked:text-white
+                                                peer-checked:border-red-700
+                                                transition
+                                            "
+                                        >
+                                            {{ $room['name'] }}
+                                        </span>
                                     </label>
+
                                 @endforeach
                             </div>
                         </div>
