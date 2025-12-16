@@ -90,7 +90,7 @@
                                         <!-- Add Sessions Button -->
                                         <a href="{{ route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup]) }}"
                                            class="bg-[#800000] text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-[#660000] active:bg-[#4d0000] transition-all duration-150">
-                                            Add Sessions
+                                            Add Courses
                                         </a>
 
                                         <!-- Edit Academic Terms Button -->
