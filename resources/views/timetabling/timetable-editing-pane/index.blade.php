@@ -15,86 +15,40 @@
 
             <div
                 class="relative w-full bg-gray-100 border-b border-gray-200 rounded-t-lg px-4 py-3"
-                x-data="{ openFilter: false }"
-                @click.outside="openFilter = false"
+                x-data="{ openFilter: false, openRoomFilter: false }"
+                @click.outside="openFilter = false; openRoomFilter = false"
             >
                 <div class="grid grid-cols-3 items-center">
 
-                    {{-- LEFT: FILTER --}}
-                    <button
-                        type="button"
-                        @click.stop="openFilter = !openFilter"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50"
-                    >
-                        <i class="bi bi-funnel-fill"></i>
-                        <span class="font-semibold">Filter timetable</span>
-                    </button>
-                    <div
-                        x-show="openFilter"
-                        x-cloak
-                        x-transition
-                        class="absolute top-full left-4 mt-2 z-50 bg-white rounded-md shadow-lg p-4 w-[720px] max-w-[90vw] border"
-                    >
-                        {{-- Programs --}}
-                        <div class="mb-3">
-                            <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Programs</h4>
-                            <div class="flex flex-wrap gap-2">
-                                <button
-                                    class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
-                                    data-program="all"
-                                >
-                                    All Programs
-                                </button>
+                    {{-- LEFT: FILTER BUTTONS --}}
+                    <div class="flex gap-3">
+                        {{-- Filter timetable --}}
+                        <button
+                            type="button"
+                            @click.stop="openFilter = !openFilter; openRoomFilter = false"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50"
+                        >
+                            <i class="bi bi-funnel-fill"></i>
+                            <span class="font-semibold">Filter timetable</span>
+                        </button>
 
-                                @foreach($sessionGroupsByProgram as $programId => $groups)
-                                    <button
-                                        class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
-                                        data-program="{{ $programId }}"
-                                    >
-                                        {{ $groups->first()->academicProgram->program_abbreviation ?? 'UNK' }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Year --}}
-                        <div class="mb-3">
-                            <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Year Level</h4>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach(['all','1st','2nd','3rd','4th'] as $year)
-                                    <button
-                                        class="tt-year-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
-                                        data-year="{{ $year }}"
-                                    >
-                                        {{ ucfirst($year) }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Time --}}
-                        <div>
-                            <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Time of Day</h4>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach(['all','morning','afternoon','evening'] as $time)
-                                    <button
-                                        class="tt-time-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
-                                        data-time="{{ $time }}"
-                                    >
-                                        {{ ucfirst($time) }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
+                        {{-- Filter rooms --}}
+                        <button
+                            type="button"
+                            @click.stop="openRoomFilter = !openRoomFilter; openFilter = false"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50"
+                        >
+                            <i class="bi bi-building"></i>
+                            <span class="font-semibold">Filter rooms</span>
+                        </button>
                     </div>
-
 
                     {{-- CENTER: TERM BUTTONS --}}
                     <div class="flex justify-center gap-6">
                         <button
                             type="button"
                             class="view-term-button px-6 py-2 font-semibold rounded-lg shadow
-                            {{ $activeTermIndex === 0 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
+                {{ $activeTermIndex === 0 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
                             data-term-index="0"
                         >
                             1st Term
@@ -103,7 +57,7 @@
                         <button
                             type="button"
                             class="view-term-button px-6 py-2 font-semibold rounded-lg shadow
-                    {{ $activeTermIndex === 1 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
+                            {{ $activeTermIndex === 1 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
                             data-term-index="1"
                         >
                             2nd Term
@@ -112,7 +66,139 @@
 
                     <div></div>
                 </div>
+
+                {{-- TIMETABLE FILTER DROPDOWN --}}
+                <div
+                    x-show="openFilter"
+                    x-cloak
+                    x-transition
+                    class="absolute top-full left-4 mt-2 z-50 bg-white rounded-md shadow-lg p-4 w-[720px] max-w-[90vw] border"
+                >
+                    <div class="flex justify-end mb-2">
+                        <button
+                            type="button"
+                            @click="openFilter = false"
+                            class="text-gray-500 hover:text-gray-800 text-lg leading-none"
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                    {{-- Programs --}}
+                    <div class="mb-3">
+                        <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Programs</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
+                                data-program="all"
+                            >
+                                All Programs
+                            </button>
+
+                            @foreach($sessionGroupsByProgram as $programId => $groups)
+                                <button
+                                    class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
+                                    data-program="{{ $programId }}"
+                                >
+                                    {{ $groups->first()->academicProgram->program_abbreviation ?? 'UNK' }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Year --}}
+                    <div class="mb-3">
+                        <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Year Level</h4>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach(['all','1st','2nd','3rd','4th'] as $year)
+                                <button
+                                    class="tt-year-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
+                                    data-year="{{ $year }}"
+                                >
+                                    {{ ucfirst($year) }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Time --}}
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Time of Day</h4>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach(['all','morning','afternoon','evening'] as $time)
+                                <button
+                                    class="tt-time-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
+                                    data-time="{{ $time }}"
+                                >
+                                    {{ ucfirst($time) }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ROOM FILTER DROPDOWN --}}
+                <div
+                    x-show="openRoomFilter"
+                    x-cloak
+                    x-transition
+                    class="absolute top-full left-4 mt-2 z-50 bg-white rounded-md shadow-lg p-4 w-[720px] max-w-[90vw] border"
+                >
+                    <div class="flex justify-end mb-2">
+                        <button
+                            type="button"
+                            @click="openRoomFilter = false"
+                            class="text-gray-500 hover:text-gray-800 text-lg leading-none"
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    <h4 class="text-xs font-semibold text-gray-600 uppercase mb-3">
+                        Rooms
+                    </h4>
+
+                    @php
+                        $roomNames = collect($tableData[0])
+                            ->filter(fn ($v, $i) => $i > 0 && trim($v) !== '')
+                            ->values();
+
+                        $roomsByType = $roomNames->map(function ($name) {
+                            $room = \App\Models\Records\Room::where('room_name', $name)->first();
+                            return [
+                                'name' => $name,
+                                'type' => $room?->room_type ?? 'Unknown',
+                            ];
+                        })->groupBy('type');
+                    @endphp
+
+                    @foreach($roomsByType as $type => $rooms)
+                        <div class="mb-3" data-room-type="{{ $type }}">
+                            <div class="font-semibold text-xs text-gray-700 mb-1">
+                                {{ ucfirst($type) }}
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                @foreach($rooms as $room)
+                                    <label class="inline-flex items-center gap-1 text-xs">
+                                        <input
+                                            type="checkbox"
+                                            class="tt-room-filter"
+                                            data-room="{{ $room['name'] }}"
+                                            checked
+                                        >
+                                        {{ $room['name'] }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
+
+
+
             <div class="grid grid-cols-6 w-full bg-white p-3 gap-2 border-t border-gray-200">
                 @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $index => $day)
                     <button
@@ -136,9 +222,24 @@
                             @if ($colIndex === 0)
                                 <th class="border border-gray-200 px-3 py-2 text-center"></th>
                             @else
-                                <th class="border border-gray-200 px-3 py-2 text-center whitespace-normal break-words">
+                                @php
+                                    $roomName = $cell;
+                                    $roomType = null;
+
+                                    if ($colIndex > 0) {
+                                        $room = \App\Models\Records\Room::where('room_name', $cell)->first();
+                                        $roomType = $room?->room_type ?? 'Unknown';
+                                    }
+                                @endphp
+
+                                <th
+                                    class="timetable-room-header border border-gray-200 px-3 py-2 text-center"
+                                    data-room="{{ $roomName }}"
+                                    data-room-type="{{ $roomType }}"
+                                >
                                     {{ $cell }}
                                 </th>
+
                             @endif
                         @endforeach
                     </tr>
@@ -234,6 +335,7 @@
                                         <td
                                             class="timetable-cell border border-gray-200 px-2 py-2 text-center text-[11px] leading-tight"
                                             rowspan="{{ $span }}"
+                                            data-room="{{ $tableData[0][$colIndex] ?? '' }}"
 
                                             {{-- FILTER METADATA --}}
                                             data-program="{{ $cellProgramId }}"
@@ -496,6 +598,77 @@
 
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const roomCheckboxes = document.querySelectorAll('.tt-room-filter');
+            const roomHeaders    = document.querySelectorAll('.timetable-room-header');
+            const roomCells      = document.querySelectorAll('.timetable-cell');
+
+            let activeRooms = new Set();
+
+            // Restore from localStorage
+            const savedRooms = JSON.parse(localStorage.getItem('tt_activeRooms') || 'null');
+            if (savedRooms && Array.isArray(savedRooms)) {
+                savedRooms.forEach(r => activeRooms.add(r));
+            }
+
+            // Default = all currently rendered rooms
+            if (activeRooms.size === 0) {
+                roomHeaders.forEach(th => {
+                    if (th.dataset.room) {
+                        activeRooms.add(th.dataset.room);
+                    }
+                });
+            }
+
+            function applyRoomFilter() {
+                // Headers
+                roomHeaders.forEach(th => {
+                    const room = th.dataset.room;
+                    th.style.display = activeRooms.has(room) ? '' : 'none';
+                });
+
+                // Cells
+                roomCells.forEach(td => {
+                    const room = td.dataset.room;
+                    td.style.display = activeRooms.has(room) ? '' : 'none';
+                });
+            }
+
+            function persistRooms() {
+                localStorage.setItem(
+                    'tt_activeRooms',
+                    JSON.stringify(Array.from(activeRooms))
+                );
+            }
+
+            roomCheckboxes.forEach(cb => {
+                // restore checkbox state
+                cb.checked = activeRooms.has(cb.dataset.room);
+
+                cb.addEventListener('change', function () {
+                    const room = cb.dataset.room;
+
+                    if (cb.checked) {
+                        activeRooms.add(room);
+                    } else {
+                        activeRooms.delete(room);
+                    }
+
+                    persistRooms();
+                    applyRoomFilter();
+                    syncRoomTypeCheckboxes();
+                });
+            });
+
+
+
+            applyRoomFilter();
+        });
+    </script>
+
+
 
 
 @endsection
