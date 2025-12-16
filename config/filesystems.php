@@ -57,15 +57,15 @@ return [
             'throw' => false,
             'report' => false,
         ],
-        'facultime' => app()->environment('local')
+        'facultime' => env('APP_ENV') === 'local'
             ? [
-                // LOCAL DEV (unchanged behavior)
+                // LOCAL DEV
                 'driver' => 'local',
                 'root'   => storage_path('app/facultime'),
                 'throw'  => false,
             ]
             : [
-                // LARAVEL CLOUD (S3 / R2)
+                // CLOUD (S3 / R2)
                 'driver' => 's3',
                 'key'    => env('AWS_ACCESS_KEY_ID'),
                 'secret' => env('AWS_SECRET_ACCESS_KEY'),
@@ -77,6 +77,7 @@ return [
                 'visibility' => 'public',
                 'throw' => false,
             ],
+
 
     ],
 

@@ -11,7 +11,6 @@
                 <img src="{{ $user->profile_photo_url }}" class="w-32 h-32 rounded-full object-cover shadow-md" alt="Profile Picture">
                 <div class="text-center md:text-left">
                     <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
-                    <p class="text-gray-500 text-lg">{{ $user->email }}</p>
                 </div>
             </div>
 

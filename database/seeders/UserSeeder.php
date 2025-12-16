@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Choraezo',
                 'email' => 'e.ramirez.143833.tc@umindanao.edu.ph',
-                'password' => '$2y$12$U9Jg/4yYFFB7FzqTjg7jNufElvc.6ipcC2AIBtXeA5ZpS6mA.5LRi',
+                'password' => '$2y$12$drN4ignh/F8A9pWwBYgho.QBaxeVDO9.B9jPJ4gWE.BFrNcjpaX.y',
                 'role' => 'admin',
             ],
             [
