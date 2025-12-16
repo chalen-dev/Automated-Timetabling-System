@@ -161,7 +161,7 @@ class CourseSessionController extends Controller
         $termMap = $validated['academic_term'] ?? [];
         if (!is_array($termMap) || empty($termMap)) {
             return redirect()
-                ->route('timetables.session-groups.edit-terms', [$timetable, $sessionGroup])
+                ->route('timetables.session-groups.index', [$timetable, $sessionGroup])
                 ->with('error', 'No changes submitted.');
         }
 
@@ -196,7 +196,7 @@ class CourseSessionController extends Controller
         });
 
         return redirect()
-            ->route('timetables.session-groups.edit-terms', [$timetable, $sessionGroup])
+            ->route('timetables.session-groups.index', [$timetable, $sessionGroup])
             ->with('success', 'Academic terms updated successfully.');
     }
 
