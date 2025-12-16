@@ -93,6 +93,12 @@
                                             Add Sessions
                                         </a>
 
+                                        <!-- Edit Academic Terms Button -->
+                                        <a href="{{ route('timetables.session-groups.edit-terms', [$timetable, $sessionGroup]) }}"
+                                           class="bg-white text-[#800000] px-4 py-2 rounded-lg font-semibold shadow border border-[#800000] hover:bg-gray-50 active:bg-gray-100 transition-all duration-150">
+                                            Edit Academic Terms
+                                        </a>
+
                                         <!-- Copy Button -->
                                         <a href="{{ route('timetables.session-groups.copy', [$timetable, $sessionGroup]) }}"
                                            class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150"

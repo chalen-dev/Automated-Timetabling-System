@@ -88,7 +88,6 @@ Route::middleware([Authenticate::class])->group(function () {
                 'session-groups/{sessionGroup}/color',
                 [SessionGroupController::class, 'updateColor']
             )->name('session-groups.update-color');
-
             // Copy session group (form + store)
             Route::get(
                 'session-groups/{sessionGroup}/copy',
@@ -98,6 +97,18 @@ Route::middleware([Authenticate::class])->group(function () {
                 'session-groups/{sessionGroup}/copy',
                 [SessionGroupController::class, 'storeCopy']
             )->name('session-groups.store-copy');
+            Route::patch(
+                'session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
+                [CourseSessionController::class, 'updateTerm']
+            )->name('session-groups.course-sessions.update-term');
+            Route::get(
+                'session-groups/{sessionGroup}/edit-terms',
+                [CourseSessionController::class, 'editTerms']
+            )->name('session-groups.edit-terms');
+            Route::patch(
+                'session-groups/{sessionGroup}/update-terms',
+                [CourseSessionController::class, 'bulkUpdateTerms']
+            )->name('session-groups.course-sessions.bulk-update-terms');
 
             // Course sessions inside a session group
             Route::resource('session-groups.course-sessions', CourseSessionController::class);

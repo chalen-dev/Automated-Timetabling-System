@@ -15,7 +15,7 @@
         </div>
         <div>
             <!-- Changed width here to make the form wider (reduces overall height) -->
-            <form action="{{ url('register') }}" method="post" class="flex flex-col w-[480px] justify-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
+            <form action="{{ url('register') }}" method="post" class="flex flex-col w-[560px] justify-center p-5 gap-1 bg-white rounded-xl shadow-2xl">
                 @csrf
 
                 <h1 class="font-bold p-3 text-center">Sign Up to Facultime</h1>
@@ -71,8 +71,8 @@
                 />
 
                 <!-- Put Password and Confirm Password side-by-side -->
-                <div class="flex gap-3">
-                    <div class="flex-1">
+                <div class="flex gap-4">
+                    <div class="flex-[1.3]">
                         <livewire:input.auth.password-text
                             label="PASSWORD"
                             elementId="register_password"
@@ -83,7 +83,7 @@
                             isRequired
                         />
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-[1.3]">
                         <livewire:input.auth.password-text
                             label="CONFIRM PASSWORD"
                             elementId="password_confirmation"
@@ -96,6 +96,7 @@
                         />
                     </div>
                 </div>
+
 
                 <button type="submit" class="bg-[#fbcc15] text-black font-bold py-2 rounded w-full hover:cursor-pointer">Register ➝</button>
                 <p class="text-center">Already a member? <a href="{{ url('login') }}" class="underline hover:font-bold text-[#5E0B0B]">Login here</a></p>

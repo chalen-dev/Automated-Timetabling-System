@@ -9,6 +9,8 @@ use App\Models\Records\Timetable;
 use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\SessionGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class CourseSessionController extends Controller
 {
@@ -116,6 +118,86 @@ class CourseSessionController extends Controller
 
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Academic term updated!');
+    }
+
+    public function editTerms(Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
+            abort(404);
+        }
+
+        $sessionGroup->load(['academicProgram']);
+
+        $courseSessions = CourseSession::query()
+            ->where('session_group_id', $sessionGroup->id)
+            ->whereHas('sessionGroup', function ($q) use ($timetable) {
+                $q->where('timetable_id', $timetable->id);
+            })
+            ->with(['course'])
+            ->get();
+
+        return view('timetabling.timetable-course-sessions.edit-terms', compact(
+            'timetable',
+            'sessionGroup',
+            'courseSessions'
+        ));
+    }
+
+    public function bulkUpdateTerms(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'academic_term' => ['required', 'array'],
+            'academic_term.*' => [
+                'nullable',
+                'string',
+                Rule::in(['', '1st', '2nd', 'semestral']),
+            ],
+        ]);
+
+        $termMap = $validated['academic_term'] ?? [];
+        if (!is_array($termMap) || empty($termMap)) {
+            return redirect()
+                ->route('timetables.session-groups.edit-terms', [$timetable, $sessionGroup])
+                ->with('error', 'No changes submitted.');
+        }
+
+        $ids = array_map('intval', array_keys($termMap));
+
+        DB::transaction(function () use ($timetable, $sessionGroup, $termMap, $ids) {
+            $sessions = CourseSession::query()
+                ->where('session_group_id', $sessionGroup->id)
+                ->whereIn('id', $ids)
+                ->whereHas('sessionGroup', function ($q) use ($timetable) {
+                    $q->where('timetable_id', $timetable->id);
+                })
+                ->with(['course'])
+                ->get();
+
+            foreach ($sessions as $courseSession) {
+                $incoming = $termMap[$courseSession->id] ?? null;
+
+                // Normalize empty string to null
+                if ($incoming === '') {
+                    $incoming = null;
+                }
+
+                // If the course is semestral, enforce semestral
+                if (($courseSession->course->duration_type ?? null) === 'semestral') {
+                    $incoming = 'semestral';
+                }
+
+                $courseSession->academic_term = $incoming;
+                $courseSession->save();
+            }
+        });
+
+        return redirect()
+            ->route('timetables.session-groups.edit-terms', [$timetable, $sessionGroup])
+            ->with('success', 'Academic terms updated successfully.');
     }
 
     /**
