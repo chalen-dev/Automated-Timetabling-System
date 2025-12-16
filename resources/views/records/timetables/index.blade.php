@@ -41,6 +41,11 @@
                                 <i class="bi bi-pencil-square"></i>
                                 <span>Edit</span>
                             </a>
+                            <a class="flex flex-col items-center justify-center pt-[5px] pb-[5px] pl-[10px] pr-[10px] hover:bg-[#cecece] hover:rounded-[10px]"
+                               href="{{ route('timetables.copy', $timetable) }}">
+                                <i class="bi bi-files"></i>
+                                <span>Copy</span>
+                            </a>
                             <livewire:buttons.delete
                                 action="timetables.destroy"
                                 :params="$timetable"

@@ -57,6 +57,14 @@ Route::middleware([Authenticate::class])->group(function () {
 
     // Top-level timetables resource
     Route::resource('timetables', TimetableController::class);
+    Route::get(
+        '/timetables/{timetable}/copy',
+        [TimetableController::class, 'copy']
+    )->name('timetables.copy');
+    Route::post(
+        '/timetables/{timetable}/store-copy',
+        [TimetableController::class, 'storeCopy']
+    )->name('timetables.store-copy');
 
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
         ->name('verification.notice');
