@@ -4,6 +4,7 @@
 
     <button
         type="submit"
+        title="Delete {{ $item_name }}"
         data-item-name="{{ $item_name }}"
         class="delete-btn flex flex-col items-center justify-center rounded cursor-pointer transition-all duration-150 {{ $class }}"
     >

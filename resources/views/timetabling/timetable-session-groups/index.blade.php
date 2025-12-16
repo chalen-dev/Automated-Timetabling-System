@@ -107,17 +107,15 @@
                                         </a>
 
                                         <!-- Show Button -->
-                                        <a href="{{ route('timetables.session-groups.show', [$timetable, $sessionGroup]) }}"
-                                           class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150">
-                                            <i class="bi-card-list"></i>
-                                        </a>
+                                        <livewire:buttons.show
+                                            :route="'timetables.session-groups.show'"
+                                            :params="[$timetable, $sessionGroup]"
+                                        />
 
-                                        <!-- Edit Button -->
-                                        <a href="{{ route('timetables.session-groups.edit', [$timetable, $sessionGroup]) }}"
-                                           class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-
+                                        <livewire:buttons.edit
+                                            :route="'timetables.session-groups.edit'"
+                                            :params="[$timetable, $sessionGroup]
+                                        "/>
                                         <!-- Delete Button -->
                                         <livewire:buttons.delete
                                             action="timetables.session-groups.destroy"

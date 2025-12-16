@@ -58,16 +58,10 @@
                             </a>
 
                             <!-- Show Button -->
-                            <a href="{{ route('courses.show', $course) }}"
-                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
-                                <i class="bi-card-list"></i>
-                            </a>
+                            <livewire:buttons.show :route="'courses.show'" :params="$course"/>
 
                             <!-- Edit Button -->
-                            <a href="{{ route('courses.edit', $course) }}"
-                               class="text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 hover:text-gray-800 active:bg-gray-300 transition-all duration-150 flex items-center justify-center w-10 h-10">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+                            <livewire:buttons.edit :route="'courses.edit'" :params="$course"/>
 
                             <!-- Delete Button -->
                             <livewire:buttons.delete
