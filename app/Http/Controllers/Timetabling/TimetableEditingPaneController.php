@@ -418,6 +418,12 @@ class TimetableEditingPaneController extends Controller
         //Determine if records are empty
         $isNotEmpty = Records::isNotEmpty($timetable);
 
+        $sessionGroups = SessionGroup::with('academicProgram')
+            ->where('timetable_id', $timetable->id)
+            ->get();
+
+        $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id');
+
         Logger::log('timetable_edit', 'timetable editing pane', [
             'timetable_id'   => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -435,7 +441,8 @@ class TimetableEditingPaneController extends Controller
             'sheetName',
             'sheetDisplayName',
             'sessionColorsByGroupId',
-            'isNotEmpty'
+            'isNotEmpty',
+            'sessionGroupsByProgram'
         ));
     }
 
