@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Timetabling;
 
 use App\Http\Controllers\Controller;
+use App\Models\Records\Room;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\SessionGroup;
@@ -12,6 +13,302 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class TimetableOverviewController extends Controller
 {
+    private function buildSessionGroupLabel(?SessionGroup $sg): string
+    {
+        if (!$sg) {
+            return 'Unknown Session Group';
+        }
+
+        $prog = $sg->academicProgram ? (string) $sg->academicProgram->program_abbreviation : 'Unknown';
+        $sessionName = (string) ($sg->session_name ?? '');
+        $yearLevel = (string) ($sg->year_level ?? '');
+        $sessionTime = (string) ($sg->session_time ?? '');
+
+        $label = trim(
+            $prog
+            . ($sessionName !== '' ? ' ' . $sessionName : '')
+            . ($yearLevel !== '' ? ' ' . $yearLevel . ' Year' : '')
+            . ($sessionTime !== '' ? ' (' . ucfirst($sessionTime) . ')' : '')
+        );
+
+        return $label !== '' ? $label : ('Session Group #' . $sg->id);
+    }
+
+    private function buildCourseTitle(?CourseSession $cs): string
+    {
+        if (!$cs) {
+            return 'Unknown Course';
+        }
+
+        if ($cs->course) {
+            $t = (string) ($cs->course->course_title ?: $cs->course->course_name ?: '');
+            if ($t !== '') {
+                return $t;
+            }
+        }
+
+        return 'Course Session #' . $cs->id;
+    }
+
+    /**
+     * Build a renderable grid:
+     * - rooms: ordered list of room names from XLSX header
+     * - timeLabels: ordered list of times from XLSX first column
+     * - grid[timeIndex][roomName][dayIndex] = null | ['render'=>bool,'rowspan'=>int,'text'=>string,'meta'=>array]
+     */
+    private function buildRoomGridForTerm($spreadsheet, int $termIndex, array $courseSessionsById, array $sessionGroupsById): array
+    {
+        $dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+        $rooms = [];
+        $timeLabels = [];
+
+        // Raw tokens by [dayIndex][roomName][timeIndex] = string token
+        $tokens = [];
+
+        for ($dayIndex = 0; $dayIndex < 6; $dayIndex++) {
+            $sheetIndex = $termIndex * 6 + $dayIndex;
+            if ($sheetIndex >= $spreadsheet->getSheetCount()) {
+                continue;
+            }
+
+            $sheet = $spreadsheet->getSheet($sheetIndex);
+            $table = $sheet->toArray(null, true, true, false);
+
+            if (empty($table) || !isset($table[0]) || !is_array($table[0])) {
+                continue;
+            }
+
+            $header = $table[0];
+            $colCount = count($header);
+            $rowCount = count($table);
+
+            // Rooms from header (col 1..N)
+            $roomByCol = [];
+            for ($c = 1; $c < $colCount; $c++) {
+                $roomName = trim((string) ($header[$c] ?? ''));
+                if ($roomName === '') {
+                    continue;
+                }
+                $roomByCol[$c] = $roomName;
+
+                if (!in_array($roomName, $rooms, true)) {
+                    $rooms[] = $roomName;
+                }
+            }
+
+            // Time labels (row 1..end, col 0)
+            $localTimeLabels = [];
+            for ($r = 1; $r < $rowCount; $r++) {
+                $t = trim((string) ($table[$r][0] ?? ''));
+                if ($t === '') {
+                    continue;
+                }
+                $localTimeLabels[] = $t;
+            }
+
+            // Use the first non-empty timeLabels as canonical
+            if (empty($timeLabels) && !empty($localTimeLabels)) {
+                $timeLabels = $localTimeLabels;
+            }
+
+            // Map cells into tokens aligned to timeLabels indexes
+            // We assume XLSX uses consistent time rows across days/sheets.
+            for ($c = 1; $c < $colCount; $c++) {
+                if (!isset($roomByCol[$c])) {
+                    continue;
+                }
+                $roomName = $roomByCol[$c];
+                if (!isset($tokens[$dayIndex])) {
+                    $tokens[$dayIndex] = [];
+                }
+                if (!isset($tokens[$dayIndex][$roomName])) {
+                    $tokens[$dayIndex][$roomName] = [];
+                }
+
+                $ti = 0;
+                for ($r = 1; $r < $rowCount; $r++) {
+                    $timeText = trim((string) ($table[$r][0] ?? ''));
+                    if ($timeText === '') {
+                        continue;
+                    }
+
+                    $cell = trim((string) ($table[$r][$c] ?? ''));
+                    $tokens[$dayIndex][$roomName][$ti] = $cell;
+                    $ti++;
+                }
+            }
+        }
+
+        // Build 30-min grid initialized to null (vacant)
+        $grid30 = [];
+        $timeCount30 = count($timeLabels);
+
+        for ($ti = 0; $ti < $timeCount30; $ti++) {
+            $grid30[$ti] = [];
+            foreach ($rooms as $roomName) {
+                $grid30[$ti][$roomName] = [];
+                for ($dayIndex = 0; $dayIndex < 6; $dayIndex++) {
+                    $grid30[$ti][$roomName][$dayIndex] = null;
+                }
+            }
+        }
+
+        // Fill 30-min grid with blocks + skip markers
+        foreach ($rooms as $roomName) {
+            for ($dayIndex = 0; $dayIndex < 6; $dayIndex++) {
+                $colTokens = $tokens[$dayIndex][$roomName] ?? [];
+
+                $ti = 0;
+                while ($ti < $timeCount30) {
+                    $token = trim((string) ($colTokens[$ti] ?? ''));
+
+                    if ($token === '' || strtolower($token) === 'vacant') {
+                        $ti++;
+                        continue;
+                    }
+
+                    if (!preg_match('/_(\d+)_(\d+)$/', $token, $m)) {
+                        $grid30[$ti][$roomName][$dayIndex] = [
+                            'render' => true,
+                            'rowspan' => 1,
+                            'text' => $token,
+                            'meta' => [
+                                'day' => $dayNames[$dayIndex] ?? (string) $dayIndex,
+                                'room' => $roomName,
+                                'session_group_id' => null,
+                                'course_session_id' => null,
+                                'academic_program_id' => 0,
+                                'year_level' => '',
+                                'session_time' => '',
+                                'session_color' => '',
+                            ],
+                        ];
+                        $ti++;
+                        continue;
+                    }
+
+                    $sessionGroupId = (int) $m[1];
+                    $courseSessionId = (int) $m[2];
+
+                    // contiguous vertical span (30-min blocks)
+                    $span = 1;
+                    $tj = $ti + 1;
+                    while ($tj < $timeCount30) {
+                        $next = trim((string) ($colTokens[$tj] ?? ''));
+                        if ($next === $token) {
+                            $span++;
+                            $tj++;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    $cs = $courseSessionsById[$courseSessionId] ?? null;
+                    $sg = $sessionGroupsById[$sessionGroupId] ?? ($cs ? $cs->sessionGroup : null);
+
+                    $text = $this->buildSessionGroupLabel($sg) . "\n" . $this->buildCourseTitle($cs);
+
+                    $programId = $sg ? (int) $sg->academic_program_id : 0;
+                    $yearLevel = $sg ? (string) ($sg->year_level ?? '') : '';
+                    $sessionTime = $sg ? (string) ($sg->session_time ?? '') : '';
+                    $sessionColor = $sg ? (string) ($sg->session_color ?? '') : '';
+
+                    $grid30[$ti][$roomName][$dayIndex] = [
+                        'render' => true,
+                        'rowspan' => $span,
+                        'text' => $text,
+                        'meta' => [
+                            'day' => $dayNames[$dayIndex] ?? (string) $dayIndex,
+                            'room' => $roomName,
+                            'session_group_id' => $sessionGroupId,
+                            'course_session_id' => $courseSessionId,
+                            'academic_program_id' => $programId,
+                            'year_level' => $yearLevel,
+                            'session_time' => $sessionTime,
+                            'session_color' => $sessionColor,
+                        ],
+                    ];
+
+                    for ($k = 1; $k < $span; $k++) {
+                        if (($ti + $k) >= $timeCount30) {
+                            break;
+                        }
+                        $grid30[$ti + $k][$roomName][$dayIndex] = ['render' => false];
+                    }
+
+                    $ti += $span;
+                }
+            }
+        }
+        // ---- Build HOURLY grid directly ----
+
+// Build hour labels from 30-min labels
+        $timeLabelsHourly = [];
+        for ($i = 0; $i < count($timeLabels); $i += 2) {
+            $timeLabelsHourly[] = $timeLabels[$i];
+        }
+
+        $hourCount = count($timeLabelsHourly);
+
+// Initialize hourly grid
+        $gridH = [];
+        for ($h = 0; $h < $hourCount; $h++) {
+            foreach ($rooms as $roomName) {
+                for ($d = 0; $d < 6; $d++) {
+                    $gridH[$h][$roomName][$d] = null;
+                }
+            }
+        }
+
+// Convert 30-min blocks → hour blocks
+        foreach ($rooms as $roomName) {
+            for ($dayIndex = 0; $dayIndex < 6; $dayIndex++) {
+
+                $ti = 0;
+                while ($ti < count($grid30)) {
+                    $cell = $grid30[$ti][$roomName][$dayIndex] ?? null;
+
+                    if (!is_array($cell) || ($cell['render'] ?? false) !== true) {
+                        $ti++;
+                        continue;
+                    }
+
+                    $span30 = max(1, (int) $cell['rowspan']);
+                    $startHour = intdiv($ti, 2);
+                    $spanHours = (int) ceil($span30 / 2);
+
+                    if ($startHour >= $hourCount) {
+                        $ti += $span30;
+                        continue;
+                    }
+
+                    $gridH[$startHour][$roomName][$dayIndex] = [
+                        'render'  => true,
+                        'rowspan' => $spanHours,
+                        'text'    => $cell['text'],
+                        'meta'    => $cell['meta'],
+                    ];
+
+                    for ($k = 1; $k < $spanHours; $k++) {
+                        if (($startHour + $k) >= $hourCount) break;
+                        $gridH[$startHour + $k][$roomName][$dayIndex] = ['render' => false];
+                    }
+
+                    $ti += $span30;
+                }
+            }
+        }
+
+        return [
+            'rooms' => $rooms,
+            'timeLabels' => $timeLabelsHourly,
+            'grid' => $gridH,
+        ];
+
+    }
+
+
     private function loadTimetableXlsxPath(Timetable $timetable): ?string
     {
         $bucketPath = "timetables/{$timetable->id}.xlsx";
@@ -229,7 +526,6 @@ class TimetableOverviewController extends Controller
             $termIndex = 0;
         }
 
-        // NEW: build filter data for tray (Programs list)
         $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
             ->with(['academicProgram'])
             ->get();
@@ -237,7 +533,6 @@ class TimetableOverviewController extends Controller
         $sessionGroupsByProgram = $sessionGroups
             ->groupBy('academic_program_id')
             ->map(function ($groups) {
-                // stable ordering: 1st->4th
                 return $groups->sortBy(function ($g) {
                     $map = ['1st' => 1, '2nd' => 2, '3rd' => 3, '4th' => 4];
                     return $map[$g->year_level] ?? 99;
@@ -250,8 +545,11 @@ class TimetableOverviewController extends Controller
             return view('timetabling.timetable-overview.index', [
                 'timetable' => $timetable,
                 'termIndex' => $termIndex,
-                'groups' => [],
                 'sessionGroupsByProgram' => $sessionGroupsByProgram,
+                'rooms' => [],
+                'roomsByType' => [],
+                'timeLabels' => [],
+                'grid' => [],
                 'error' => 'Timetable file not found.',
             ]);
         }
@@ -260,122 +558,61 @@ class TimetableOverviewController extends Controller
 
         try {
             $spreadsheet = IOFactory::load($xlsxPath);
-            $placements = $this->buildPlacementsFromTimetableSheets($spreadsheet);
 
-            $dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-            $sessions = CourseSession::whereHas('sessionGroup', function ($q) use ($timetable) {
+            $courseSessions = CourseSession::whereHas('sessionGroup', function ($q) use ($timetable) {
                 $q->where('timetable_id', $timetable->id);
             })
                 ->with(['course', 'sessionGroup.academicProgram'])
                 ->get();
 
-            $groupsById = [];
+            $courseSessionsById = [];
+            foreach ($courseSessions as $cs) {
+                $courseSessionsById[(int) $cs->id] = $cs;
+            }
 
-            foreach ($sessions as $cs) {
-                if (!$this->sessionBelongsToTerm($cs, $termIndex)) {
-                    continue;
-                }
+            $sessionGroupsById = [];
+            foreach ($sessionGroups as $sg) {
+                $sessionGroupsById[(int) $sg->id] = $sg;
+            }
 
-                $sg = $cs->sessionGroup;
-                $sgId = $sg ? (int) $sg->id : 0;
+            $gridData = $this->buildRoomGridForTerm(
+                $spreadsheet,
+                $termIndex,
+                $courseSessionsById,
+                $sessionGroupsById
+            );
 
-                $programId = $sg ? (int) $sg->academic_program_id : 0;
-                $prog = $sg && $sg->academicProgram ? $sg->academicProgram->program_abbreviation : 'Unknown';
-                $sessionName = $sg ? (string) $sg->session_name : '';
-                $yearLevel = $sg ? (string) $sg->year_level : '';
-                $sessionTime = $sg ? (string) $sg->session_time : '';
+            // Build roomsByType (single query, then group)
+            $roomModelsByName = Room::whereIn('room_name', $gridData['rooms'])
+                ->get()
+                ->keyBy('room_name');
 
-                $groupLabel = trim(
-                    $prog
-                    . ($sessionName !== '' ? ' ' . $sessionName : '')
-                    . ($yearLevel !== '' ? ' ' . $yearLevel . ' Year' : '')
-                    . ($sessionTime !== '' ? ' (' . ucfirst($sessionTime) . ')' : '')
-                );
-
-                if (!isset($groupsById[$sgId])) {
-                    $groupsById[$sgId] = [
-                        'session_group_id' => $sgId,
-                        'group_label' => $groupLabel !== '' ? $groupLabel : ($sgId ? ('Session Group #' . $sgId) : 'Unknown Session Group'),
-                        'items' => [],
-
-                        // NEW: for filtering in Blade/JS
-                        'academic_program_id' => $programId,
-                        'year_level' => $yearLevel,
-                        'session_time' => $sessionTime,
-
-                        // existing sort keys
-                        'sort_session_time' => strtolower(trim($sessionTime)),
-                        'sort_year_level' => strtolower(trim($yearLevel)),
-                        'sort_program_abbr' => strtolower(trim($prog)),
-                        'sort_session_name' => strtolower(trim($sessionName)),
-                    ];
-                }
-
-                $courseTitle = '';
-                if ($cs->course) {
-                    $courseTitle = (string) ($cs->course->course_title ?: $cs->course->course_name ?: '');
-                }
-                if ($courseTitle === '') {
-                    $courseTitle = 'Course Session #' . $cs->id;
-                }
-
-                $sid = (string) $cs->id;
-
-                $item = [
-                    'course_session_id' => $cs->id,
-                    'course_title' => $courseTitle,
-                    'days' => [],
+            $roomsByType = [];
+            foreach ($gridData['rooms'] as $roomName) {
+                $type = $roomModelsByName[$roomName]->room_type ?? 'Unknown';
+                $roomsByType[$type][] = [
+                    'name' => $roomName,
+                    'type' => $type,
                 ];
-
-                foreach ($dayNames as $dayIdx => $dayName) {
-                    $entries = $placements[$termIndex][$sid][$dayIdx] ?? [];
-                    usort($entries, function ($a, $b) {
-                        return strcmp((string)($a['start'] ?? ''), (string)($b['start'] ?? ''));
-                    });
-                    $item['days'][$dayName] = $entries;
-                }
-
-                $groupsById[$sgId]['items'][] = $item;
             }
 
-            foreach ($groupsById as $gid => $g) {
-                usort($groupsById[$gid]['items'], function ($a, $b) {
-                    return strcmp((string) $a['course_title'], (string) $b['course_title']);
-                });
-            }
-
-            $groups = array_values($groupsById);
-
-            $sessionTimeOrder = ['morning' => 0, 'afternoon' => 1, 'evening' => 2];
-            $yearLevelOrder = ['1st' => 1, '2nd' => 2, '3rd' => 3, '4th' => 4];
-
-            usort($groups, function ($a, $b) use ($sessionTimeOrder, $yearLevelOrder) {
-                $aId = (int) ($a['session_group_id'] ?? 0);
-                $bId = (int) ($b['session_group_id'] ?? 0);
-
-                if ($aId === 0 && $bId !== 0) return 1;
-                if ($bId === 0 && $aId !== 0) return -1;
-
-                $aTimeRank = $sessionTimeOrder[(string)($a['sort_session_time'] ?? '')] ?? 99;
-                $bTimeRank = $sessionTimeOrder[(string)($b['sort_session_time'] ?? '')] ?? 99;
-                if ($aTimeRank !== $bTimeRank) return $aTimeRank <=> $bTimeRank;
-
-                $aYearRank = $yearLevelOrder[(string)($a['sort_year_level'] ?? '')] ?? 99;
-                $bYearRank = $yearLevelOrder[(string)($b['sort_year_level'] ?? '')] ?? 99;
-                if ($aYearRank !== $bYearRank) return $aYearRank <=> $bYearRank;
-
-                $p = strcmp((string)($a['sort_program_abbr'] ?? ''), (string)($b['sort_program_abbr'] ?? ''));
-                if ($p !== 0) return $p;
-
-                return strcmp((string)($a['sort_session_name'] ?? ''), (string)($b['sort_session_name'] ?? ''));
+            // Optional: stable type ordering (comlab, lecture, then others)
+            $typeOrder = ['comlab' => 0, 'lecture' => 1, 'gym' => 2, 'main' => 3, 'Unknown' => 99];
+            uksort($roomsByType, function ($a, $b) use ($typeOrder) {
+                $ra = $typeOrder[strtolower((string) $a)] ?? 50;
+                $rb = $typeOrder[strtolower((string) $b)] ?? 50;
+                if ($ra !== $rb) return $ra <=> $rb;
+                return strcmp((string) $a, (string) $b);
             });
 
             return view('timetabling.timetable-overview.index', [
                 'timetable' => $timetable,
                 'termIndex' => $termIndex,
-                'groups' => $groups,
                 'sessionGroupsByProgram' => $sessionGroupsByProgram,
+                'rooms' => $gridData['rooms'],
+                'roomsByType' => $roomsByType,
+                'timeLabels' => $gridData['timeLabels'],
+                'grid' => $gridData['grid'],
                 'error' => null,
             ]);
         } finally {
