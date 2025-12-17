@@ -9,14 +9,12 @@
             $activeDayIndex  = $sheetIndex % 6;
         @endphp
 
-        <livewire:trays.unassigned-courses-tray :timetable="$timetable" />
 
         @if (!empty($tableData) && isset($tableData[0]))
 
             <div
                 class="relative w-full bg-gray-100 border-b border-gray-200 rounded-t-lg px-4 py-3"
-                x-data="{ openFilter: false, openRoomFilter: false }"
-                @click.outside="openFilter = false; openRoomFilter = false"
+                x-data="{ openFilter: false, openRoomFilter: false, openUnplaced: false }"
             >
                 <div class="grid grid-cols-3 items-center">
 
@@ -48,7 +46,7 @@
                         <button
                             type="button"
                             class="view-term-button px-6 py-2 font-semibold rounded-lg shadow
-                {{ $activeTermIndex === 0 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
+                             {{ $activeTermIndex === 0 ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-700' }}"
                             data-term-index="0"
                         >
                             1st Term
@@ -64,7 +62,22 @@
                         </button>
                     </div>
 
-                    <div></div>
+                    <div class="flex justify-end">
+                        <button
+                            type="button"
+                            @click.stop="openUnplaced = !openUnplaced"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50"
+                        >
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <span class="font-semibold">Unplaced</span>
+
+                            @if (!empty($unplacedGroups))
+                                <span class="text-xs text-gray-600">
+                                    ({{ collect($unplacedGroups)->sum('count') }})
+                                </span>
+                            @endif
+                        </button>
+                    </div>
                 </div>
 
                 {{-- TIMETABLE FILTER DROPDOWN --}}
@@ -221,6 +234,89 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- RIGHT-SIDE UNPLACED PANEL (MATCHES OVERVIEW) --}}
+                <div
+                    x-show="openUnplaced"
+                    x-cloak
+                    x-transition
+                    @click.outside="openUnplaced = false"
+                    class="fixed top-[140px] right-4 z-[999] bg-white rounded-xl shadow-xl
+                    w-[520px] max-w-[90vw] h-[calc(100vh-180px)] border flex flex-col"
+                >
+                    <div class="flex items-center justify-between px-5 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-gray-800">
+                            Unplaced Course Sessions
+                        </h2>
+
+                        <button
+                            type="button"
+                            @click="openUnplaced = false"
+                            class="text-gray-500 hover:text-gray-800 text-xl leading-none"
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                        @if (empty($unplacedGroups))
+                            <div class="text-sm text-gray-500 italic">
+                                No unplaced sessions found.
+                            </div>
+                        @else
+                            @foreach ($unplacedGroups as $group)
+                                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                    <div class="flex items-center justify-between bg-gray-100 px-4 py-2">
+                                        <div class="font-semibold text-gray-800 text-sm">
+                                            {{ $group['group_label'] }}
+                                        </div>
+                                        <div class="text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-full px-2 py-1">
+                                            {{ $group['count'] }} unplaced
+                                        </div>
+                                    </div>
+
+                                    <div class="divide-y divide-gray-200">
+                                        @foreach ($group['items'] as $item)
+                                            <div class="px-4 py-2">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div class="min-w-0">
+                                                        <div class="font-semibold text-gray-800 text-[12px] leading-tight">
+                                                            {{ $item['course_title'] !== '' ? $item['course_title'] : 'Course Session #' . $item['course_session_id'] }}
+                                                        </div>
+
+                                                        <div class="text-[11px] text-gray-700 leading-tight mt-0.5">
+                                                            <span class="font-semibold">Issue:</span>
+                                                            {{ $item['reason_title'] }}
+                                                        </div>
+
+                                                        @if (!empty($item['reason_hint']))
+                                                            <div class="text-[11px] text-gray-500 leading-tight">
+                                                                {{ $item['reason_hint'] }}
+                                                            </div>
+                                                        @endif
+
+                                                        <div class="text-[10px] text-gray-500 leading-tight mt-0.5">
+                                                            <span class="font-semibold">Term tried:</span>
+                                                            {{ $item['terms_tried'] }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-[10px] text-gray-400 whitespace-nowrap">
+                                                        #{{ $item['course_session_id'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+
+
+
             </div>
 
 

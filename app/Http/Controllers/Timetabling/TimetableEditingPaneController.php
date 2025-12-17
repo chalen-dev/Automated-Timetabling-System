@@ -33,6 +33,113 @@ class TimetableEditingPaneController extends Controller
         return $s;
     }
 
+    private function loadUnassignedFromXlsx(Timetable $timetable): array
+    {
+        $bucketPath = "timetables/{$timetable->id}.xlsx";
+        $xlsxPath = null;
+        $tempFile = null;
+
+        if (Storage::disk('facultime')->exists($bucketPath)) {
+            $tempFile = tempnam(sys_get_temp_dir(), 'tt_unassigned_');
+            file_put_contents($tempFile, Storage::disk('facultime')->get($bucketPath));
+            $xlsxPath = $tempFile;
+        } else {
+            $legacyPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            if (file_exists($legacyPath)) {
+                $xlsxPath = $legacyPath;
+            }
+        }
+
+        if (!$xlsxPath || !file_exists($xlsxPath)) return [];
+
+        try {
+            $spreadsheet = IOFactory::load($xlsxPath);
+            $sheet = $spreadsheet->getSheetByName('Unassigned');
+            if (!$sheet) return [];
+
+            $rows = $sheet->toArray(null, true, true, false);
+            if (empty($rows) || empty($rows[0])) return [];
+
+            $headers = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
+            $idx = fn($k) => array_search($k, $headers, true);
+
+            $iId    = $idx('course_session_id');
+            $iCode  = $idx('code');
+            $iTerms = $idx('terms_tried');
+
+            if ($iId === false || $iCode === false) return [];
+
+            $raw = [];
+            for ($r = 1; $r < count($rows); $r++) {
+                $id = (int)($rows[$r][$iId] ?? 0);
+                $code = trim((string)($rows[$r][$iCode] ?? ''));
+                if (!$id || !$code) continue;
+
+                $raw[] = [
+                    'course_session_id' => $id,
+                    'code' => $code,
+                    'terms_tried' => (string)($rows[$r][$iTerms] ?? ''),
+                ];
+            }
+
+            if (empty($raw)) return [];
+
+            $sessions = CourseSession::with(['course','sessionGroup.academicProgram'])
+                ->whereIn('id', collect($raw)->pluck('course_session_id'))
+                ->get()
+                ->keyBy('id');
+
+            $groups = [];
+
+            foreach ($raw as $r) {
+                $parts = explode('_', $r['code']);
+                $sgId = isset($parts[2]) ? (int)$parts[2] : 0;
+
+                $cs = $sessions[$r['course_session_id']] ?? null;
+                $sg = $cs?->sessionGroup;
+
+                if (!isset($groups[$sgId])) {
+                    $label = $sg
+                        ? trim(
+                            ($sg->academicProgram->program_abbreviation ?? 'UNK') . ' ' .
+                            $sg->session_name . ' ' .
+                            $sg->year_level . ' Year' .
+                            ($sg->session_time ? ' (' . ucfirst($sg->session_time) . ')' : '')
+                        )
+                        : 'Unknown Session Group';
+
+                    $groups[$sgId] = [
+                        'group_label' => $label,
+                        'count' => 0,
+                        'items' => [],
+                    ];
+                }
+
+                $groups[$sgId]['items'][] = [
+                    'course_session_id' => $r['course_session_id'],
+                    'course_title' =>
+                        $cs?->course?->course_title
+                        ?? $cs?->course?->course_name
+                            ?? '',
+                    'terms_tried' => $r['terms_tried'],
+                    'reason_title' => 'No available slot/room',
+                    'reason_hint' =>
+                        'Couldn’t find a valid day/time/room combination that satisfies constraints.',
+                ];
+
+                $groups[$sgId]['count']++;
+            }
+
+            return array_values($groups);
+
+        } finally {
+            if ($tempFile && file_exists($tempFile)) {
+                @unlink($tempFile);
+            }
+        }
+    }
+
+
     private function calculateVerticalRowspan(array $tableData): array
     {
         $rowspanData = [];
@@ -424,6 +531,8 @@ class TimetableEditingPaneController extends Controller
 
         $sessionGroupsByProgram = $sessionGroups->groupBy('academic_program_id');
 
+        $unplacedGroups = $this->loadUnassignedFromXlsx($timetable);
+
         Logger::log('timetable_edit', 'timetable editing pane', [
             'timetable_id'   => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -442,7 +551,8 @@ class TimetableEditingPaneController extends Controller
             'sheetDisplayName',
             'sessionColorsByGroupId',
             'isNotEmpty',
-            'sessionGroupsByProgram'
+            'sessionGroupsByProgram',
+            'unplacedGroups'
         ));
     }
 

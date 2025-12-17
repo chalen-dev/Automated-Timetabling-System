@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="flex flex-col w-full p-4 pl-39 text-gray-800 justify-center items-center">
-        <div class="w-full max-w-[1450px]">
+        <div class="w-full max-w-[1320px]">
             <div class="flex items-center justify-between mb-3">
                 <div class="text-white font-semibold">
                     Timetable Overview (Room Grid)
@@ -41,7 +41,11 @@
             {{-- TOP BAR: Filter timetable + Filter rooms + Term selector --}}
             <div
                 class="relative flex items-center justify-center w-full p-3 gap-6 bg-gray-100 border border-gray-200 rounded-t-lg"
-                x-data="{ openFilter: false, openRoomFilter: false }"
+                x-data="{
+                    openFilter: false,
+                    openRoomFilter: false,
+                    openUnplaced: false
+                }"
                 @click.outside="openFilter = false; openRoomFilter = false"
             >
                 <div class="absolute left-3 flex gap-3">
@@ -216,6 +220,90 @@
                         @endforeach
                     @endif
                 </div>
+
+                <div class="absolute right-3">
+                    <button
+                        type="button"
+                        @click.stop="openUnplaced = !openUnplaced"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50"
+                    >
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span class="font-semibold">Unplaced</span>
+                        @if (!empty($unplacedGroups))
+                            <span class="text-xs text-gray-600">
+                                ({{ collect($unplacedGroups)->sum('count') }})
+                            </span>
+                        @endif
+                    </button>
+
+                    <div
+                        x-show="openUnplaced"
+                        x-cloak
+                        @click.outside="openUnplaced = false"
+                        class="absolute right-0 top-full mt-2 z-50 bg-white rounded-md shadow-lg p-4 w-[520px] max-w-[90vw] border"
+                    >
+                        <h2 class="text-lg font-semibold text-gray-800 mb-3">
+                            Unplaced Course Sessions
+                        </h2>
+
+                        @if (empty($unplacedGroups))
+                            <div class="text-sm text-gray-500 italic">
+                                No unplaced sessions found.
+                            </div>
+                        @else
+                            <div class="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
+                                @foreach ($unplacedGroups as $group)
+                                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                        <div class="flex items-center justify-between bg-gray-100 px-4 py-2">
+                                            <div class="font-semibold text-gray-800 text-sm">
+                                                {{ $group['group_label'] }}
+                                            </div>
+                                            <div class="text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-full px-2 py-1">
+                                                {{ $group['count'] }} unplaced
+                                            </div>
+                                        </div>
+
+                                        <div class="divide-y divide-gray-200">
+                                            @foreach ($group['items'] as $item)
+                                                <div class="px-4 py-2">
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div class="min-w-0">
+                                                            <div class="font-semibold text-gray-800 text-[12px] leading-tight">
+                                                                {{ $item['course_title'] !== '' ? $item['course_title'] : 'Course Session #' . $item['course_session_id'] }}
+                                                            </div>
+
+                                                            <div class="text-[11px] text-gray-700 leading-tight mt-0.5">
+                                                                <span class="font-semibold">Issue:</span>
+                                                                {{ $item['reason_title'] }}
+                                                            </div>
+
+                                                            @if (!empty($item['reason_hint']))
+                                                                <div class="text-[11px] text-gray-500 leading-tight">
+                                                                    {{ $item['reason_hint'] }}
+                                                                </div>
+                                                            @endif
+
+                                                            <div class="text-[10px] text-gray-500 leading-tight mt-0.5">
+                                                                <span class="font-semibold">Term tried:</span>
+                                                                {{ $item['terms_tried'] }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="text-[10px] text-gray-400 whitespace-nowrap">
+                                                            #{{ $item['course_session_id'] }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
+
             </div>
 
             <div class="overflow-x-auto bg-white rounded-b-lg border border-gray-200 border-t-0 shadow-md">
