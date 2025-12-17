@@ -176,35 +176,26 @@ class TimetableController extends Controller
             }
 
             /* ----------------------------------------------------
-             | 5. COPY XLSX FILE (NEW FEATURE)
+             | 5. COPY XLSX FILE (CANONICAL PATHS)
              ---------------------------------------------------- */
 
             $sourceBucketPath = "timetables/{$timetable->id}.xlsx";
-            $sourceLocalPath  = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            $destBucketPath   = "timetables/{$newTimetable->id}.xlsx";
 
-            // New destination directory + file
-            $destDirBucket = "timetables/{$newTimetable->id}";
-            $destFileBucket = "{$destDirBucket}/{$newTimetable->id}.xlsx";
-
-            $destDirLocal = storage_path("app/exports/timetables/{$newTimetable->id}");
-            $destFileLocal = "{$destDirLocal}/{$newTimetable->id}.xlsx";
-
-            // Ensure local directory exists
-            if (!is_dir($destDirLocal)) {
-                @mkdir($destDirLocal, 0755, true);
-            }
+            $sourceLocalPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            $destLocalPath   = storage_path("app/exports/timetables/{$newTimetable->id}.xlsx");
 
             /* ---- Bucket → Bucket copy ---- */
             if (Storage::disk('facultime')->exists($sourceBucketPath)) {
                 try {
                     Storage::disk('facultime')->copy(
                         $sourceBucketPath,
-                        $destFileBucket
+                        $destBucketPath
                     );
                 } catch (\Throwable $e) {
                     logger()->warning('Timetable XLSX copy (bucket) failed', [
                         'from' => $sourceBucketPath,
-                        'to'   => $destFileBucket,
+                        'to'   => $destBucketPath,
                         'error'=> $e->getMessage(),
                     ]);
                 }
@@ -213,15 +204,16 @@ class TimetableController extends Controller
             /* ---- Local → Local copy (canonical) ---- */
             if (file_exists($sourceLocalPath)) {
                 try {
-                    File::copy($sourceLocalPath, $destFileLocal);
+                    File::copy($sourceLocalPath, $destLocalPath);
                 } catch (\Throwable $e) {
                     logger()->warning('Timetable XLSX copy (local) failed', [
                         'from' => $sourceLocalPath,
-                        'to'   => $destFileLocal,
+                        'to'   => $destLocalPath,
                         'error'=> $e->getMessage(),
                     ]);
                 }
             }
+
 
             Logger::log('store-copy', 'timetable', [
                 'source_timetable_id' => $timetable->id,

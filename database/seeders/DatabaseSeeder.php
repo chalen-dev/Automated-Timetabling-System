@@ -37,11 +37,22 @@ class DatabaseSeeder extends Seeder
             File::cleanDirectory($profilesPath);
         }
 
-        // Delete all files in the "timetables" folder on the facultime disk (bucket)
-        // Locally this just cleans storage/app/exports/timetables as well,
-        // on Laravel Cloud it clears the bucket prefix "timetables/"
-        if (Storage::disk('facultime')->exists('timetables')) {
-            Storage::disk('facultime')->deleteDirectory('timetables');
+
+
+        $bucketFolders = [
+            'timetables',
+            'formatted-timetables',
+            'profiles',
+        ];
+
+        foreach ($bucketFolders as $folder) {
+            try {
+                if (Storage::disk('facultime')->exists($folder)) {
+                    Storage::disk('facultime')->deleteDirectory($folder);
+                }
+            } catch (\Throwable $e) {
+                // Non-fatal: seeding should continue even if bucket cleanup fails
+            }
         }
 
         /*
