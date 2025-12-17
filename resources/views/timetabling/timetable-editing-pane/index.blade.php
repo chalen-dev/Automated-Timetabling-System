@@ -564,6 +564,32 @@
                     }, 60);
                 });
             });
+
+            // TERM BUTTON HANDLER (FIX)
+            document.querySelectorAll('.view-term-button').forEach(function (btn) {
+                btn.addEventListener('click', function (ev) {
+                    ev.preventDefault();
+
+                    const termIdx = parseInt(btn.getAttribute('data-term-index'), 10);
+                    if (isNaN(termIdx) || termIdx === activeTermIndex) return;
+
+                    // Update term button styles immediately
+                    document.querySelectorAll('.view-term-button').forEach(b => {
+                        b.classList.remove('bg-red-700', 'text-white');
+                        b.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+
+                    btn.classList.remove('bg-gray-200', 'text-gray-700');
+                    btn.classList.add('bg-red-700', 'text-white');
+
+                    // Preserve current day when switching term
+                    setTimeout(() => {
+                        activeTermIndex = termIdx;
+                        goToView(activeTermIndex, activeDayIndex);
+                    }, 60);
+                });
+            });
+
             // Optional keyboard navigation (left/right) across sheets
             document.addEventListener('keydown', function (e) {
                 const currentSheet = activeTermIndex * 6 + activeDayIndex;
