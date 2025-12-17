@@ -19,6 +19,92 @@ use Throwable;
 
 class CourseSessionController extends Controller
 {
+    protected function clearCourseSessionFromTimetableXlsx(Timetable $timetable, int $courseSessionId): void
+    {
+        $disk = Storage::disk('facultime');
+        $remotePath = "timetables/{$timetable->id}.xlsx";
+
+        // Load XLSX (bucket first, local fallback)
+        if ($disk->exists($remotePath)) {
+            $tempPath = tempnam(sys_get_temp_dir(), 'tt_') . '.xlsx';
+            file_put_contents($tempPath, $disk->get($remotePath));
+            $writeBackToBucket = true;
+        } else {
+            $tempPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            $writeBackToBucket = false;
+
+            if (!file_exists($tempPath)) {
+                return; // nothing to clear
+            }
+        }
+
+        $spreadsheet = IOFactory::load($tempPath);
+        $needle = '_' . $courseSessionId;
+        $changed = false;
+
+        foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+            $highestRow = $sheet->getHighestRow();
+            $highestCol = Coordinate::columnIndexFromString($sheet->getHighestColumn());
+
+            // skip header row and time column
+            for ($row = 2; $row <= $highestRow; $row++) {
+                for ($col = 2; $col <= $highestCol; $col++) {
+
+                    $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
+                    $cell = $sheet->getCell($cellAddress);
+                    $value = trim((string) $cell->getValue());
+
+                    if ($value !== '' && str_ends_with($value, $needle)) {
+                        $cell->setValue('vacant');
+                        $changed = true;
+                    }
+                }
+            }
+        }
+
+        if ($changed) {
+            IOFactory::createWriter($spreadsheet, 'Xlsx')->save($tempPath);
+
+            if ($writeBackToBucket) {
+                $disk->put($remotePath, fopen($tempPath, 'r'));
+                unlink($tempPath);
+            }
+        }
+    }
+
+    /**
+     * Display a listing of the course sessions for a single session group.
+     */
+    public function index(Timetable $timetable, SessionGroup $sessionGroup, Request $request)
+    {
+        // Safety: ensure session group belongs to timetable
+        if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
+            abort(404);
+        }
+
+        // Load course sessions with course relation
+        $courseSessions = CourseSession::query()
+            ->where('session_group_id', $sessionGroup->id)
+            ->with('course')
+            ->orderBy('id') // change ordering as needed
+            ->get();
+
+        // Optionally allow simple searching (by course_title / course_name)
+        if ($search = $request->input('search')) {
+            $courseSessions = $courseSessions->filter(function($cs) use ($search) {
+                $title = $cs->course->course_title ?? '';
+                $name  = $cs->course->course_name ?? '';
+                return stripos($title, $search) !== false || stripos($name, $search) !== false;
+            })->values();
+        }
+
+        return view(
+            'timetabling.timetable-course-sessions.index',
+            compact('timetable', 'sessionGroup', 'courseSessions')
+        );
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
@@ -71,12 +157,12 @@ class CourseSessionController extends Controller
         $courses = Course::whereNotIn('id', $assignedCourseIds)->get();
 
         if(empty($validatedData['courses'])) {
-            return view('timetabling.timetable-course-sessions.create', [
-                'timetable' => $timetable,
-                'sessionGroup' => $sessionGroup,
-                'courses' => $courses,
-                'message' => 'Must select a course.'
-            ]);
+            return redirect()
+                ->route(
+                    'timetables.session-groups.course-sessions.create',
+                    [$timetable, $sessionGroup]
+                )
+                ->with('error', 'Must select at least one course.');
         }
 
         $addedCourses = [];
@@ -110,20 +196,28 @@ class CourseSessionController extends Controller
             'academic_term.*' => 'required|in:1st,2nd,semestral',
         ]);
 
+        $newTerm = $validated['academic_term'][$courseSession->id];
+
+        // 1️⃣ Clear timetable placements (XLSX only)
+        $this->clearCourseSessionFromTimetableXlsx($timetable, $courseSession->id);
+
+        // 2️⃣ Update DB term
         $courseSession->update([
-            'academic_term' => $validated['academic_term'][$courseSession->id],
+            'academic_term' => $newTerm,
         ]);
 
         Logger::log('update_academic_term', 'course sessions', [
             'timetable_id' => $timetable->id,
             'session_group_id' => $sessionGroup->id,
             'course_session_id' => $courseSession->id,
-            'academic_term' => $validated['academic_term'][$courseSession->id],
+            'academic_term' => $newTerm,
         ]);
 
-        return redirect()->route('timetables.session-groups.index', $timetable)
-            ->with('success', 'Academic term updated!');
+        return redirect()
+            ->route('timetables.session-groups.index', $timetable)
+            ->with('success', 'Academic term updated and timetable placement cleared.');
     }
+
 
     public function editTerms(Timetable $timetable, SessionGroup $sessionGroup)
     {
@@ -313,6 +407,79 @@ class CourseSessionController extends Controller
             ->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Course session deleted and timetable cleared.');
     }
+
+    public function delete(Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
+            abort(404);
+        }
+
+        $courseSessions = CourseSession::query()
+            ->where('session_group_id', $sessionGroup->id)
+            ->with('course')
+            ->orderBy('id')
+            ->get();
+
+        return view(
+            'timetabling.timetable-course-sessions.delete',
+            compact('timetable', 'sessionGroup', 'courseSessions')
+        );
+    }
+
+    public function bulkDestroy(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
+    {
+        // Safety check
+        if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'course_sessions'   => ['required', 'array'],
+            'course_sessions.*' => ['integer', 'exists:course_sessions,id'],
+        ]);
+
+        $ids = array_map('intval', $validated['course_sessions']);
+
+        try {
+            DB::transaction(function () use ($ids, $timetable, $sessionGroup) {
+
+                $sessions = CourseSession::query()
+                    ->where('session_group_id', $sessionGroup->id)
+                    ->whereIn('id', $ids)
+                    ->get();
+
+                foreach ($sessions as $courseSession) {
+
+                    // 1️⃣ Clear occurrences from XLSX (same logic as destroy)
+                    $this->clearCourseSessionFromTimetableXlsx(
+                        $timetable,
+                        $courseSession->id
+                    );
+
+                    // 2️⃣ Delete DB record LAST
+                    $courseSession->delete();
+                }
+            });
+
+        } catch (\Throwable $e) {
+            // XLSX or DB failure → nothing partially committed
+            return redirect()
+                ->route('timetables.session-groups.course-sessions.delete', [$timetable, $sessionGroup])
+                ->with('error', 'Bulk delete failed. No course sessions were deleted.');
+        }
+
+        Logger::log('bulk_delete', 'course sessions', [
+            'timetable_id'     => $timetable->id,
+            'session_group_id' => $sessionGroup->id,
+            'deleted_ids'      => $ids,
+        ]);
+
+        return redirect()
+            ->route('timetables.session-groups.course-sessions.index', [$timetable, $sessionGroup])
+            ->with('success', count($ids) . ' course session(s) deleted and cleared from timetable.');
+    }
+
+
 
 
 

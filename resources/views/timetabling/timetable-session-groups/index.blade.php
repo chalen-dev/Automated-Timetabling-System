@@ -87,10 +87,12 @@
                                             </button>
                                         </div>
 
-                                        <!-- Add Sessions Button -->
-                                        <a href="{{ route('timetables.session-groups.course-sessions.create', [$timetable, $sessionGroup]) }}"
-                                           class="bg-[#800000] text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-[#660000] active:bg-[#4d0000] transition-all duration-150">
-                                            Add Courses
+                                        <!-- Edit Courses Button -->
+                                        <a
+                                            href="{{ route('timetables.session-groups.course-sessions.index', [$timetable, $sessionGroup]) }}"
+                                            class="bg-[#800000] text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-[#660000] active:bg-[#4d0000] transition-all duration-150"
+                                        >
+                                            Edit Courses
                                         </a>
 
                                         <!-- Edit Academic Terms Button -->
@@ -155,25 +157,13 @@
                                             <td class="px-6 py-3">{{ $courseSession->course->unit_load }}</td>
                                             <td class="px-6 py-3">{{ $courseSession->course->course_type }}</td>
                                             <td class="px-6 py-3">
-                                                <form method="POST"
-                                                      action="{{ route('timetables.session-groups.course-sessions.update-term', [$timetable, $sessionGroup, $courseSession]) }}">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <select
-                                                        name="academic_term[{{ $courseSession->id }}]"
-                                                        onchange="this.form.submit()"
-                                                        @if($courseSession->course->duration_type === 'semestral') disabled @endif
-                                                        class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:ring-2 focus:ring-maroon-600 focus:outline-none"
-                                                    >
-                                                        @if($courseSession->course->duration_type === 'semestral')
-                                                            <option value="semestral" selected>semestral</option>
-                                                        @else
-                                                            <option value="" {{ is_null($courseSession->academic_term) ? 'selected' : '' }}>-- Select Term --</option>
-                                                            <option value="1st" {{ $courseSession->academic_term == '1st' ? 'selected' : '' }}>1st</option>
-                                                            <option value="2nd" {{ $courseSession->academic_term == '2nd' ? 'selected' : '' }}>2nd</option>
-                                                        @endif
-                                                    </select>
-                                                </form>
+                                                @php
+                                                    $term = $courseSession->academic_term;
+                                                @endphp
+
+                                                <span class="text-sm text-gray-800">
+        {{ $term ? ucfirst($term) : '—' }}
+    </span>
                                             </td>
                                             <td class="px-6 py-3 text-center">
                                                 <livewire:buttons.delete

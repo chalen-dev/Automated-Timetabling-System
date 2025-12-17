@@ -105,25 +105,41 @@ Route::middleware([Authenticate::class])->group(function () {
                 'session-groups/{sessionGroup}/copy',
                 [SessionGroupController::class, 'storeCopy']
             )->name('session-groups.store-copy');
-            Route::patch(
-                'session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
-                [CourseSessionController::class, 'updateTerm']
-            )->name('session-groups.course-sessions.update-term');
+            // Bulk delete (view)
             Route::get(
-                'session-groups/{sessionGroup}/edit-terms',
-                [CourseSessionController::class, 'editTerms']
-            )->name('session-groups.edit-terms');
+                'session-groups/{sessionGroup}/course-sessions/delete',
+                [CourseSessionController::class, 'delete']
+            )->name('timetables.session-groups.course-sessions.delete');
+
+            // Bulk delete (action)
+            Route::post(
+                'session-groups/{sessionGroup}/course-sessions/bulk-delete',
+                [CourseSessionController::class, 'bulkDestroy']
+            )->name('timetables.session-groups.course-sessions.bulk-destroy');
+
             Route::patch(
                 'session-groups/{sessionGroup}/update-terms',
                 [CourseSessionController::class, 'bulkUpdateTerms']
             )->name('session-groups.course-sessions.bulk-update-terms');
-
             // Course sessions inside a session group
-            Route::resource('session-groups.course-sessions', CourseSessionController::class);
+            Route::resource(
+                'session-groups.course-sessions',
+                CourseSessionController::class
+            )->only(['index','create', 'store', 'destroy']);
             Route::patch(
                 'session-groups/{sessionGroup}/course-sessions/{courseSession}/update-term',
                 [CourseSessionController::class, 'updateTerm']
             )->name('session-groups.course-sessions.update-term');
+            // Bulk delete (selection screen)
+            Route::get(
+                'session-groups/{sessionGroup}/course-sessions/delete',
+                [CourseSessionController::class, 'delete']
+            )->name('session-groups.course-sessions.delete');
+            // Bulk delete (action)
+            Route::post(
+                'session-groups/{sessionGroup}/course-sessions/bulk-delete',
+                [CourseSessionController::class, 'bulkDestroy']
+            )->name('session-groups.course-sessions.bulk-destroy');
 
             // Timetable professors
             Route::resource('timetable-professors', TimetableProfessorController::class)
