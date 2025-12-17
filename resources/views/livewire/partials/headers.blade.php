@@ -41,7 +41,7 @@
                         </button>
                     </div>
                     <div class="flex flex-col text-center box-fit">
-                        <h1 class="font-bold text-[18px]">Timetable View</h1>
+                        <h1 class="font-bold text-[18px]">Timetable</h1>
                         <p>{{$timetable->timetable_name}} {{$timetable->semester}} semester ({{$timetable->academic_year}})</p>
                     </div>
                     <div>
