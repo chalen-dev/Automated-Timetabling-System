@@ -267,14 +267,33 @@
                         @else
                             @foreach ($unplacedGroups as $group)
                                 <div class="border border-gray-200 rounded-lg overflow-hidden">
-                                    <div class="flex items-center justify-between bg-gray-100 px-4 py-2">
-                                        <div class="font-semibold text-gray-800 text-sm">
+                                    @php
+                                        $headerBg = $group['group_color'] ?? null;
+                                    @endphp
+
+                                    <div
+                                        class="flex items-center justify-between px-4 py-2"
+                                        @if($headerBg)
+                                            style="background-color: {{ $headerBg }}; color: #000000;"
+                                        @else
+                                            class="bg-gray-100"
+                                        @endif
+                                    >
+                                        <div class="font-semibold text-sm">
                                             {{ $group['group_label'] }}
                                         </div>
-                                        <div class="text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-full px-2 py-1">
+
+                                        <div
+                                            class="text-xs font-semibold rounded-full px-2 py-1"
+                                            style="
+                                                background: rgba(255,255,255,0.9);
+                                                color: #374151;
+                                            "
+                                        >
                                             {{ $group['count'] }} unplaced
                                         </div>
                                     </div>
+
 
                                     <div class="divide-y divide-gray-200">
                                         @foreach ($group['items'] as $item)

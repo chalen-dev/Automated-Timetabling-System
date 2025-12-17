@@ -195,6 +195,7 @@
                                                 type="checkbox"
                                                 class="tt-room-filter sr-only peer"
                                                 data-room="{{ $room['name'] }}"
+                                                data-room-type="{{ $type }}"
                                             >
                                             <span
                                                 class="
@@ -253,19 +254,33 @@
                         @else
                             <div class="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
                                 @foreach ($unplacedGroups as $group)
-                                    <div class="border border-gray-200 rounded-lg overflow-hidden">
-                                        <div class="flex items-center justify-between bg-gray-100 px-4 py-2">
+                                    <div class="unplaced-group border border-gray-200 rounded-lg overflow-hidden">
+                                        @php
+                                            $groupBg = !empty($group['group_color'])
+                                                ? 'background-color: ' . e($group['group_color']) . ';'
+                                                : '';
+                                        @endphp
+
+                                        <div
+                                            class="flex items-center justify-between px-4 py-2"
+                                            style="{{ $groupBg }}"
+                                        >
                                             <div class="font-semibold text-gray-800 text-sm">
                                                 {{ $group['group_label'] }}
                                             </div>
-                                            <div class="text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-full px-2 py-1">
-                                                {{ $group['count'] }} unplaced
+                                            <div class="unplaced-badge text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-full px-2 py-1">
+                                                {{ $group['count'] }}
                                             </div>
                                         </div>
 
                                         <div class="divide-y divide-gray-200">
                                             @foreach ($group['items'] as $item)
-                                                <div class="px-4 py-2">
+                                                <div
+                                                    class="px-4 py-2 unplaced-item"
+                                                    data-course-session-id="{{ $item['course_session_id'] }}"
+                                                    data-total-laboratory-days="{{ $item['course_total_laboratory_class_days'] ?? 0 }}"
+                                                    data-total-lecture-days="{{ $item['course_total_lecture_class_days'] ?? 0 }}"
+                                                >
                                                     <div class="flex items-start justify-between gap-3">
                                                         <div class="min-w-0">
                                                             <div class="font-semibold text-gray-800 text-[12px] leading-tight">
@@ -297,6 +312,7 @@
                                             @endforeach
                                         </div>
                                     </div>
+
                                 @endforeach
                             </div>
                         @endif
@@ -408,16 +424,23 @@
                                                 class="tt-room-col tt-cell border {{ $thinColor }} px-1 py-1 align-top {{ $dayCellW }} {{ $sepLeft }} {{ $sepRight }} overview-block"
                                                 rowspan="{{ max(1, $rowspan) }}"
                                                 data-room="{{ $roomName }}"
+
+                                                {{-- FILTER METADATA --}}
                                                 data-program="{{ $programId }}"
                                                 data-year="{{ strtolower($yearLevel) }}"
                                                 data-time="{{ strtolower($sessionTime) }}"
                                                 data-bg="{{ $sessionColor }}"
+
+                                                {{-- ORIGINAL CONTENT (for restore) --}}
+                                                data-original-html="{{ e($text) }}"
+
                                                 style="{{ $bgStyle }}"
                                             >
-                                                <div class="text-[10px] leading-tight font-semibold text-gray-900">
-                                                    {{ $text }}
+                                                <div class="cell-original text-[10px] leading-tight font-semibold text-gray-900">
+                                                    {!! nl2br(e($text)) !!}
                                                 </div>
                                             </td>
+
                                         @else
                                             <td
                                                 class="tt-room-col tt-cell border {{ $thinColor }} px-1 py-1 align-top text-[10px] {{ $dayCellW }} {{ $sepLeft }} {{ $sepRight }}"
@@ -472,14 +495,32 @@
                         (activeYear === 'all' || y === activeYear.toLowerCase()) &&
                         (activeTime === 'all' || t === activeTime.toLowerCase());
 
+                    const original = (cell.dataset.originalHtml || '').trim();
+
+                    // SAFETY: if no original content, do nothing
+                    if (!original) return;
+
+                    // MATCHED → restore original
                     if (match) {
-                        const bg = cell.dataset.bg || '';
-                        cell.style.backgroundColor = bg ? bg : '';
-                    } else {
-                        cell.style.backgroundColor = '#e6e7e9';
+                        cell.style.backgroundColor = cell.dataset.bg || '';
+                        cell.innerHTML = `
+                <div class="cell-original text-[10px] leading-tight font-semibold text-gray-900">
+                    ${original.replace(/\n/g, '<br>')}
+                </div>
+            `;
+                        return;
                     }
+
+                    // FILTERED OUT → OCCUPIED
+                    cell.style.backgroundColor = '#e6e7e9';
+                    cell.innerHTML = `
+            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                Occupied
+            </div>
+        `;
                 });
             }
+
 
             document.querySelectorAll('.tt-program-filter').forEach(btn => {
                 if (btn.dataset.program === activeProgram) setActive(btn, '.tt-program-filter');
@@ -518,46 +559,108 @@
     {{-- Room filters (localStorage) --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const roomCheckboxes = document.querySelectorAll('.tt-room-filter');
-            const roomCols = document.querySelectorAll('.tt-room-col');
+            const roomCheckboxes = Array.from(document.querySelectorAll('.tt-room-filter'));
+            const roomCols = Array.from(document.querySelectorAll('.tt-room-col'));
+            const STORAGE_KEY = 'tt_overview_activeRooms';
 
-            let activeRooms = new Set();
-            const storageKey = 'tt_overview_activeRooms';
+            // ---------- LOAD SAVED STATE ----------
+            let saved = localStorage.getItem(STORAGE_KEY);
+            let activeRooms = null;
 
-            // default = none selected
-            const savedRooms = JSON.parse(localStorage.getItem(storageKey) || 'null');
-            if (savedRooms && Array.isArray(savedRooms)) {
-                savedRooms.forEach(r => activeRooms.add(r));
+            try {
+                activeRooms = saved ? new Set(JSON.parse(saved)) : null;
+            } catch {
+                activeRooms = null;
             }
 
-            function persistRooms() {
-                localStorage.setItem(storageKey, JSON.stringify(Array.from(activeRooms)));
-            }
+            // ---------- SYNC CHECKBOXES ----------
+            roomCheckboxes.forEach(cb => {
+                if (activeRooms === null) {
+                    // no saved state = initial load → checked visually, but not committed
+                    cb.checked = true;
+                } else {
+                    cb.checked = activeRooms.has(cb.dataset.room);
+                }
+            });
 
-            function applyRoomFilter() {
-                roomCols.forEach(el => {
-                    const room = el.dataset.room;
-                    if (!room) return;
-                    el.style.display = activeRooms.has(room) ? '' : 'none';
+            // ---------- APPLY ROOM VISIBILITY ----------
+            function applyRoomColumns() {
+                // no saved state → show all
+                if (activeRooms === null) {
+                    roomCols.forEach(col => col.style.display = '');
+                    return;
+                }
+
+                // saved state exists
+                roomCols.forEach(col => {
+                    col.style.display = activeRooms.has(col.dataset.room) ? '' : 'none';
                 });
             }
 
+            // ---------- APPLY UNPLACED FILTER ----------
+            function applyUnplacedFilter() {
+                const selectedTypes = new Set(
+                    roomCheckboxes
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.dataset.roomType?.toLowerCase())
+                        .filter(Boolean)
+                );
+
+                const showAll = selectedTypes.size === 0;
+                const groups = document.querySelectorAll('.unplaced-group');
+
+                groups.forEach(group => {
+                    const items = group.querySelectorAll('.unplaced-item');
+                    let visibleCount = 0;
+
+                    items.forEach(item => {
+                        if (showAll) {
+                            item.style.display = '';
+                            visibleCount++;
+                            return;
+                        }
+
+                        const lab = parseInt(item.dataset.totalLaboratoryDays || '0', 10);
+                        const lec = parseInt(item.dataset.totalLectureDays || '0', 10);
+
+                        let match = false;
+                        if (selectedTypes.has('comlab') && lab > 0) match = true;
+                        if (selectedTypes.has('lecture') && lec > 0) match = true;
+
+                        item.style.display = match ? '' : 'none';
+                        if (match) visibleCount++;
+                    });
+
+                    const badge = group.querySelector('.unplaced-badge');
+                    if (badge) badge.textContent = visibleCount;
+
+                    group.style.display = visibleCount === 0 ? 'none' : '';
+                });
+            }
+
+            // ---------- HANDLE USER CHANGES ----------
             roomCheckboxes.forEach(cb => {
-                const room = cb.dataset.room;
-                cb.checked = activeRooms.has(room);
+                cb.addEventListener('change', () => {
+                    // user interaction = commit state
+                    activeRooms = new Set(
+                        roomCheckboxes
+                            .filter(c => c.checked)
+                            .map(c => c.dataset.room)
+                    );
 
-                cb.addEventListener('change', function () {
-                    if (!room) return;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify([...activeRooms]));
 
-                    if (cb.checked) activeRooms.add(room);
-                    else activeRooms.delete(room);
-
-                    persistRooms();
-                    applyRoomFilter();
+                    applyRoomColumns();
+                    applyUnplacedFilter();
                 });
             });
 
-            applyRoomFilter();
+            // ---------- INITIAL RUN ----------
+            applyRoomColumns();
+            applyUnplacedFilter();
         });
     </script>
+
+
+
 @endsection

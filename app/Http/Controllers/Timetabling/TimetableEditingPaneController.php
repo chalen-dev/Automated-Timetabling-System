@@ -110,6 +110,7 @@ class TimetableEditingPaneController extends Controller
 
                     $groups[$sgId] = [
                         'group_label' => $label,
+                        'group_color' => $sg?->session_color,
                         'count' => 0,
                         'items' => [],
                     ];

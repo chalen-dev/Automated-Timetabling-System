@@ -78,6 +78,7 @@ class TimetableOverviewController extends Controller
 
             foreach ($raw as $r) {
                 $parts = explode('_', $r['code']);
+                // tolerant parse: prefer parts[2] as session group id (legacy encoded)
                 $sgId = isset($parts[2]) ? (int) $parts[2] : 0;
 
                 $cs = $sessions[$r['course_session_id']] ?? null;
@@ -95,10 +96,15 @@ class TimetableOverviewController extends Controller
 
                     $groups[$sgId] = [
                         'group_label' => $label,
+                        'group_color' => $sg?->session_color ?: null,
                         'count' => 0,
                         'items' => [],
                     ];
                 }
+
+                // extract course totals (defaults 0)
+                $totalLabDays = (int) ($cs?->course?->total_laboratory_class_days ?? 0);
+                $totalLectureDays = (int) ($cs?->course?->total_lecture_class_days ?? 0);
 
                 $groups[$sgId]['items'][] = [
                     'course_session_id' => $r['course_session_id'],
@@ -109,6 +115,9 @@ class TimetableOverviewController extends Controller
                     'reason_title' => 'No available slot/room',
                     'reason_hint' =>
                         'Couldn’t find a valid day/time/room combination that satisfies constraints.',
+                    // NEW: expose course totals so the JS can filter unplaced items by room type
+                    'course_total_laboratory_class_days' => $totalLabDays,
+                    'course_total_lecture_class_days' => $totalLectureDays,
                 ];
 
                 $groups[$sgId]['count']++;
@@ -122,6 +131,7 @@ class TimetableOverviewController extends Controller
             }
         }
     }
+
 
     private function buildSessionGroupLabel(?SessionGroup $sg): string
     {
