@@ -447,16 +447,7 @@
                                             }
 
                                             if ($cellColor === null) {
-                                                $availableColors = $colors;
-
-                                                if (isset($cellColors[$rowIndex - 1][$colIndex])) {
-                                                    $availableColors = array_diff($availableColors, [$cellColors[$rowIndex - 1][$colIndex]]);
-                                                }
-                                                if (isset($cellColors[$rowIndex][$colIndex - 1])) {
-                                                    $availableColors = array_diff($availableColors, [$cellColors[$rowIndex][$colIndex - 1]]);
-                                                }
-
-                                                $cellColor = $availableColors[array_rand($availableColors)] ?? $colors[0];
+                                                $cellColor = '#ffffff'; // default white
                                             }
 
                                             for ($r = $rowIndex; $r < $rowIndex + $span; $r++) {
