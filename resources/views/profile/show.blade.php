@@ -28,7 +28,7 @@
 
                 <!-- Buttons -->
                 <div class="flex flex-row gap-6 mt-6">
-                    <a href="{{ route('profile.edit') }}">
+                    <a href="{{ route('profile.confirm') }}">
                         <button class="px-8 py-3 rounded-[12px] bg-[#1e40af] text-white font-semibold hover:bg-[#1e3a8a] transition duration-500">
                             Edit Profile
                         </button>

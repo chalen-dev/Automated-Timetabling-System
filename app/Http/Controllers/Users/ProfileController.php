@@ -87,7 +87,33 @@ class ProfileController extends Controller
 
         $user->save();
 
+        session()->forget('profile_identity_confirmed');
+
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully.');
+    }
+
+    public function confirmIdentity()
+    {
+        return view('profile.confirm-identity');
+    }
+
+    public function verifyIdentity(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'password' => 'Incorrect password.',
+            ]);
+        }
+
+        session(['profile_identity_confirmed' => true]);
+
+        return redirect()->route('profile.edit');
     }
 
     public function destroy(Request $request)

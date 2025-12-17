@@ -191,9 +191,21 @@ Route::middleware([Authenticate::class])->group(function () {
 
     //User Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    Route::get('/profile/confirm-identity', [ProfileController::class, 'confirmIdentity'])
+        ->name('profile.confirm');
+
+    Route::post('/profile/confirm-identity', [ProfileController::class, 'verifyIdentity'])
+        ->name('profile.confirm.verify');
+
+    /* Protect edit with middleware */
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])
+        ->middleware('confirm.identity')
+        ->name('profile.edit');
+
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 
     // Test route (Tinker)
     Route::get('/test-file', function() {
