@@ -105,6 +105,10 @@ Route::middleware([Authenticate::class])->group(function () {
                 'session-groups/{sessionGroup}/copy',
                 [SessionGroupController::class, 'storeCopy']
             )->name('session-groups.store-copy');
+            Route::get(
+                'session-groups/{sessionGroup}/edit-terms',
+                [CourseSessionController::class, 'editTerms']
+            )->name('session-groups.edit-terms');
             // Bulk delete (view)
             Route::get(
                 'session-groups/{sessionGroup}/course-sessions/delete',
