@@ -332,7 +332,7 @@ class SessionGroupController extends Controller
                         $value = trim((string) $cell->getValue());
 
                         if ($value !== '' && str_contains($value, $needle)) {
-                            $cell->setValue('Vacant');
+                            $cell->setValue('vacant');
                             $changed = true;
                         }
                     }
