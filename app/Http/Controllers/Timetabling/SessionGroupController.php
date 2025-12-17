@@ -10,6 +10,8 @@ use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\SessionGroup;
 use App\Models\Users\UserLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -267,103 +269,107 @@ class SessionGroupController extends Controller
         return redirect()->route('timetables.session-groups.index', $timetable)
             ->with('success', 'Class Session copied successfully (including its course sessions).');
     }
+
+
     public function destroy(Timetable $timetable, SessionGroup $sessionGroup)
     {
         $sessionGroupId   = $sessionGroup->id;
         $sessionGroupName = $sessionGroup->session_name;
 
-        // Find all course sessions in THIS timetable that belong to this session group
-        $sessions = CourseSession::where('session_group_id', $sessionGroupId)
-            ->whereHas('sessionGroup', function ($q) use ($timetable) {
-                $q->where('timetable_id', $timetable->id);
-            })
-            ->with(['sessionGroup.academicProgram'])
-            ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | 1. LOAD DB DATA FIRST (DO NOT DELETE YET)
+        |--------------------------------------------------------------------------
+        */
+        $sessions = $sessionGroup->courseSessions()->get();
 
-        foreach ($sessions as $session) {
-            // Use the session's sessionGroup (should exist) to build the encoded token
-            $group = $session->sessionGroup;
-            if (! $group) {
-                error_log("SessionGroup destroy: session {$session->id} missing sessionGroup relation; skipping XLSX clean.");
-                // still attempt deletion below
+        /*
+        |--------------------------------------------------------------------------
+        | 2. LOAD XLSX (bucket first, local fallback)
+        |--------------------------------------------------------------------------
+        */
+        $disk = Storage::disk('facultime');
+        $remotePath = "timetables/{$timetable->id}.xlsx";
+
+        if ($disk->exists($remotePath)) {
+            $tempPath = tempnam(sys_get_temp_dir(), 'tt_') . '.xlsx';
+            file_put_contents($tempPath, $disk->get($remotePath));
+            if (filesize($tempPath) < 1024) {
+                throw new \Exception('Downloaded XLSX is too small / invalid');
+            }
+            $writeBackToBucket = true;
+        } else {
+            $tempPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            $writeBackToBucket = false;
+
+            if (!file_exists($tempPath)) {
+                return redirect()
+                    ->route('timetables.session-groups.index', $timetable)
+                    ->with('success', 'Session group deleted (no XLSX found).');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. CLEAR ALL CELLS FOR THIS SESSION GROUP (ALL SHEETS)
+        |--------------------------------------------------------------------------
+        */
+        try {
+            $spreadsheet = IOFactory::load($tempPath);
+            $needle = '_' . $sessionGroupId . '_';
+            $changed = false;
+
+            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+                $highestRow = $sheet->getHighestRow();
+                $highestCol = Coordinate::columnIndexFromString($sheet->getHighestColumn());
+
+                // skip header row + time column
+                for ($row = 2; $row <= $highestRow; $row++) {
+                    for ($col = 2; $col <= $highestCol; $col++) {
+
+                        $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
+                        $cell = $sheet->getCell($cellAddress);
+                        $value = trim((string) $cell->getValue());
+
+                        if ($value !== '' && str_contains($value, $needle)) {
+                            $cell->setValue('Vacant');
+                            $changed = true;
+                        }
+                    }
+                }
+
             }
 
-            $programAbbr = $group->academicProgram?->program_abbreviation ?? 'UNK';
-            $yearLevel   = $group->year_level ?? '';
-            $groupId     = $group->id ?? $sessionGroupId;
-            $sessionId   = $session->id;
+            /*
+            |--------------------------------------------------------------------------
+            | 4. SAVE XLSX BACK
+            |--------------------------------------------------------------------------
+            */
+            if ($changed) {
+                IOFactory::createWriter($spreadsheet, 'Xlsx')->save($tempPath);
 
-            $encoded = "{$programAbbr}_{$yearLevel}_{$groupId}_{$sessionId}";
-
-            $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
-
-            if (! file_exists($xlsxPath)) {
-                error_log("SessionGroup destroy: XLSX not found for timetable {$timetable->id} (session {$sessionId})");
-            } elseif (! is_writable($xlsxPath) && ! is_writable(dirname($xlsxPath))) {
-                error_log("SessionGroup destroy: XLSX not writable for timetable {$timetable->id} (session {$sessionId})");
-            } else {
-                try {
-                    $spreadsheet = IOFactory::load($xlsxPath);
-                    $sheetCount  = $spreadsheet->getSheetCount();
-                    $madeChange  = false;
-
-                    for ($si = 0; $si < $sheetCount; $si++) {
-                        $sheet = $spreadsheet->getSheet($si);
-                        $table = $sheet->toArray(null, true, true, false);
-
-                        if (empty($table) || !is_array($table[0])) {
-                            continue;
-                        }
-
-                        $rowCount = count($table);
-                        $colCount = count($table[0] ?? []);
-
-                        // skip col 0 (time), skip row 0 (room header)
-                        for ($r = 1; $r < $rowCount; $r++) {
-                            for ($c = 1; $c < $colCount; $c++) {
-                                $cellVal = trim((string)($table[$r][$c] ?? ''));
-
-                                if ($cellVal === $encoded) {
-                                    $excelRowIndex = $r + 1;
-                                    $excelColIndex = $c + 1;
-                                    $colLetter = Coordinate::stringFromColumnIndex($excelColIndex);
-                                    $cellAddress = $colLetter . $excelRowIndex;
-
-                                    $sheet->setCellValue($cellAddress, 'Vacant');
-                                    $madeChange = true;
-                                }
-                            }
-                        }
-                    }
-
-                    if ($madeChange) {
-                        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-                        $writer->save($xlsxPath);
-                        error_log("SessionGroup destroy: replaced '{$encoded}' with 'Vacant' in timetable {$timetable->id}");
-                    }
-                } catch (\Throwable $e) {
-                    error_log("SessionGroup destroy: XLSX cleaning error for session {$sessionId} — " . $e->getMessage());
+                if ($writeBackToBucket) {
+                    $disk->put($remotePath, fopen($tempPath, 'r'));
+                    unlink($tempPath);
                 }
             }
-
-            // Always attempt DB cleanup for the session
-            try {
-                $session->delete();
-            } catch (\Throwable $e) {
-                error_log("FAILED deleting CourseSession {$sessionId}: " . $e->getMessage());
-            }
-        }
-
-        // Now delete the SessionGroup itself
-        try {
-            $sessionGroup->delete();
         } catch (\Throwable $e) {
-            error_log("FAILED deleting SessionGroup {$sessionGroupId}: " . $e->getMessage());
-            return redirect()->route('timetables.session-groups.index', $timetable)
-                ->with('error', 'Failed to delete Class Session. Check logs for details.');
+            // XLSX failed → DO NOT DELETE DB
+            return redirect()
+                ->route('timetables.session-groups.index', $timetable)
+                ->with('error', 'Failed to update timetable file. No records were deleted.');
         }
 
-        // User-facing audit log (keep using Logger:: for this)
+        /*
+        |--------------------------------------------------------------------------
+        | 5. DELETE DB RECORDS LAST (SAFE)
+        |--------------------------------------------------------------------------
+        */
+        DB::transaction(function () use ($sessionGroup) {
+            $sessionGroup->courseSessions()->delete();
+            $sessionGroup->delete();
+        });
+
         Logger::log('delete', 'session groups', [
             'session_group_id' => $sessionGroupId,
             'session_name'     => $sessionGroupName,
@@ -371,9 +377,13 @@ class SessionGroupController extends Controller
             'timetable_name'   => $timetable->timetable_name,
         ]);
 
-        return redirect()->route('timetables.session-groups.index', $timetable)
-            ->with('success', 'Class Session and its Course Sessions deleted successfully.');
+        return redirect()
+            ->route('timetables.session-groups.index', $timetable)
+            ->with('success', 'Session group and all timetable cells cleared.');
     }
+
+
+
     public function updateColor(Request $request, Timetable $timetable, SessionGroup $sessionGroup)
     {
         $data = $request->validate([
