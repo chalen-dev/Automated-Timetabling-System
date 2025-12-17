@@ -33,15 +33,6 @@
                     Programs
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        class="program-filter-btn inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-semibold border transition
-                                       border-transparent bg-gray-200 text-gray-800 hover:bg-gray-300"
-                        data-program-id="all"
-                    >
-                        All Programs
-                    </button>
-
                     @foreach($sessionGroupsByProgram as $programId => $groups)
                         @php
                             $abbr = $groups->first()->academicProgram->program_abbreviation ?? 'Unknown';
@@ -64,14 +55,6 @@
                     Year Level
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        class="year-filter-btn inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-semibold border transition
-                                       border-transparent bg-gray-200 text-gray-800 hover:bg-gray-300"
-                        data-year="all"
-                    >
-                        All Years
-                    </button>
                     <button
                         type="button"
                         class="year-filter-btn inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-semibold border transition
@@ -113,14 +96,6 @@
                     Time of Day
                 </h3>
                 <div class="flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        class="time-filter-btn inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-semibold border transition
-                                       border-transparent bg-gray-200 text-gray-800 hover:bg-gray-300"
-                        data-time="all"
-                    >
-                        All Times
-                    </button>
                     <button
                         type="button"
                         class="time-filter-btn inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-semibold border transition

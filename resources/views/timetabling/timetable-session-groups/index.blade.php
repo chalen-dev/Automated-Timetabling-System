@@ -391,80 +391,97 @@
         const timeButtons = Array.from(document.querySelectorAll('.time-filter-btn'));
         const programSections = Array.from(document.querySelectorAll('.program-section'));
 
-        let currentProgramId = 'all';
-        let currentYear = 'all';
-        let currentTime = 'all';
+        let selectedPrograms = new Set();
+        let selectedYears = new Set();
+        let selectedTimes = new Set();
 
-        function styleActiveButton(buttons, activeValue, attrName) {
-            buttons.forEach(function (btn) {
-                const val = btn.getAttribute(attrName) || 'all';
-                const isActive = val === activeValue;
 
-                btn.classList.toggle('bg-[#5e0b0b]', isActive);
-                btn.classList.toggle('text-white', isActive);
-                btn.classList.toggle('border-[#5e0b0b]', isActive);
-
-                if (!isActive) {
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
-                } else {
-                    btn.classList.remove('bg-gray-200', 'text-gray-800');
-                }
-            });
-        }
 
         function recomputeVisibility() {
             programSections.forEach(function (section) {
-                const secProgramId = section.getAttribute('data-program-id');
-                const programMatches = (currentProgramId === 'all' || secProgramId === currentProgramId);
+                let sectionHasVisible = false;
 
-                // Show/hide entire program section first
-                section.style.display = programMatches ? '' : 'none';
-                if (!programMatches) {
-                    return;
-                }
-
-                const groups = section.querySelectorAll('.sg-group');
-                groups.forEach(function (group) {
+                section.querySelectorAll('.sg-group').forEach(function (group) {
+                    const programId = section.getAttribute('data-program-id');
                     const year = group.getAttribute('data-year-level');
                     const time = group.getAttribute('data-session-time');
 
-                    const yearMatch = (currentYear === 'all' || year === currentYear);
-                    const timeMatch = (currentTime === 'all' || time === currentTime);
+                    const programMatch =
+                        selectedPrograms.size === 0 || selectedPrograms.has(programId);
 
-                    group.style.display = (yearMatch && timeMatch) ? '' : 'none';
+                    const yearMatch =
+                        selectedYears.size === 0 || selectedYears.has(year);
+
+                    const timeMatch =
+                        selectedTimes.size === 0 || selectedTimes.has(time);
+
+                    const visible = programMatch && yearMatch && timeMatch;
+
+                    group.style.display = visible ? '' : 'none';
+
+                    if (visible) sectionHasVisible = true;
                 });
+
+                section.style.display = sectionHasVisible ? '' : 'none';
             });
         }
 
-        // Default active styles
-        styleActiveButton(programButtons, 'all', 'data-program-id');
-        styleActiveButton(yearButtons, 'all', 'data-year');
-        styleActiveButton(timeButtons, 'all', 'data-time');
         recomputeVisibility();
 
-        // Wire up clicks
         programButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                currentProgramId = btn.getAttribute('data-program-id') || 'all';
-                styleActiveButton(programButtons, currentProgramId, 'data-program-id');
+                const id = btn.getAttribute('data-program-id');
+
+                if (selectedPrograms.has(id)) {
+                    selectedPrograms.delete(id);
+                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                } else {
+                    selectedPrograms.add(id);
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
                 recomputeVisibility();
             });
         });
 
         yearButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                currentYear = btn.getAttribute('data-year') || 'all';
-                styleActiveButton(yearButtons, currentYear, 'data-year');
+                const year = btn.getAttribute('data-year');
+
+                if (selectedYears.has(year)) {
+                    selectedYears.delete(year);
+                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                } else {
+                    selectedYears.add(year);
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
                 recomputeVisibility();
             });
         });
 
+
         timeButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                currentTime = btn.getAttribute('data-time') || 'all';
-                styleActiveButton(timeButtons, currentTime, 'data-time');
+                const time = btn.getAttribute('data-time');
+
+                if (selectedTimes.has(time)) {
+                    selectedTimes.delete(time);
+                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                } else {
+                    selectedTimes.add(time);
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
                 recomputeVisibility();
             });
         });
+
     });
 </script>
