@@ -110,13 +110,6 @@
                     <div class="mb-3">
                         <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Programs</h4>
                         <div class="flex flex-wrap gap-2">
-                            <button
-                                class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
-                                data-program="all"
-                            >
-                                All Programs
-                            </button>
-
                             @foreach($sessionGroupsByProgram as $programId => $groups)
                                 <button
                                     class="tt-program-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
@@ -132,7 +125,7 @@
                     <div class="mb-3">
                         <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Year Level</h4>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['all','1st','2nd','3rd','4th'] as $year)
+                            @foreach(['1st','2nd','3rd','4th'] as $year)
                                 <button
                                     class="tt-year-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
                                     data-year="{{ $year }}"
@@ -147,7 +140,7 @@
                     <div>
                         <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Time of Day</h4>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['all','morning','afternoon','evening'] as $time)
+                            @foreach(['morning','afternoon','evening'] as $time)
                                 <button
                                     class="tt-time-filter px-3 py-1.5 rounded-full text-xs font-semibold border bg-gray-200 text-gray-800"
                                     data-time="{{ $time }}"
@@ -627,133 +620,129 @@
         document.addEventListener('DOMContentLoaded', function () {
             const cells = Array.from(document.querySelectorAll('.timetable-cell'));
 
-            let activeProgram = 'all';
-            let activeYear    = 'all';
-            let activeTime    = 'all';
+            let selectedPrograms = new Set(
+                JSON.parse(localStorage.getItem('tt_editor_programs') || '[]')
+            );
+            let selectedYears = new Set(
+                JSON.parse(localStorage.getItem('tt_editor_years') || '[]')
+            );
+            let selectedTimes = new Set(
+                JSON.parse(localStorage.getItem('tt_editor_times') || '[]')
+            );
 
-            function setActive(btn, groupSelector) {
-                document.querySelectorAll(groupSelector).forEach(b => {
-                    b.classList.remove('bg-red-700', 'text-white');
-                    b.classList.add('bg-gray-200', 'text-gray-800');
-                });
-
-                btn.classList.remove('bg-gray-200', 'text-gray-800');
-                btn.classList.add('bg-red-700', 'text-white');
+            function persist() {
+                localStorage.setItem('tt_editor_programs', JSON.stringify([...selectedPrograms]));
+                localStorage.setItem('tt_editor_years', JSON.stringify([...selectedYears]));
+                localStorage.setItem('tt_editor_times', JSON.stringify([...selectedTimes]));
             }
 
-            const savedProgram = localStorage.getItem('tt_activeProgram');
-            const savedYear    = localStorage.getItem('tt_activeYear');
-            const savedTime    = localStorage.getItem('tt_activeTime');
+            function toggle(btn, set, value) {
+                if (set.has(value)) {
+                    set.delete(value);
+                    btn.classList.remove('bg-red-700', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                } else {
+                    set.add(value);
+                    btn.classList.add('bg-red-700', 'text-white');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+            }
 
-            if (savedProgram) activeProgram = savedProgram;
-            if (savedYear) activeYear = savedYear;
-            if (savedTime) activeTime = savedTime;
-
-            function applyTimetableFilters() {
+            function applyFilters() {
                 cells.forEach(cell => {
-                    const p = cell.dataset.program;
-                    const y = cell.dataset.year;
-                    const t = cell.dataset.time;
+                    const p = cell.dataset.program || '';
+                    const y = (cell.dataset.year || '').toLowerCase();
+                    const t = (cell.dataset.time || '').toLowerCase();
 
-                    const match =
-                        (activeProgram === 'all' || p === activeProgram) &&
-                        (activeYear === 'all' || y === activeYear) &&
-                        (activeTime === 'all' || t === activeTime);
+                    const programMatch =
+                        selectedPrograms.size === 0 || selectedPrograms.has(p);
 
-                    const orig = (cell.dataset.originalDisplay || '').trim().toLowerCase();
+                    const yearMatch =
+                        selectedYears.size === 0 || selectedYears.has(y);
 
-                    // --- VACANT (always same styling) ---
-                    if (orig === 'vacant') {
+                    const timeMatch =
+                        selectedTimes.size === 0 || selectedTimes.has(t);
+
+                    const visible = programMatch && yearMatch && timeMatch;
+
+                    const originalDisplay = (cell.dataset.originalDisplay || '').trim();
+                    const originalTitle   = (cell.dataset.originalTitle || '').trim();
+
+                    // Vacant cells are never filtered
+                    if (originalDisplay.toLowerCase() === 'vacant') {
                         cell.style.backgroundColor = '';
                         cell.innerHTML = `<span class="text-gray-400 italic text-[11px]">Vacant</span>`;
                         return;
                     }
 
-                    // --- MATCHED OCCUPIED ---
-                    if (match) {
+                    if (visible) {
                         cell.style.backgroundColor = cell.dataset.bg || '';
                         cell.innerHTML = `
-                <div class="font-semibold text-[11px] leading-tight">
-                    ${cell.dataset.originalDisplay || ''}
-                </div>
-                ${cell.dataset.originalTitle
-                            ? `<div class="italic mt-0.5 text-[10px] leading-tight">${cell.dataset.originalTitle}</div>`
+                    <div class="font-semibold text-[11px] leading-tight">
+                        ${originalDisplay}
+                    </div>
+                    ${originalTitle
+                            ? `<div class="italic mt-0.5 text-[10px] leading-tight">${originalTitle}</div>`
                             : ''
                         }
-            `;
-                        return;
-                    }
-
-                    // --- FILTERED OUT OCCUPIED ---
-                    cell.style.backgroundColor = '#e6e7e9';
-                    cell.innerHTML = `
-            <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
-                Occupied
-            </div>
-        `;
-                });
-            }
-
-
-            function persistFilters() {
-                localStorage.setItem('tt_activeProgram', activeProgram);
-                localStorage.setItem('tt_activeYear', activeYear);
-                localStorage.setItem('tt_activeTime', activeTime);
-            }
-
-            function restoreActiveButtons() {
-                document.querySelectorAll('.tt-program-filter').forEach(btn => {
-                    if (btn.dataset.program === activeProgram) {
-                        setActive(btn, '.tt-program-filter');
-                    }
-                });
-
-                document.querySelectorAll('.tt-year-filter').forEach(btn => {
-                    if (btn.dataset.year === activeYear) {
-                        setActive(btn, '.tt-year-filter');
-                    }
-                });
-
-                document.querySelectorAll('.tt-time-filter').forEach(btn => {
-                    if (btn.dataset.time === activeTime) {
-                        setActive(btn, '.tt-time-filter');
+                `;
+                    } else {
+                        cell.style.backgroundColor = '#e6e7e9';
+                        cell.innerHTML = `
+                    <div class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                        Occupied
+                    </div>
+                `;
                     }
                 });
             }
 
-            // PROGRAM FILTER
+            // ---------- PROGRAM FILTERS ----------
             document.querySelectorAll('.tt-program-filter').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    activeProgram = btn.dataset.program;
-                    setActive(btn, '.tt-program-filter');
-                    persistFilters();
-                    applyTimetableFilters();
+                const val = btn.dataset.program;
+                if (selectedPrograms.has(val)) {
+                    btn.classList.add('bg-red-700', 'text-white');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
+                btn.addEventListener('click', () => {
+                    toggle(btn, selectedPrograms, val);
+                    persist();
+                    applyFilters();
                 });
             });
 
-            // YEAR FILTER
+            // ---------- YEAR FILTERS ----------
             document.querySelectorAll('.tt-year-filter').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    activeYear = btn.dataset.year;
-                    setActive(btn, '.tt-year-filter');
-                    persistFilters();
-                    applyTimetableFilters();
+                const val = btn.dataset.year.toLowerCase();
+                if (selectedYears.has(val)) {
+                    btn.classList.add('bg-red-700', 'text-white');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
+                btn.addEventListener('click', () => {
+                    toggle(btn, selectedYears, val);
+                    persist();
+                    applyFilters();
                 });
             });
 
-            // TIME FILTER
+            // ---------- TIME FILTERS ----------
             document.querySelectorAll('.tt-time-filter').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    activeTime = btn.dataset.time;
-                    setActive(btn, '.tt-time-filter');
-                    persistFilters();
-                    applyTimetableFilters();
+                const val = btn.dataset.time.toLowerCase();
+                if (selectedTimes.has(val)) {
+                    btn.classList.add('bg-red-700', 'text-white');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+
+                btn.addEventListener('click', () => {
+                    toggle(btn, selectedTimes, val);
+                    persist();
+                    applyFilters();
                 });
             });
 
-            restoreActiveButtons();
-            applyTimetableFilters();
-
+            applyFilters();
         });
     </script>
 

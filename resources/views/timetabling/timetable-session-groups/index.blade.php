@@ -209,7 +209,7 @@
         let overlay = null;
         let overlayGrid = null;
         let overlayTitle = null;
-        let activeWrapper = null; // the current [data-session-group-id] wrapper
+        let activeWrapper = null;
 
         function createOverlay() {
             overlay = document.createElement('div');
@@ -263,19 +263,14 @@
             overlay.appendChild(modal);
 
             overlay.addEventListener('click', function (e) {
-                if (e.target === overlay) {
-                    hideOverlay();
-                }
+                if (e.target === overlay) hideOverlay();
             });
 
             document.body.appendChild(overlay);
         }
 
         function ensureOverlay() {
-            if (!overlay) {
-                createOverlay();
-            }
-            return overlay;
+            if (!overlay) createOverlay();
         }
 
         function hideOverlay() {
@@ -284,18 +279,10 @@
             activeWrapper = null;
         }
 
-        function showOverlay() {
-            ensureOverlay();
-            overlay.style.display = 'flex';
-        }
-
         function setGroupColor(wrapperEl, hex) {
             wrapperEl.dataset.currentColor = hex;
-
             const preview = wrapperEl.querySelector('.sg-color-display');
-            if (preview) {
-                preview.style.backgroundColor = hex;
-            }
+            if (preview) preview.style.backgroundColor = hex;
         }
 
         function saveGroupColor(wrapperEl, hex) {
@@ -310,22 +297,7 @@
                     'X-CSRF-TOKEN': CSRF_TOKEN
                 },
                 body: JSON.stringify({ session_color: hex })
-            })
-                .then(function (res) {
-                    if (!res.ok) {
-                        console.error('Failed to save session_color, status:', res.status);
-                    }
-                    return res.json().catch(function () {});
-                })
-                .then(function (data) {
-                    // If backend returns a color, trust it
-                    if (data && data.session_color && wrapperEl) {
-                        setGroupColor(wrapperEl, data.session_color);
-                    }
-                })
-                .catch(function (err) {
-                    console.error('Error saving session_color', err);
-                });
+            }).catch(() => {});
         }
 
         function openColorPicker(wrapperEl) {
@@ -335,7 +307,7 @@
 
             const currentColor = (wrapperEl.dataset.currentColor || '').toLowerCase();
 
-            GROUP_COLOR_PRESETS.forEach(function (hex) {
+            GROUP_COLOR_PRESETS.forEach(hex => {
                 const swatch = document.createElement('button');
                 swatch.type = 'button';
                 swatch.style.width = '1.5rem';
@@ -343,15 +315,12 @@
                 swatch.style.borderRadius = '0.25rem';
                 swatch.style.border = '1px solid #d1d5db';
                 swatch.style.backgroundColor = hex;
-                swatch.style.cursor = 'pointer';
 
-                if (currentColor && currentColor === hex.toLowerCase()) {
+                if (currentColor === hex.toLowerCase()) {
                     swatch.style.outline = '2px solid #111827';
-                    swatch.style.outlineOffset = '1px';
                 }
 
-                swatch.addEventListener('click', function (e) {
-                    e.stopPropagation();
+                swatch.addEventListener('click', function () {
                     setGroupColor(wrapperEl, hex);
                     saveGroupColor(wrapperEl, hex);
                     hideOverlay();
@@ -360,55 +329,85 @@
                 overlayGrid.appendChild(swatch);
             });
 
-            showOverlay();
+            overlay.style.display = 'flex';
         }
 
-        // Attach click handlers to each Color button
-        document.querySelectorAll('.sg-color-btn').forEach(function (btn) {
+        document.querySelectorAll('.sg-color-btn').forEach(btn => {
             const wrapperEl = btn.closest('[data-session-group-id]');
             if (!wrapperEl) return;
-
-            btn.addEventListener('click', function (e) {
+            btn.addEventListener('click', e => {
                 e.preventDefault();
                 e.stopPropagation();
                 openColorPicker(wrapperEl);
             });
         });
 
-        // --- Program / Year / Time filter logic (plain JS) ---
+        // ===========================
+        // SESSION GROUP FILTER LOGIC
+        // ===========================
+
+        const STORAGE_KEYS = {
+            programs: 'sg_filters_programs',
+            years: 'sg_filters_years',
+            times: 'sg_filters_times'
+        };
+
         const programButtons = Array.from(document.querySelectorAll('.program-filter-btn'));
-        const yearButtons = Array.from(document.querySelectorAll('.year-filter-btn'));
-        const timeButtons = Array.from(document.querySelectorAll('.time-filter-btn'));
+        const yearButtons    = Array.from(document.querySelectorAll('.year-filter-btn'));
+        const timeButtons    = Array.from(document.querySelectorAll('.time-filter-btn'));
         const programSections = Array.from(document.querySelectorAll('.program-section'));
 
-        let selectedPrograms = new Set();
-        let selectedYears = new Set();
-        let selectedTimes = new Set();
+        let selectedPrograms = new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.programs) || '[]'));
+        let selectedYears    = new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.years) || '[]'));
+        let selectedTimes    = new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.times) || '[]'));
 
+        function persistFilters() {
+            localStorage.setItem(STORAGE_KEYS.programs, JSON.stringify([...selectedPrograms]));
+            localStorage.setItem(STORAGE_KEYS.years, JSON.stringify([...selectedYears]));
+            localStorage.setItem(STORAGE_KEYS.times, JSON.stringify([...selectedTimes]));
+        }
 
+        function restoreButtonStates() {
+            programButtons.forEach(btn => {
+                const id = btn.dataset.programId;
+                if (selectedPrograms.has(id)) {
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+            });
+
+            yearButtons.forEach(btn => {
+                const year = btn.dataset.year;
+                if (selectedYears.has(year)) {
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+            });
+
+            timeButtons.forEach(btn => {
+                const time = btn.dataset.time;
+                if (selectedTimes.has(time)) {
+                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                    btn.classList.remove('bg-gray-200', 'text-gray-800');
+                }
+            });
+        }
 
         function recomputeVisibility() {
-            programSections.forEach(function (section) {
+            programSections.forEach(section => {
                 let sectionHasVisible = false;
 
-                section.querySelectorAll('.sg-group').forEach(function (group) {
-                    const programId = section.getAttribute('data-program-id');
-                    const year = group.getAttribute('data-year-level');
-                    const time = group.getAttribute('data-session-time');
+                section.querySelectorAll('.sg-group').forEach(group => {
+                    const programId = section.dataset.programId;
+                    const year = group.dataset.yearLevel;
+                    const time = group.dataset.sessionTime;
 
-                    const programMatch =
-                        selectedPrograms.size === 0 || selectedPrograms.has(programId);
-
-                    const yearMatch =
-                        selectedYears.size === 0 || selectedYears.has(year);
-
-                    const timeMatch =
-                        selectedTimes.size === 0 || selectedTimes.has(time);
-
-                    const visible = programMatch && yearMatch && timeMatch;
+                    const visible =
+                        (selectedPrograms.size === 0 || selectedPrograms.has(programId)) &&
+                        (selectedYears.size === 0 || selectedYears.has(year)) &&
+                        (selectedTimes.size === 0 || selectedTimes.has(time));
 
                     group.style.display = visible ? '' : 'none';
-
                     if (visible) sectionHasVisible = true;
                 });
 
@@ -416,62 +415,38 @@
             });
         }
 
+        restoreButtonStates();
         recomputeVisibility();
 
-        programButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                const id = btn.getAttribute('data-program-id');
-
-                if (selectedPrograms.has(id)) {
-                    selectedPrograms.delete(id);
-                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
-                } else {
-                    selectedPrograms.add(id);
-                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.remove('bg-gray-200', 'text-gray-800');
-                }
-
+        programButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.programId;
+                selectedPrograms.has(id) ? selectedPrograms.delete(id) : selectedPrograms.add(id);
+                persistFilters();
+                restoreButtonStates();
                 recomputeVisibility();
             });
         });
 
-        yearButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                const year = btn.getAttribute('data-year');
-
-                if (selectedYears.has(year)) {
-                    selectedYears.delete(year);
-                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
-                } else {
-                    selectedYears.add(year);
-                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.remove('bg-gray-200', 'text-gray-800');
-                }
-
+        yearButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const year = btn.dataset.year;
+                selectedYears.has(year) ? selectedYears.delete(year) : selectedYears.add(year);
+                persistFilters();
+                restoreButtonStates();
                 recomputeVisibility();
             });
         });
 
-
-        timeButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                const time = btn.getAttribute('data-time');
-
-                if (selectedTimes.has(time)) {
-                    selectedTimes.delete(time);
-                    btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.add('bg-gray-200', 'text-gray-800');
-                } else {
-                    selectedTimes.add(time);
-                    btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
-                    btn.classList.remove('bg-gray-200', 'text-gray-800');
-                }
-
+        timeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const time = btn.dataset.time;
+                selectedTimes.has(time) ? selectedTimes.delete(time) : selectedTimes.add(time);
+                persistFilters();
+                restoreButtonStates();
                 recomputeVisibility();
             });
         });
-
     });
 </script>
+
