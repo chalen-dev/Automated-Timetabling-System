@@ -30,7 +30,7 @@ return new class extends Migration
                 'private',
                 'public',
                 'restricted',
-            ])->default('private')->after('user_id');
+            ])->default('private');
             $table->timestamps();
         });
     }
