@@ -325,9 +325,17 @@ class CourseSessionController extends Controller
                     $incoming = 'semestral';
                 }
 
+                // CLEAR ALL XLSX PLACEMENTS (same rule as destroy)
+                $this->clearCourseSessionFromTimetableXlsx(
+                    $timetable,
+                    $courseSession->id
+                );
+
+                // Update DB LAST
                 $courseSession->academic_term = $incoming;
                 $courseSession->save();
             }
+
         });
 
         return redirect()
