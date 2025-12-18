@@ -48,6 +48,8 @@ class TimetableSettingsController extends Controller
             'visibility' => $data['visibility'],
             'allow_non_owner_record_edit' =>
                 $request->boolean('allow_non_owner_record_edit'),
+            'allow_non_owner_timetable_edit' =>
+                $request->boolean('allow_non_owner_timetable_edit'),
         ]);
 
         // Sync access tables (ONLY if restricted)

@@ -102,4 +102,16 @@ class TimetablePolicy
         // Non-owner allowed only if timetable permits it
         return (bool) $timetable->allow_non_owner_record_edit;
     }
+    public function editTimetable(User $user, Timetable $timetable): bool
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        if ($timetable->user_id === $user->id) {
+            return true;
+        }
+
+        return (bool) $timetable->allow_non_owner_timetable_edit;
+    }
 }

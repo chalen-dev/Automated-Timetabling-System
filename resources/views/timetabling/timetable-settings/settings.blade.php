@@ -146,6 +146,20 @@
                         Allow non-owners to edit records (Class Sessions & Rooms)
                     </label>
                 </div>
+                <div class="flex items-center gap-3 mt-3">
+                    <input
+                        type="checkbox"
+                        id="allow_non_owner_timetable_edit"
+                        name="allow_non_owner_timetable_edit"
+                        value="1"
+                        {{ $timetable->allow_non_owner_timetable_edit ? 'checked' : '' }}
+                        class="rounded border-gray-300"
+                    >
+
+                    <label for="allow_non_owner_timetable_edit" class="text-sm text-gray-700">
+                        Allow non-owners to edit the timetable (Editor)
+                    </label>
+                </div>
 
 
             </div>

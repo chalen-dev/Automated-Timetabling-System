@@ -33,7 +33,10 @@ return new class extends Migration
             ])->default('private');
             $table
                 ->boolean('allow_non_owner_record_edit')
-                ->default(true);
+                ->default(false);
+            $table
+                ->boolean('allow_non_owner_timetable_edit')
+                ->default(false);
             $table->timestamps();
         });
     }

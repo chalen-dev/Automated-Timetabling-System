@@ -559,6 +559,8 @@ class TimetableEditingPaneController extends Controller
 
     public function editor(Timetable $timetable)
     {
+        $this->authorize('editTimetable', $timetable);
+
         $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
             ->with([
                 'academicProgram',       // uses AcademicProgram model you just showed
@@ -611,6 +613,8 @@ class TimetableEditingPaneController extends Controller
 
     public function saveFromEditor(Timetable $timetable, Request $request)
     {
+        $this->authorize('editTimetable', $timetable);
+
         $tempFile = null;
 
         try {
@@ -994,6 +998,7 @@ class TimetableEditingPaneController extends Controller
 
     public function exportFormattedSpreadsheet(Timetable $timetable)
     {
+        $this->authorize('editTimetable', $timetable);
         // Try to load source XLSX from the facultime bucket first
         $bucketPath = "timetables/{$timetable->id}.xlsx";
         $inputPath  = null;

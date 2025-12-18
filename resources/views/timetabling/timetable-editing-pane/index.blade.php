@@ -510,26 +510,28 @@
     </div>
 
     {{-- Floating Edit Timetable button (bottom-right, circular with tooltip) --}}
-    @if ($isNotEmpty)
-        <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
-           class="fixed bottom-6 right-6 z-50 group">
-            <div
-                class="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-xl
-                       hover:bg-green-600 transition duration-150 cursor-pointer">
-                <i class="bi bi-pencil-square text-2xl"></i>
-            </div>
-
-            {{-- Tooltip --}}
-            <div
-                class="absolute right-16 bottom-1/2 translate-y-1/2 opacity-0 pointer-events-none
-                       group-hover:opacity-100 group-hover:pointer-events-auto
-                       transition-opacity duration-150">
-                <div class="px-3 py-1 rounded-md bg-gray-900 text-white text-xs shadow-lg whitespace-nowrap">
-                    Edit timetable
+    @can('editTimetable', $timetable)
+        @if ($isNotEmpty)
+            <a href="{{ route('timetables.timetable-editing-pane.editor', ['timetable' => $timetable->id]) }}"
+               class="fixed bottom-6 right-6 z-50 group">
+                <div
+                    class="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-xl
+                           hover:bg-green-600 transition duration-150 cursor-pointer">
+                    <i class="bi bi-pencil-square text-2xl"></i>
                 </div>
-            </div>
-        </a>
-    @endif
+
+                {{-- Tooltip --}}
+                <div
+                    class="absolute right-16 bottom-1/2 translate-y-1/2 opacity-0 pointer-events-none
+                           group-hover:opacity-100 group-hover:pointer-events-auto
+                           transition-opacity duration-150">
+                    <div class="px-3 py-1 rounded-md bg-gray-900 text-white text-xs shadow-lg whitespace-nowrap">
+                        Edit timetable
+                    </div>
+                </div>
+            </a>
+        @endif
+    @endcan
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
