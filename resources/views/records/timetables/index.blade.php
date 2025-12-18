@@ -55,7 +55,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
@@ -93,7 +96,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
@@ -131,7 +137,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
@@ -172,7 +181,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
@@ -210,7 +222,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
@@ -248,7 +263,10 @@
                                     </p>
 
                                     @if($timetable->user)
-                                        <p class="text-sm text-gray-500 mt-1">
+                                        <p class="text-sm mt-1
+                                        {{ $timetable->user_id === auth()->id()
+                                            ? 'text-green-600 font-semibold'
+                                            : 'text-gray-500' }}">
                                             by {{ $timetable->user->name }}
                                         </p>
                                     @endif
