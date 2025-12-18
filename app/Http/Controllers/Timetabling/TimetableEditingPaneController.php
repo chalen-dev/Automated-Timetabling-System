@@ -140,7 +140,6 @@ class TimetableEditingPaneController extends Controller
         }
     }
 
-
     private function calculateVerticalRowspan(array $tableData): array
     {
         $rowspanData = [];
@@ -432,6 +431,116 @@ class TimetableEditingPaneController extends Controller
         return $placementsByView;
     }
 
+    private function createEmptyTimetableSkeleton(Timetable $timetable): void
+    {
+        // Canonical room list (must match editor & saveFromEditor ordering)
+        $rooms = \DB::table('timetable_rooms as tr')
+            ->join('rooms as r', 'r.id', '=', 'tr.room_id')
+            ->where('tr.timetable_id', $timetable->id)
+            ->orderByRaw("
+            CASE
+                WHEN LOWER(r.room_type) = 'comlab' THEN 0
+                WHEN LOWER(r.room_type) = 'lecture' THEN 1
+                ELSE 2
+            END
+        ")
+            ->orderBy('r.room_name')
+            ->pluck('room_name')
+            ->toArray();
+
+        if (empty($rooms)) {
+            // Safety: should not happen because isNotEmpty() already passed
+            return;
+        }
+
+        // Canonical time slots (matches your template exactly)
+        $timeSlots = [
+            '7:00 AM','7:30 AM','8:00 AM','8:30 AM','9:00 AM','9:30 AM',
+            '10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM',
+            '12:30 PM','1:00 PM','1:30 PM','2:00 PM','2:30 PM',
+            '3:00 PM','3:30 PM','4:00 PM','4:30 PM','5:00 PM','5:30 PM',
+            '6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM','8:30 PM','9:00 PM',
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->removeSheetByIndex(0); // remove default
+
+        $terms = ['1st', '2nd'];
+        $days  = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        foreach ($terms as $term) {
+            foreach ($days as $day) {
+                $sheet = new Worksheet($spreadsheet, "{$term}_{$day}");
+                $spreadsheet->addSheet($sheet);
+
+                // Header row
+                $sheet->setCellValue(
+                    Coordinate::stringFromColumnIndex(1) . '1',
+                    'timeslots'
+                );
+                foreach ($rooms as $i => $roomName) {
+                    $sheet->setCellValue(
+                        Coordinate::stringFromColumnIndex($i + 2) . '1',
+                        $roomName
+                    );
+                }
+
+                // Data rows
+                foreach ($timeSlots as $r => $label) {
+                    $rowIndex = $r + 2;
+                    $sheet->setCellValue(
+                        'A' . $rowIndex,
+                        $label
+                    );
+
+                    foreach ($rooms as $i => $_) {
+                        $sheet->setCellValue(
+                            Coordinate::stringFromColumnIndex($i + 2) . $rowIndex,
+                            'vacant'
+                        );
+                    }
+                }
+            }
+        }
+
+        // Empty Overview sheets
+        foreach (['Overview_1st', 'Overview_2nd'] as $name) {
+            $sheet = new Worksheet($spreadsheet, $name);
+            $spreadsheet->addSheet($sheet);
+            $sheet->setCellValue('A1', 'course_session');
+            $sheet->setCellValue('A2', 'No sessions available.');
+        }
+
+        // Empty Unassigned sheet (required by Livewire tray)
+        $unassigned = new Worksheet($spreadsheet, 'Unassigned');
+        $spreadsheet->addSheet($unassigned);
+        $unassigned->fromArray(
+            ['course_session_id','code','terms_tried','reason'],
+            null,
+            'A1'
+        );
+
+        // Save to canonical local path
+        $dir = storage_path('app/exports/timetables');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        $path = $dir . DIRECTORY_SEPARATOR . $timetable->id . '.xlsx';
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save($path);
+
+        // Best-effort upload to bucket (non-fatal)
+        try {
+            Storage::disk('facultime')->put(
+                "timetables/{$timetable->id}.xlsx",
+                file_get_contents($path)
+            );
+        } catch (\Throwable $e) {
+            // silent by design
+        }
+    }
+
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -525,6 +634,19 @@ class TimetableEditingPaneController extends Controller
 
         //Determine if records are empty
         $isNotEmpty = Records::isNotEmpty($timetable);
+
+        if ($isNotEmpty) {
+            $bucketPath = "timetables/{$timetable->id}.xlsx";
+            $localPath  = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+
+            $hasXlsx =
+                Storage::disk('facultime')->exists($bucketPath) ||
+                file_exists($localPath);
+
+            if (!$hasXlsx) {
+                $this->createEmptyTimetableSkeleton($timetable);
+            }
+        }
 
         $sessionGroups = SessionGroup::with('academicProgram')
             ->where('timetable_id', $timetable->id)
@@ -886,7 +1008,7 @@ class TimetableEditingPaneController extends Controller
                         }
                     }
 
-                    $newSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetName);
+                    $newSheet = new Worksheet($spreadsheet, $sheetName);
                     $spreadsheet->addSheet($newSheet);
 
                     if (!empty($rows)) {
