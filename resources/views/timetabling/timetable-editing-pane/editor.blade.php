@@ -98,6 +98,10 @@
         box-shadow: inset 0 0 0 2px rgba(234, 179, 8, 0.9); /* yellow-ish */
     }
 
+    /* Lunch-time violation row (persistent warning) */
+    .timetable-editor tr.lunch-violation td {
+        background-color: #fef3c7 !important; /* amber-100 */
+    }
 
     /* While hovering a swap target (single-cell dashed outline) */
     .timetable-editor td.drag-over {
@@ -656,11 +660,20 @@
         // locked courses (by CourseSession id) - global across all views
         const lockedSessions = new Set();
 
+        // ----- LUNCH RULE -----
+        const LUNCH_TIME_LABEL = '12:00 PM';
+        let lunchRowIndex = null;
+        let lunchRowHasViolation = false;
+        const LUNCH_WARNING_TEXT =
+            'Lunch break violation: courses must not be scheduled during lunch time (12:00 PM).';
+
         // sessions that are in conflict in the current view (same group, same timeframe)
         let conflictSessionIds = new Set();
-
         // sessions that are misaligned across timetables (same group+course, different timeslots)
         let alignmentIssueSessionIds = new Set();
+
+        let lunchViolationSessionIds = new Set();
+
         // alignmentTargetRowByViewAndSession[viewKey][sessionId] = targetRow
         let alignmentTargetRowByViewAndSession = {};
         const alignmentTargetBlocksBySessionId = {};
@@ -1035,6 +1048,30 @@
                 }
             });
         }
+
+        function recomputeLunchViolations() {
+            lunchRowHasViolation = false;
+            lunchViolationSessionIds = new Set();
+
+            if (lunchRowIndex === null) return;
+
+            Object.values(placementsByView).forEach(viewPlacements => {
+                if (!viewPlacements) return;
+
+                Object.entries(viewPlacements).forEach(([sessionId, p]) => {
+                    if (!p) return;
+
+                    const start = p.topRow;
+                    const end   = p.topRow + p.blocks;
+
+                    if (lunchRowIndex >= start && lunchRowIndex < end) {
+                        lunchRowHasViolation = true;
+                        lunchViolationSessionIds.add(String(sessionId));
+                    }
+                });
+            });
+        }
+
 
         // ---------- CLASS-DAY USAGE COMPUTATION (across all term/day views) ----------
 
@@ -1526,6 +1563,18 @@
             if (!canvasBody) return;
 
             canvasRows = canvasBody.rows.length;
+
+            // detect lunch row index from the Time column
+            for (let r = 0; r < canvasRows; r++) {
+                const timeCell = canvasBody.rows[r].cells[0];
+                if (!timeCell) continue;
+
+                if (timeCell.textContent.trim() === LUNCH_TIME_LABEL) {
+                    lunchRowIndex = r;
+                    break;
+                }
+            }
+
             const headerRow = table.tHead && table.tHead.rows[0];
             if (headerRow) {
                 canvasCols = headerRow.cells.length - 1; // minus Time column
@@ -1553,9 +1602,36 @@
             // Recompute alignment (across all term/day views) and conflicts (within current view)
             recomputeAlignmentIssues();
             recomputeConflicts();
+            recomputeLunchViolations();
 
             // clear any previous alignment row highlight
             clearAlignmentRowHighlight();
+
+            // clear previous lunch highlights + tooltips
+            for (let r = 0; r < canvasRows; r++) {
+                const tr = canvasBody.rows[r];
+                tr.classList.remove('lunch-violation');
+
+                const timeTd = tr.cells[0];
+                if (timeTd && timeTd.title === LUNCH_WARNING_TEXT) {
+                    timeTd.removeAttribute('title');
+                }
+            }
+
+            // apply lunch highlight + tooltip if violated
+            if (lunchRowHasViolation && lunchRowIndex !== null) {
+                const tr = canvasBody.rows[lunchRowIndex];
+                if (tr) {
+                    tr.classList.add('lunch-violation');
+
+                    const timeTd = tr.cells[0]; // Time column
+                    if (timeTd) {
+                        timeTd.title = LUNCH_WARNING_TEXT;
+                    }
+                }
+            }
+
+
 
             // Reset all cells
             for (let r = 0; r < canvasRows; r++) {
@@ -1621,25 +1697,34 @@
                 // separate conflict vs alignment
                 const hasConflict  = conflictSessionIds.has(sessionId);
                 const hasAlignment = alignmentIssueSessionIds.has(sessionId);
+                const hasLunch     = lunchViolationSessionIds.has(sessionId);
 
-                if (hasConflict || hasAlignment) {
-                    contentHTML += `
-                        <div class="conflict-warning-icon">⚠</div>
-                    `;
+                if (hasConflict || hasAlignment || hasLunch) {
+                    contentHTML += `<div class="conflict-warning-icon">⚠</div>`;
 
                     const messages = [];
+
                     if (hasConflict) {
                         messages.push(
                             "Conflict: this session group is double-scheduled in this timeframe (same group appearing in multiple rooms)."
                         );
                     }
+
                     if (hasAlignment) {
                         messages.push(
                             "Alignment: this course is placed at different timeslots across other timetables; consider aligning its time."
                         );
                     }
+
+                    if (hasLunch) {
+                        messages.push(
+                            "Lunch break violation: courses must not be scheduled during lunch time (12:00 PM)."
+                        );
+                    }
+
                     topTd.title = messages.join("\n");
                 }
+
 
 
                 // term badge at bottom of the cell
