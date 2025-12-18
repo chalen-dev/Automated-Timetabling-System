@@ -1016,13 +1016,19 @@ class TimetableEditingPaneController extends Controller
                         $rowIndex = 1;
 
                         foreach ($headers as $colIndex => $h) {
-                            $newSheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex, $h);
+                            $newSheet->setCellValue(
+                                Coordinate::stringFromColumnIndex($colIndex + 1) . $rowIndex,
+                                $h
+                            );
                         }
 
                         foreach ($rows as $r) {
                             $rowIndex++;
                             foreach ($headers as $colIndex => $h) {
-                                $newSheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex, $r[$h] ?? '');
+                                $newSheet->setCellValue(
+                                    Coordinate::stringFromColumnIndex($colIndex + 1) . $rowIndex,
+                                    $r[$h] ?? ''
+                                );
                             }
                         }
                     } else {
