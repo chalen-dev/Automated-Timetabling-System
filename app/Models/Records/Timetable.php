@@ -10,14 +10,31 @@ class Timetable extends Model
 {
     protected $fillable = [
         'timetable_name',
-        //created_at          ------- NOTE: is already implemented automatically through LARAVEL TIMESTAMPS, just call it from the controller
         'semester',
         'academic_year',
         'timetable_description',
         'user_id',
+        'visibility',
     ];
+
     public function user(){
         return $this->belongsTo(User::class);
+    }
+
+    public function allowedUsers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'timetable_user_access'
+        )->withTimestamps();
+    }
+
+    public function allowedPrograms()
+    {
+        return $this->belongsToMany(
+            AcademicProgram::class,
+            'timetable_academic_program'
+        )->withTimestamps();
     }
 
     public function sessionGroups(){
@@ -41,5 +58,36 @@ class Timetable extends Model
             'timetable_id',
             'room_id'
         );
+    }
+
+    public function isVisibleTo(\App\Models\Users\User $user): bool
+    {
+        // Owner always sees
+        if ($this->user_id === $user->id) {
+            return true;
+        }
+
+        if ($this->visibility === 'public') {
+            return true;
+        }
+
+        if ($this->visibility === 'restricted') {
+            // Direct user access
+            if ($this->allowedUsers()->where('users.id', $user->id)->exists()) {
+                return true;
+            }
+
+            // Academic program access
+            if (
+                $user->academic_program_id &&
+                $this->allowedPrograms()
+                    ->where('academic_programs.id', $user->academic_program_id)
+                    ->exists()
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

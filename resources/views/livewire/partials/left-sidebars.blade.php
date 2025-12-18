@@ -46,6 +46,19 @@
                                 <span>Generate Timetable</span>
                             </div>
                         </a>
+                        @can('manageAccess', $timetable)
+                            <a href="{{ route('timetables.settings.edit', $timetable) }}">
+                                <div
+                                    class="{{ request()->routeIs('timetables.settings.*')
+                                            ? 'bg-[#5e0b0b] text-[#ffffff]'
+                                            : 'hover:bg-[#911A141A]' }}
+                                        justify-center transition-transform duration-300 pt-2 pb-2
+                                        flex flex-col h-16 items-center gap-2 rounded-2xl"
+                                >
+                                    <span>Settings</span>
+                                </div>
+                            </a>
+                        @endcan
                     </div>
                 </div>
             </aside>

@@ -39,6 +39,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Timetable::class);
     }
 
+    public function accessibleTimetables()
+    {
+        return $this->belongsToMany(
+            Timetable::class,
+            'timetable_user_access'
+        )->withTimestamps();
+    }
+
+
     public function academicProgram()
     {
         return $this->belongsTo(AcademicProgram::class);

@@ -20,13 +20,30 @@ class TimetableController extends Controller
 
     public function index()
     {
-        $timetables = Timetable::all();
+        $user = auth()->user();
 
-        //Log
+        $timetables = Timetable::query()
+            ->where('user_id', $user->id) // owner
+            ->orWhere('visibility', 'public')
+            ->orWhere(function ($q) use ($user) {
+                $q->where('visibility', 'restricted')
+                    ->where(function ($sub) use ($user) {
+                        $sub->whereHas('allowedUsers', function ($u) use ($user) {
+                            $u->where('users.id', $user->id);
+                        })
+                            ->orWhereHas('allowedPrograms', function ($p) use ($user) {
+                                $p->where('academic_programs.id', $user->academic_program_id);
+                            });
+                    });
+            })
+            ->latest()
+            ->get();
+
         Logger::log('index', 'timetable', null);
 
         return view('records.timetables.index', compact('timetables'));
     }
+
 
     public function create()
     {
@@ -48,6 +65,7 @@ class TimetableController extends Controller
         ]);
 
         $validatedData['user_id'] = auth()->id();
+        $validatedData['visibility'] = 'private';
 
         $timetable = Timetable::create($validatedData);
 
@@ -66,7 +84,8 @@ class TimetableController extends Controller
 
     public function show(Timetable $timetable)
     {
-        //Log
+        $this->authorize('view', $timetable);
+
         Logger::log('show', 'timetable', [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name,
@@ -77,19 +96,18 @@ class TimetableController extends Controller
 
     public function edit(Timetable $timetable)
     {
-        $semesterOptions = $this->semesterOptions;
+        $this->authorize('update', $timetable);
 
-        //Log
-        Logger::log('edit', 'timetable', [
-            'timetable_id' => $timetable->id,
-            'timetable_name' => $timetable->timetable_name,
-        ]);
+        $semesterOptions = $this->semesterOptions;
 
         return view('records.timetables.edit', compact('timetable', 'semesterOptions'));
     }
 
+
     public function update(Request $request, Timetable $timetable)
     {
+        $this->authorize('update', $timetable);
+
         $validatedData = $request->validate([
             'timetable_name' => 'required|string|max:30',
             'semester' => 'required|string|in:1st,2nd',
@@ -110,6 +128,8 @@ class TimetableController extends Controller
 
     public function copy(Timetable $timetable)
     {
+        $this->authorize('copy', $timetable);
+
         $semesterOptions = $this->semesterOptions;
 
         Logger::log('copy', 'timetable', [
@@ -125,6 +145,8 @@ class TimetableController extends Controller
 
     public function storeCopy(Request $request, Timetable $timetable)
     {
+        $this->authorize('copy', $timetable);
+
         $validated = $request->validate([
             'timetable_name' => 'required|string|max:30',
             'semester' => 'required|string|in:1st,2nd',
@@ -230,6 +252,8 @@ class TimetableController extends Controller
 
     public function destroy(Timetable $timetable)
     {
+        $this->authorize('delete', $timetable);
+
         $timetableData = [
             'timetable_id' => $timetable->id,
             'timetable_name' => $timetable->timetable_name

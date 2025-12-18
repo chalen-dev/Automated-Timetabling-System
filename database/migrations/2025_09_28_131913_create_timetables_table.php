@@ -26,6 +26,11 @@ return new class extends Migration
             $table->enum('semester', ['1st', '2nd'])->default('1st');
             $table->string('academic_year');
             $table->text('timetable_description')->nullable();
+            $table->enum('visibility', [
+                'private',
+                'public',
+                'restricted',
+            ])->default('private')->after('user_id');
             $table->timestamps();
         });
     }

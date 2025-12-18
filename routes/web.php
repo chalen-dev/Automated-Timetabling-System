@@ -10,6 +10,7 @@ use App\Http\Controllers\Records\RoomExclusiveAcademicProgramsController;
 use App\Http\Controllers\Records\RoomExclusiveDayController;
 use App\Http\Controllers\Records\SpecializationController;
 use App\Http\Controllers\Records\TimetableController;
+use App\Http\Controllers\TimetableSettingsController;
 use App\Http\Controllers\Timetabling\CourseSessionController;
 use App\Http\Controllers\Timetabling\GenerateTimetableController;
 use App\Http\Controllers\Timetabling\SessionGroupController;
@@ -170,6 +171,17 @@ Route::middleware([Authenticate::class])->group(function () {
 
             Route::get('overview', [TimetableOverviewController::class, 'index'])
                 ->name('timetable-overview.index');
+
+            // Timetable settings (visibility & access)
+            Route::get(
+                'settings',
+                [TimetableSettingsController::class, 'edit']
+            )->name('settings.edit');
+
+            Route::put(
+                'settings',
+                [TimetableSettingsController::class, 'update']
+            )->name('settings.update');
         });
 
     // Courses

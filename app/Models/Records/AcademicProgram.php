@@ -2,6 +2,7 @@
 
 namespace App\Models\Records;
 
+use App\Models\Records\Timetable;
 use App\Models\Timetabling\SessionGroup;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,6 +35,14 @@ class AcademicProgram extends Model
             'room_exclusive_academic_programs',
             'academic_program_id',
             'room_id'
+        )->withTimestamps();
+    }
+
+    public function accessibleTimetables()
+    {
+        return $this->belongsToMany(
+            Timetable::class,
+            'timetable_academic_program'
         )->withTimestamps();
     }
 }
