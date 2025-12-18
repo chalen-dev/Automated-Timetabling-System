@@ -78,6 +78,7 @@ class DatabaseSeeder extends Seeder
             CourseSessionSeeder::class,
             TimetableProfessorSeeder::class,
             TimetableRoomSeeder::class,
+            TestUserSeeder::class,
         ]);
     }
 }

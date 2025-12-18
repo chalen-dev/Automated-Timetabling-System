@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -122,7 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 if (Storage::disk($disk)->exists($path)) {
                     return Storage::disk($disk)->url($path);
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // fall through to placeholder
             }
         }

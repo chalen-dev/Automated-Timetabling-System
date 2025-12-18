@@ -90,4 +90,28 @@ class Timetable extends Model
 
         return false;
     }
+
+    public function scopeVisibleTo($query, User $user)
+    {
+        return $query->where(function ($q) use ($user) {
+
+            $q->where('user_id', $user->id)
+                ->orWhere('visibility', 'public')
+                ->orWhere(function ($q) use ($user) {
+                    $q->where('visibility', 'restricted')
+                        ->whereHas('allowedUsers', fn ($q) =>
+                        $q->where('users.id', $user->id)
+                        );
+                })
+                ->orWhere(function ($q) use ($user) {
+                    if ($user->academic_program_id) {
+                        $q->where('visibility', 'restricted')
+                            ->whereHas('allowedPrograms', fn ($q) =>
+                            $q->where('academic_programs.id', $user->academic_program_id)
+                            );
+                    }
+                });
+
+        });
+    }
 }

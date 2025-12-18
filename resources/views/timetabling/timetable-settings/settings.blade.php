@@ -48,14 +48,14 @@
             </div>
 
             <!-- Restricted Settings -->
-            <div class="border-t pt-6">
+            <div id="restricted-section" class="border-t pt-6 transition-opacity duration-200">
 
                 <h2 class="text-lg font-semibold mb-4 text-gray-700">
                     Restricted Access
                 </h2>
 
                 <p class="text-sm text-gray-500 mb-4">
-                    Select users and/or academic programs that can view this timetable.
+                    Select users and/or academic programs that can edit this timetable.
                 </p>
 
                 <!-- Users -->
@@ -64,12 +64,29 @@
 
                     <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border rounded-lg p-3">
                         @forelse($users as $user)
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label
+                                class="flex items-start gap-3 cursor-pointer
+                                   border border-gray-200 rounded-md
+                                   p-3 hover:bg-gray-50 transition">
                                 <input type="checkbox"
+                                       class="mt-1"
                                        name="user_ids[]"
                                        value="{{ $user->id }}"
                                     {{ $timetable->allowedUsers->contains($user->id) ? 'checked' : '' }}>
-                                <span>{{ $user->name }}</span>
+
+                                <div class="flex flex-col leading-tight">
+                                    <span class="font-medium text-gray-800">
+                                        {{ $user->name }}
+                                    </span>
+
+                                    <span class="text-sm text-gray-600">
+                                        {{ trim($user->first_name . ' ' . $user->last_name) }}
+                                    </span>
+
+                                    <span class="text-xs text-gray-500">
+                                        {{ $user->email }}
+                                    </span>
+                                </div>
                             </label>
                         @empty
                             <div class="col-span-2 text-sm text-gray-500 italic">
@@ -85,17 +102,27 @@
                     <h3 class="font-semibold mb-2 text-gray-600">
                         Allowed Academic Programs
                     </h3>
+                    <p class="text-sm text-gray-500 mb-4">
+                        All users belonging to the selected academic programs can edit this timetable.
+                    </p>
 
                     <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border rounded-lg p-3">
                         @foreach($programs as $program)
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label
+                                class="flex items-center gap-3 cursor-pointer
+                                   border border-gray-200 rounded-md
+                                   p-3 hover:bg-gray-50 transition">
                                 <input type="checkbox"
                                        name="program_ids[]"
                                        value="{{ $program->id }}"
                                     {{ $timetable->allowedPrograms->contains($program->id) ? 'checked' : '' }}>
-                                <span>{{ $program->program_name }} ({{ $program->program_abbreviation }})</span>
+
+                                <span class="text-gray-800">
+                                    {{ $program->program_name }} ({{ $program->program_abbreviation }})
+                                </span>
                             </label>
                         @endforeach
+
                     </div>
                 </div>
 
@@ -112,5 +139,33 @@
 
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const restrictedSection = document.getElementById('restricted-section');
+            const restrictedInputs = restrictedSection.querySelectorAll('.restricted-input');
+            const visibilityRadios = document.querySelectorAll('input[name="visibility"]');
+
+            function updateRestrictedState() {
+                const isRestricted = document.querySelector('input[name="visibility"]:checked')?.value === 'restricted';
+
+                // Grey out section
+                restrictedSection.classList.toggle('opacity-50', !isRestricted);
+                restrictedSection.classList.toggle('pointer-events-none', !isRestricted);
+
+                // Enable / disable inputs
+                restrictedInputs.forEach(input => {
+                    input.disabled = !isRestricted;
+                });
+            }
+
+            // Initial state (page load)
+            updateRestrictedState();
+
+            // React to radio changes
+            visibilityRadios.forEach(radio => {
+                radio.addEventListener('change', updateRestrictedState);
+            });
+        });
+    </script>
 
 @endsection

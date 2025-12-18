@@ -1,40 +1,69 @@
 @extends('app')
 
-@section('title', 'Timetables')
+@section('title', 'Timetable Info')
 
 @section('content')
-    <div class="flex flex-col gap-[20px] pt-[40px] pb-[40px] pr-[50px] pl-[50px] justify-center items-center bg-white rounded-2xl shadow-2xl">
-        <h1 class="font-bold text-[18px]">Timetable Info</h1>
+    <div class="w-screen flex justify-center pt-[40px] pb-[40px]">
+        <div class="w-full max-w-[600px] bg-white rounded-2xl shadow-2xl p-[40px] flex flex-col gap-[25px]">
 
-        <!-- Basic info row -->
-        <div class="flex flex-row gap-[15px] w-full">
-            <div class="flex flex-col gap-[8px] w-[150px]">
-                <p>Timetable Name</p>
-                <p>Semester</p>
-                <p>Academic Year</p>
+
+        <h1 class="font-bold text-[18px] text-center">
+                Timetable Info
+            </h1>
+
+            <!-- Info fields -->
+            <div class="flex flex-col gap-[15px]">
+
+                <div>
+                    <p class="text-sm font-semibold text-gray-600">Timetable Name</p>
+                    <p class="text-base">{{ $timetable->timetable_name }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm font-semibold text-gray-600">Semester</p>
+                    <p class="text-base">{{ $timetable->semester }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm font-semibold text-gray-600">Academic Year</p>
+                    <p class="text-base">{{ $timetable->academic_year }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm font-semibold text-gray-600">Created By</p>
+                    <p class="text-base">
+                        {{
+                            trim(
+                                ($timetable->user?->first_name ?? '') . ' ' .
+                                ($timetable->user?->last_name ?? '')
+                            ) ?: ($timetable->user?->name ?? 'Unknown')
+                        }}
+                    </p>
+                </div>
+
             </div>
-            <div class="flex flex-col gap-[8px] w-[10px]">
-                <p>:</p>
-                <p>:</p>
-                <p>:</p>
+
+            <!-- Description -->
+            <div class="flex flex-col gap-[6px]">
+                <p class="text-sm font-semibold text-gray-600">
+                    Timetable Description
+                </p>
+                <div class="bg-gray-100 p-3 rounded-lg text-sm min-h-[40px]">
+                    {{ $timetable->timetable_description ?: '—' }}
+                </div>
             </div>
-            <div class="flex flex-col gap-[8px] flex-1">
-                <p>{{$timetable->timetable_name}}</p>
-                <p>{{$timetable->semester}}</p>
-                <p>{{$timetable->academic_year}}</p>
-            </div>
+
+            <!-- Back button -->
+            <a href="{{ route('timetables.index') }}" class="flex justify-center">
+                <button
+                    class="pt-[10px] pb-[10px] pl-[24px] pr-[24px] rounded-[12px]
+                           text-[16px] bg-[#aaa] text-white font-[600]
+                           hover:bg-[#828282] transition"
+                >
+                    Back
+                </button>
+            </a>
+
         </div>
-
-        <!-- Description block -->
-        <div class="flex flex-col gap-[5px] w-full">
-            <p class="font-semibold">Timetable Description:</p>
-            <p class="bg-gray-100 p-3 rounded-lg">{{$timetable->timetable_description}}</p>
-        </div>
-
-        <a href="{{route('timetables.index')}}" class="flex flex-row w-full justify-center">
-            <button class="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[12px] text-[16px] bg-[#aaa] text-[#fff] cursor-pointer font-[600] hover:bg-[#828282]">
-                <span>Back</span>
-            </button>
-        </a>
     </div>
 @endsection

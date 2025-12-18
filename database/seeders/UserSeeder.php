@@ -38,6 +38,8 @@ class UserSeeder extends Seeder
                 'password' => '$2y$12$0Ac9aiAL21Yn3e3Ntz2eDOZqTlZGpwZbLgIEPeWfVdYHj0H6hfXZG',
                 'role' => 'admin',
             ],
+
+
         ];
         User::insertOrIgnore($data);
     }
