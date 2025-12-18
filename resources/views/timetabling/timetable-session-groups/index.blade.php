@@ -368,30 +368,45 @@
         }
 
         function restoreButtonStates() {
+            // Reset all buttons first
             programButtons.forEach(btn => {
-                const id = btn.dataset.programId;
-                if (selectedPrograms.has(id)) {
+                btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                btn.classList.add('bg-gray-200', 'text-gray-800');
+            });
+
+            yearButtons.forEach(btn => {
+                btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                btn.classList.add('bg-gray-200', 'text-gray-800');
+            });
+
+            timeButtons.forEach(btn => {
+                btn.classList.remove('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
+                btn.classList.add('bg-gray-200', 'text-gray-800');
+            });
+
+            // Re-apply active styles based on Sets
+            programButtons.forEach(btn => {
+                if (selectedPrograms.has(btn.dataset.programId)) {
                     btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
                     btn.classList.remove('bg-gray-200', 'text-gray-800');
                 }
             });
 
             yearButtons.forEach(btn => {
-                const year = btn.dataset.year;
-                if (selectedYears.has(year)) {
+                if (selectedYears.has(btn.dataset.year)) {
                     btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
                     btn.classList.remove('bg-gray-200', 'text-gray-800');
                 }
             });
 
             timeButtons.forEach(btn => {
-                const time = btn.dataset.time;
-                if (selectedTimes.has(time)) {
+                if (selectedTimes.has(btn.dataset.time)) {
                     btn.classList.add('bg-[#5e0b0b]', 'text-white', 'border-[#5e0b0b]');
                     btn.classList.remove('bg-gray-200', 'text-gray-800');
                 }
             });
         }
+
 
         function recomputeVisibility() {
             programSections.forEach(section => {
