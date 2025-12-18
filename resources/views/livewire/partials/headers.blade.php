@@ -42,7 +42,7 @@
                     </div>
                     <div class="flex flex-col text-center box-fit">
                         <h1 class="font-bold text-[18px]">Timetable</h1>
-                        <p>{{$timetable->timetable_name}} {{$timetable->semester}} semester ({{$timetable->academic_year}})</p>
+                        <p>{{$timetable->timetable_name}} {{$timetable->semester}} Semester ({{$timetable->academic_year}})</p>
                     </div>
                     <div>
                         <img src="{{ asset('umtc_logo.png') }}" class="w-15 h-15" alt="UMTC Logo"/>
