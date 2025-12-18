@@ -22,27 +22,60 @@ class TimetableController extends Controller
     {
         $user = auth()->user();
 
-        $timetables = Timetable::query()
-            ->where('user_id', $user->id) // owner
-            ->orWhere('visibility', 'public')
-            ->orWhere(function ($q) use ($user) {
-                $q->where('visibility', 'restricted')
-                    ->where(function ($sub) use ($user) {
-                        $sub->whereHas('allowedUsers', function ($u) use ($user) {
-                            $u->where('users.id', $user->id);
-                        })
-                            ->orWhereHas('allowedPrograms', function ($p) use ($user) {
-                                $p->where('academic_programs.id', $user->academic_program_id);
-                            });
+        if ($user->role === 'admin') {
+
+            $owned = Timetable::where('user_id', $user->id)->latest()->get();
+
+            $public = Timetable::where('visibility', 'public')
+                ->where('user_id', '!=', $user->id)
+                ->latest()
+                ->get();
+
+            $others = Timetable::where('user_id', '!=', $user->id)
+                ->where('visibility', '!=', 'public')
+                ->latest()
+                ->get();
+
+            return view('records.timetables.index', [
+                'owned'  => $owned->whereNotNull('id')->values(),
+                'public' => $public->whereNotNull('id')->values(),
+                'others' => $others->whereNotNull('id')->values(),
+                'private'=> collect(),
+                'shared' => collect(),
+            ]);
+
+        } else {
+
+            $private = Timetable::where('user_id', $user->id)
+                ->where('visibility', 'private')
+                ->latest()
+                ->get();
+
+            $shared = Timetable::where('visibility', 'restricted')
+                ->where(function ($q) use ($user) {
+                    $q->whereHas('allowedUsers', function ($u) use ($user) {
+                        $u->where('users.id', $user->id);
+                    })->orWhereHas('allowedPrograms', function ($p) use ($user) {
+                        $p->where('academic_programs.id', $user->academic_program_id);
                     });
-            })
-            ->latest()
-            ->get();
+                })
+                ->latest()
+                ->get();
 
-        Logger::log('index', 'timetable', null);
+            $public = Timetable::where('visibility', 'public')->latest()->get();
 
-        return view('records.timetables.index', compact('timetables'));
+            return view('records.timetables.index', [
+                'private' => $private->whereNotNull('id')->values(),
+                'shared'  => $shared->whereNotNull('id')->values(),
+                'public'  => $public->whereNotNull('id')->values(),
+                'owned'   => collect(),
+                'others'  => collect(),
+            ]);
+
+        }
     }
+
+
 
 
     public function create()

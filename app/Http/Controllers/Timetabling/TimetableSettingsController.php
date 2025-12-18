@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Timetabling;
 
+use App\Http\Controllers\Controller;
+use App\Models\Records\AcademicProgram;
 use App\Models\Records\Timetable;
 use App\Models\Users\User;
-use App\Models\Records\AcademicProgram;
 use Illuminate\Http\Request;
 
 class TimetableSettingsController extends Controller
@@ -19,6 +20,7 @@ class TimetableSettingsController extends Controller
         return view('timetabling.timetable-settings.settings', [
             'timetable' => $timetable,
             'users' => User::where('role', '!=', 'admin')
+                ->where('id', '!=', $timetable->user_id)
                 ->orderBy('name')
                 ->get(),
             'programs' => AcademicProgram::orderBy('program_name')->get(),

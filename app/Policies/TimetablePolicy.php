@@ -7,11 +7,23 @@ use App\Models\Users\User;
 
 class TimetablePolicy
 {
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return null; // fall back to specific ability checks
+    }
     /**
      * View a timetable
      */
     public function view(User $user, Timetable $timetable): bool
     {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
         if ($timetable->user_id === $user->id) {
             return true;
         }

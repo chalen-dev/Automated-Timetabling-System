@@ -29,8 +29,8 @@ class UserController extends Controller
                 'required',
                 'string',
                 'email',
-                'unique:users',
-                'regex:/^[a-z]\.[a-z]+\.([0-9]{6})\.tc@umindanao\.edu\.ph$/',
+                'unique:users,email',
+                'regex:/^[a-zA-Z0-9._%-]+@umindanao\.edu\.ph$/',
             ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'academic_program_id' => ['required', 'exists:academic_programs,id'],
@@ -74,7 +74,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('login.form')
-            ->with('success', 'User registered successfully. Please verify your email.');
+            ->with('success', 'User registered successfully. Please wait for admin approval.');
     }
 
 

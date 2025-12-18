@@ -30,7 +30,13 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'first_name' => 'nullable|string|max:50',
             'last_name'  => 'nullable|string|max:50',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'unique:users,email,' . $user->id,
+                'regex:/^[a-zA-Z0-9._%-]+@umindanao\.edu\.ph$/',
+            ],
             'password' => 'nullable|string|min:6|confirmed',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
