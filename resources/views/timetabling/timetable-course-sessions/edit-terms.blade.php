@@ -82,7 +82,13 @@
                     @endphp
 
                     @forelse($sorted as $courseSession)
-                        <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                        <tr
+                            class="border-t border-gray-200 hover:bg-gray-50 transition-colors
+                                @if(($courseSession->course->duration_type ?? null) === 'semestral')
+                                    sg-term-locked
+                                @endif
+                            "
+                        >
                             <td class="px-6 py-3">{{ $courseSession->course->course_title ?? 'Unknown Course' }}</td>
                             <td class="px-6 py-3">{{ $courseSession->course->course_name ?? '' }}</td>
                             <td class="px-6 py-3">{{ $courseSession->course->unit_load ?? '' }}</td>
@@ -135,11 +141,23 @@
     </div>
 @endsection
 <style>
-    /* Stronger than hover utility classes so multiple changed rows stay highlighted */
+    /* Changed rows (user-edited) */
     tr.sg-term-changed td {
-        background-color: rgb(254 252 232); /* close to Tailwind bg-yellow-50 */
+        background-color: rgb(254 252 232); /* yellow */
+    }
+
+    /* Locked semestral rows */
+    tr.sg-term-locked td {
+        background-color: rgb(243 244 246); /* Tailwind gray-100 */
+        color: rgb(107 114 128); /* gray-500 */
+    }
+
+    tr.sg-term-locked select {
+        background-color: rgb(229 231 235); /* gray-200 */
+        cursor: not-allowed;
     }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const selects = Array.from(document.querySelectorAll('.term-select'));
@@ -153,7 +171,9 @@
                 const current = (sel.value || '');
                 const row = sel.closest('tr');
 
-                const isChanged = original !== current;
+                const isLocked = row && row.classList.contains('sg-term-locked');
+                const isChanged = !isLocked && original !== current;
+
                 if (isChanged) changed++;
 
                 if (row) {
