@@ -25,9 +25,25 @@
             id="coursesTray"
             class="bg-white shadow-md rounded-bl-xl p-6 space-y-4 w-[400px] h-200 overflow-y-auto"
         >
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">
-                Courses Tray
-            </h2>
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xl font-semibold text-gray-800">
+                    Courses Tray
+                </h2>
+
+                <label class="term-toggle">
+                    <input
+                        type="checkbox"
+                        id="toggleAcademicTerms"
+                        checked
+                    >
+                    <span class="term-toggle-track">
+                        <span class="term-toggle-knob"></span>
+                    </span>
+                    <span class="term-toggle-label">
+                        Academic Terms
+                    </span>
+                </label>
+            </div>
 
             {{-- This container will be populated by JS using window.sessionGroupsData --}}
             <div id="sessionGroupsContainer" class="space-y-4">

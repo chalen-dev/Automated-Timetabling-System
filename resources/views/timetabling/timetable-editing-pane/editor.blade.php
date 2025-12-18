@@ -76,6 +76,11 @@
     .term-badge-2nd { border-color: #f97316; }
     .term-badge-sem { border-color: #a855f7; }
 
+    /* Hide academic term badges when disabled */
+    .hide-academic-terms .term-badge {
+        display: none !important;
+    }
+
 
 
     /* Blue band = valid placement (tray -> canvas, slide) */
@@ -227,9 +232,59 @@
         padding-bottom: 1.75rem; /* you already had this; keeping it */
     }
 
+    /* Academic terms toggle (tray header) */
+    .term-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        user-select: none;
+    }
 
+    /* Hide native checkbox */
+    .term-toggle input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
 
+    /* Track */
+    .term-toggle-track {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        background-color: #d1d5db; /* gray-300 */
+        border-radius: 9999px;
+        transition: background-color 0.2s ease;
+    }
 
+    /* Knob */
+    .term-toggle-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background-color: #ffffff;
+        border-radius: 9999px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+
+    /* Checked state */
+    .term-toggle input:checked + .term-toggle-track {
+        background-color: #dc2626; /* red-600 (matches tray theme) */
+    }
+
+    .term-toggle input:checked + .term-toggle-track .term-toggle-knob {
+        transform: translateX(16px);
+    }
+
+    /* Label text */
+    .term-toggle-label {
+        font-size: 0.875rem;
+        color: #4b5563; /* gray-600 */
+    }
 
     #timetableContextMenu {
         position: fixed;
@@ -337,6 +392,18 @@
         // Clear state when drag ends (anywhere)
         document.addEventListener('dragend', function () {
             isDraggingFromTray = false;
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('toggleAcademicTerms');
+            if (!toggle) return;
+
+            toggle.addEventListener('change', function () {
+                document.body.classList.toggle(
+                    'hide-academic-terms',
+                    !toggle.checked
+                );
+            });
         });
 
         // When a drag that started in the tray actually leaves the tray root,
