@@ -294,7 +294,9 @@
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div class="min-w-0">
                                                         <div class="font-semibold text-gray-800 text-[12px] leading-tight">
-                                                            {{ $item['course_title'] !== '' ? $item['course_title'] : 'Course Session #' . $item['course_session_id'] }}
+                                                            @if (!empty($item['course_title']))
+                                                                {{ $item['course_title'] }}
+                                                            @endif
                                                         </div>
 
                                                         <div class="text-[11px] text-gray-700 leading-tight mt-0.5">

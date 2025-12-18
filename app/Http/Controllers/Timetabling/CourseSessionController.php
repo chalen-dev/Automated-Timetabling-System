@@ -19,8 +19,7 @@ use Throwable;
 
 class CourseSessionController extends Controller
 {
-    protected function clearCourseSessionFromTimetableXlsx(Timetable $timetable, int $courseSessionId): void
-    {
+    protected function clearCourseSessionFromTimetableXlsx(Timetable $timetable, int $courseSessionId): void {
         $disk = Storage::disk('facultime');
         $remotePath = "timetables/{$timetable->id}.xlsx";
 
@@ -34,7 +33,7 @@ class CourseSessionController extends Controller
             $writeBackToBucket = false;
 
             if (!file_exists($tempPath)) {
-                return; // nothing to clear
+                return;
             }
         }
 
@@ -43,19 +42,53 @@ class CourseSessionController extends Controller
         $changed = false;
 
         foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+            $sheetName = $sheet->getTitle();
+
+            /*
+            |----------------------------------------------------------
+            | A. OVERVIEW + UNASSIGNED → DELETE ROWS
+            |----------------------------------------------------------
+            */
+            if (in_array($sheetName, ['Overview_1st', 'Overview_2nd', 'Unassigned'])) {
+
+                $highestRow = $sheet->getHighestRow();
+                $rowsToDelete = [];
+
+                // Column A = course_session_id
+                for ($row = 2; $row <= $highestRow; $row++) {
+                    $idCell = trim((string) $sheet->getCell("A{$row}")->getValue());
+
+                    if ((string) $idCell === (string) $courseSessionId) {
+                        $rowsToDelete[] = $row;
+                    }
+                }
+
+                rsort($rowsToDelete);
+
+                foreach ($rowsToDelete as $row) {
+                    $sheet->removeRow($row, 1);
+                    $changed = true;
+                }
+
+                continue;
+            }
+
+            /*
+            |----------------------------------------------------------
+            | B. TIMETABLE SHEETS → CLEAR CELLS
+            |----------------------------------------------------------
+            */
             $highestRow = $sheet->getHighestRow();
             $highestCol = Coordinate::columnIndexFromString($sheet->getHighestColumn());
 
-            // skip header row and time column
             for ($row = 2; $row <= $highestRow; $row++) {
                 for ($col = 2; $col <= $highestCol; $col++) {
 
                     $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
-                    $cell = $sheet->getCell($cellAddress);
-                    $value = trim((string) $cell->getValue());
+                    $value = trim((string) $sheet->getCell($cellAddress)->getValue());
 
                     if ($value !== '' && str_ends_with($value, $needle)) {
-                        $cell->setValue('vacant');
+                        $sheet->setCellValue($cellAddress, 'vacant');
                         $changed = true;
                     }
                 }
@@ -71,6 +104,7 @@ class CourseSessionController extends Controller
             }
         }
     }
+
 
     /**
      * Display a listing of the course sessions for a single session group.
@@ -198,10 +232,10 @@ class CourseSessionController extends Controller
 
         $newTerm = $validated['academic_term'][$courseSession->id];
 
-        // 1️⃣ Clear timetable placements (XLSX only)
+        // Clear timetable placements (XLSX only)
         $this->clearCourseSessionFromTimetableXlsx($timetable, $courseSession->id);
 
-        // 2️⃣ Update DB term
+        // Update DB term
         $courseSession->update([
             'academic_term' => $newTerm,
         ]);
@@ -346,23 +380,58 @@ class CourseSessionController extends Controller
         */
         try {
             $spreadsheet = IOFactory::load($tempPath);
-            $needle = '_' . $courseSessionId; // course_session_id is ALWAYS the last segment
+            $needle = '_' . $courseSessionId; // always last segment
             $changed = false;
 
             foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+                $sheetName = $sheet->getTitle();
+
+                /*
+                |----------------------------------------------------------
+                | A. OVERVIEW + UNASSIGNED → DELETE ROWS BY course_session_id
+                |----------------------------------------------------------
+                */
+                if (in_array($sheetName, ['Overview_1st', 'Overview_2nd', 'Unassigned'])) {
+
+                    $highestRow = $sheet->getHighestRow();
+                    $rowsToDelete = [];
+
+                    // Column A = course_session_id
+                    for ($row = 2; $row <= $highestRow; $row++) {
+                        $idCell = trim((string) $sheet->getCell("A{$row}")->getValue());
+
+                        if ((string) $idCell === (string) $courseSessionId) {
+                            $rowsToDelete[] = $row;
+                        }
+                    }
+
+                    // Delete bottom-up to avoid shifting
+                    rsort($rowsToDelete);
+
+                    foreach ($rowsToDelete as $row) {
+                        $sheet->removeRow($row, 1);
+                        $changed = true;
+                    }
+
+                    continue;
+                }
+
+                /*
+                |----------------------------------------------------------
+                | B. TIMETABLE SHEETS → CLEAR CELLS (EXISTING BEHAVIOR)
+                |----------------------------------------------------------
+                */
                 $highestRow = $sheet->getHighestRow();
                 $highestCol = Coordinate::columnIndexFromString($sheet->getHighestColumn());
 
-                // Skip header row (1) and time column (A)
                 for ($row = 2; $row <= $highestRow; $row++) {
                     for ($col = 2; $col <= $highestCol; $col++) {
 
                         $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
-                        $cell = $sheet->getCell($cellAddress);
-                        $value = trim((string) $cell->getValue());
+                        $value = trim((string) $sheet->getCell($cellAddress)->getValue());
 
                         if ($value !== '' && str_ends_with($value, $needle)) {
-                            $cell->setValue('vacant');
+                            $sheet->setCellValue($cellAddress, 'vacant');
                             $changed = true;
                         }
                     }
@@ -370,9 +439,9 @@ class CourseSessionController extends Controller
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | 3. SAVE XLSX BACK (same source)
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
+            | SAVE XLSX BACK
+            |----------------------------------------------------------
             */
             if ($changed) {
                 IOFactory::createWriter($spreadsheet, 'Xlsx')->save($tempPath);
@@ -384,11 +453,11 @@ class CourseSessionController extends Controller
             }
 
         } catch (Throwable $e) {
-            // XLSX failed → DO NOT DELETE DB
             return redirect()
                 ->route('timetables.session-groups.index', $timetable)
                 ->with('error', 'Failed to update timetable file. Course session was NOT deleted.');
         }
+
 
         /*
         |--------------------------------------------------------------------------

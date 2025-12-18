@@ -8,6 +8,8 @@ use App\Models\Records\Room;
 use App\Models\Records\Timetable;
 use App\Models\Timetabling\TimetableRoom;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Throwable;
 
@@ -112,84 +114,164 @@ class TimetableRoomController extends Controller
         // Keep a copy of the room name for matching BEFORE detaching
         $roomName = trim((string) $room->room_name);
 
-        // Detach room from timetable (preserve existing DB behavior)
-        $timetable->rooms()->detach($room->id);
 
-        $xlsxPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
-        $errorMessage = null;
+        /*
+        |--------------------------------------------------------------------------
+        | 1. LOAD XLSX (bucket first, local fallback) — SAME AS OTHERS
+        |--------------------------------------------------------------------------
+        */
+        $disk = Storage::disk('facultime');
+        $remotePath = "timetables/{$timetable->id}.xlsx";
+
+        if ($disk->exists($remotePath)) {
+            $tempPath = tempnam(sys_get_temp_dir(), 'tt_') . '.xlsx';
+            file_put_contents($tempPath, $disk->get($remotePath));
+            $writeBackToBucket = true;
+        } else {
+            $tempPath = storage_path("app/exports/timetables/{$timetable->id}.xlsx");
+            $writeBackToBucket = false;
+
+            if (!file_exists($tempPath)) {
+                return redirect()
+                    ->route('timetables.timetable-rooms.index', $timetable)
+                    ->with('error', 'Timetable XLSX not found.');
+            }
+        }
+
         $madeChange = false;
 
+        /*
+        |--------------------------------------------------------------------------
+        | 2. REMOVE ROOM COLUMN FROM ALL TIMETABLE SHEETS
+        |--------------------------------------------------------------------------
+        */
         try {
-            if (file_exists($xlsxPath)) {
-                if (!is_writable($xlsxPath) && !is_writable(dirname($xlsxPath))) {
-                    $errorMessage = "Timetable file or directory is not writable: {$xlsxPath}";
-                } else {
-                    $spreadsheet = IOFactory::load($xlsxPath);
-                    $sheetCount = $spreadsheet->getSheetCount();
+            $spreadsheet = IOFactory::load($tempPath);
 
-                    $normalize = function ($s) {
-                        $s = strtolower(trim((string) $s));
-                        return preg_replace('/\s+/', ' ', $s);
-                    };
+            $normalize = function ($s) {
+                $s = strtolower(trim((string) $s));
+                return preg_replace('/\s+/', ' ', $s);
+            };
 
-                    $targetNorm = $normalize($roomName);
+            $targetNorm = $normalize($roomName);
 
-                    for ($si = 0; $si < $sheetCount; $si++) {
-                        $sheet = $spreadsheet->getSheet($si);
-                        $table = $sheet->toArray(null, true, true, false);
-                        if (empty($table) || !isset($table[0]) || !is_array($table[0])) {
-                            continue;
-                        }
+            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
 
-                        $header = $table[0];
-                        $colCount = count($header);
+                $highestCol = Coordinate::columnIndexFromString(
+                    $sheet->getHighestColumn()
+                );
 
-                        // header index 0 is Time column; rooms start at index 1
-                        for ($c = 1; $c < $colCount; $c++) {
-                            $raw = trim((string) ($header[$c] ?? ''));
-                            if ($raw === '') {
+                for ($col = 2; $col <= $highestCol; $col++) {
+
+                    $headerValue = trim((string) $sheet->getCell(
+                        Coordinate::stringFromColumnIndex($col) . '1'
+                    )->getValue());
+
+                    if ($headerValue === '') {
+                        continue;
+                    }
+
+                    if ($normalize($headerValue) === $targetNorm) {
+
+                        $highestRow = $sheet->getHighestRow();
+                        $newColIndex = 1;
+
+                        // Rebuild sheet without the removed column
+                        for ($c = 1; $c <= $highestCol; $c++) {
+
+                            if ($c === $col) {
                                 continue;
                             }
 
-                            if ($normalize($raw) === $targetNorm) {
-                                // array index -> Excel col index (1-based)
-                                $excelIndex = $c + 1;
+                            for ($r = 1; $r <= $highestRow; $r++) {
 
-                                // remove one column at $excelIndex (1 = A)
-                                $sheet->removeColumnByIndex($excelIndex, 1);
-
-                                $madeChange = true;
-                                // header changed; stop scanning this sheet
-                                break;
+                                $sheet->setCellValue(
+                                    Coordinate::stringFromColumnIndex($newColIndex) . $r,
+                                    $sheet->getCell(
+                                        Coordinate::stringFromColumnIndex($c) . $r
+                                    )->getValue()
+                                );
                             }
-                        }
-                    }
 
-                    if ($madeChange) {
-                        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-                        $writer->save($xlsxPath);
+                            $newColIndex++;
+                        }
+
+                        // Remove leftover columns at the end
+                        if ($newColIndex <= $highestCol) {
+                            $sheet->removeColumnByIndex(
+                                $newColIndex,
+                                $highestCol - $newColIndex + 1
+                            );
+                        }
+
+                        $madeChange = true;
+                        break;
                     }
                 }
-            } else {
-                $errorMessage = "Timetable XLSX not found: {$xlsxPath}";
             }
-        } catch (Throwable $e) {
-            // Capture error message to display to user; do not use Logger/\Log
-            $errorMessage = "Error while updating timetable file: " . $e->getMessage();
-        }
 
-        // Use session flash messages for user-visible errors / success
-        if ($errorMessage) {
+            $overviewSheets = ['Overview_1st', 'Overview_2nd'];
+
+            foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+
+                if (!in_array($sheet->getTitle(), $overviewSheets, true)) {
+                    continue;
+                }
+
+                $highestRow = $sheet->getHighestRow();
+                $highestCol = Coordinate::columnIndexFromString(
+                    $sheet->getHighestColumn()
+                );
+
+                for ($r = 2; $r <= $highestRow; $r++) { // skip header row
+                    for ($c = 1; $c <= $highestCol; $c++) {
+
+                        $cell = Coordinate::stringFromColumnIndex($c) . $r;
+                        $value = trim((string) $sheet->getCell($cell)->getValue());
+
+                        if ($normalize($value) === $targetNorm) {
+                            $sheet->setCellValue($cell, 'vacant');
+                            $madeChange = true;
+                        }
+                    }
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 3. SAVE XLSX BACK
+            |--------------------------------------------------------------------------
+            */
+            if ($madeChange) {
+                IOFactory::createWriter($spreadsheet, 'Xlsx')->save($tempPath);
+
+                if ($writeBackToBucket) {
+                    $disk->put($remotePath, fopen($tempPath, 'r'));
+                    unlink($tempPath);
+                }
+            }
+
+        } catch (Throwable $e) {
             return redirect()
                 ->route('timetables.timetable-rooms.index', $timetable)
-                ->with('error', $errorMessage);
+                ->with('error', 'Failed to update timetable spreadsheet.');
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | 4. DONE
+        |--------------------------------------------------------------------------
+        */
         $successMsg = 'Room detached from timetable' . ($madeChange ? ' and spreadsheet column removed.' : '.');
+
+        // Detach room from timetable (preserve existing DB behavior)
+        $timetable->rooms()->detach($room->id);
+
         return redirect()
             ->route('timetables.timetable-rooms.index', $timetable)
             ->with('success', $successMsg);
     }
+
 
 
 

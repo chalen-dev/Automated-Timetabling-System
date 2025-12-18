@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Throwable;
 
 class SessionGroupController extends Controller
 {
@@ -320,31 +321,60 @@ class SessionGroupController extends Controller
             $changed = false;
 
             foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+                $sheetName = $sheet->getTitle();
+
+                /*
+                |----------------------------------------------------------
+                | A. OVERVIEW + UNASSIGNED → DELETE ROWS
+                |----------------------------------------------------------
+                */
+                if (in_array($sheetName, ['Overview_1st', 'Overview_2nd', 'Unassigned'])) {
+
+                    $highestRow = $sheet->getHighestRow();
+                    $rowsToDelete = [];
+
+                    // Column B = `code`
+                    for ($row = 2; $row <= $highestRow; $row++) {
+                        $code = trim((string) $sheet->getCell("B{$row}")->getValue());
+
+                        if ($code !== '' && str_contains($code, $needle)) {
+                            $rowsToDelete[] = $row;
+                        }
+                    }
+
+                    // Delete bottom-up to avoid shifting issues
+                    rsort($rowsToDelete);
+
+                    foreach ($rowsToDelete as $row) {
+                        $sheet->removeRow($row, 1);
+                        $changed = true;
+                    }
+
+                    continue;
+                }
+
+                /*
+                |----------------------------------------------------------
+                | B. TIMETABLE SHEETS → CLEAR CELLS (EXISTING BEHAVIOR)
+                |----------------------------------------------------------
+                */
                 $highestRow = $sheet->getHighestRow();
                 $highestCol = Coordinate::columnIndexFromString($sheet->getHighestColumn());
 
-                // skip header row + time column
                 for ($row = 2; $row <= $highestRow; $row++) {
                     for ($col = 2; $col <= $highestCol; $col++) {
 
                         $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
-                        $cell = $sheet->getCell($cellAddress);
-                        $value = trim((string) $cell->getValue());
+                        $value = trim((string) $sheet->getCell($cellAddress)->getValue());
 
                         if ($value !== '' && str_contains($value, $needle)) {
-                            $cell->setValue('vacant');
+                            $sheet->setCellValue($cellAddress, 'vacant');
                             $changed = true;
                         }
                     }
                 }
-
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | 4. SAVE XLSX BACK
-            |--------------------------------------------------------------------------
-            */
             if ($changed) {
                 IOFactory::createWriter($spreadsheet, 'Xlsx')->save($tempPath);
 
@@ -353,12 +383,13 @@ class SessionGroupController extends Controller
                     unlink($tempPath);
                 }
             }
-        } catch (\Throwable $e) {
-            // XLSX failed → DO NOT DELETE DB
+
+        } catch (Throwable $e) {
             return redirect()
                 ->route('timetables.session-groups.index', $timetable)
                 ->with('error', 'Failed to update timetable file. No records were deleted.');
         }
+
 
         /*
         |--------------------------------------------------------------------------
