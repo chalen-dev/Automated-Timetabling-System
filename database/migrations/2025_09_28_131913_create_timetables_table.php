@@ -31,6 +31,9 @@ return new class extends Migration
                 'public',
                 'restricted',
             ])->default('private');
+            $table
+                ->boolean('allow_non_owner_record_edit')
+                ->default(true);
             $table->timestamps();
         });
     }

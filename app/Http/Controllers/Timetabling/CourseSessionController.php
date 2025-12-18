@@ -111,6 +111,8 @@ class CourseSessionController extends Controller
      */
     public function index(Timetable $timetable, SessionGroup $sessionGroup, Request $request)
     {
+        $this->authorize('editRecords', $timetable);
+
         // Safety: ensure session group belongs to timetable
         if ((int) $sessionGroup->timetable_id !== (int) $timetable->id) {
             abort(404);

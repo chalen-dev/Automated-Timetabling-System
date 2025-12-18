@@ -1,5 +1,18 @@
 @php use Illuminate\Support\Str; @endphp
+@php
+    $user = auth()->user();
 
+    $isAdmin = $user && $user->role === 'admin';
+    $isOwner = $user && $activeTimetable && $user->id === $activeTimetable->user_id;
+
+    $canEditRecords =
+        $activeTimetable
+        && (
+            $isAdmin
+            || $isOwner
+            || $activeTimetable->allow_non_owner_record_edit
+        );
+@endphp
 <div
     x-data="{open: false}"
 
@@ -24,11 +37,18 @@
                                 <span>Overview</span>
                             </div>
                         </a>
-                        <a href="{{route('timetables.session-groups.index', $timetable)}}">
-                            <div class="{{ request()->routeIs('timetables.session-groups.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
-                                <span>Class Sessions</span>
-                            </div>
-                        </a>
+                        @if($canEditRecords)
+                            <a href="{{route('timetables.session-groups.index', $timetable)}}">
+                                <div class="{{ request()->routeIs('timetables.session-groups.index')
+                                        ? 'bg-[#5e0b0b] text-[#ffffff]'
+                                        : 'hover:bg-[#911A141A]' }}
+                                        justify-center transition-transform duration-300 pt-2 pb-2
+                                        flex flex-col h-16 items-center gap-2 rounded-2xl">
+                                    <span>Class Sessions</span>
+                                </div>
+                            </a>
+                        @endif
+
                         <!--
                         <a href="{{-- route('timetables.timetable-professors.index', $timetable) --}}">
                             <div class="{{-- request()->routeIs('timetables.timetable-professors.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' --}} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
@@ -36,16 +56,24 @@
                             </div>
                         </a>
                         -->
-                        <a href="{{route('timetables.timetable-rooms.index', $timetable)}}">
-                            <div class="{{ request()->routeIs('timetables.timetable-rooms.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
-                                <span>Rooms</span>
-                            </div>
-                        </a>
+                        @if($canEditRecords)
+                            <a href="{{route('timetables.timetable-rooms.index', $timetable)}}">
+                                <div class="{{ request()->routeIs('timetables.timetable-rooms.index')
+                                    ? 'bg-[#5e0b0b] text-[#ffffff]'
+                                    : 'hover:bg-[#911A141A]' }}
+                                    justify-center transition-transform duration-300 pt-2 pb-2
+                                    flex flex-col h-16 items-center gap-2 rounded-2xl">
+                                    <span>Rooms</span>
+                                </div>
+                            </a>
+                        @endif
+                        @can('manageAccess', $timetable)
                         <a href="{{route('timetables.generate-timetable.index', $timetable)}}">
                             <div class="{{ request()->routeIs('timetables.generate-timetable.index') ? 'bg-[#5e0b0b] text-[#ffffff]' : 'hover:bg-[#911A141A]' }} justify-center transition-transform duration-300 pt-2 pb-2 flex flex-col h-16 items-center gap-2 rounded-2xl">
                                 <span>Generate Timetable</span>
                             </div>
                         </a>
+                        @endcan
                         @can('manageAccess', $timetable)
                             <a href="{{ route('timetables.settings.edit', $timetable) }}">
                                 <div

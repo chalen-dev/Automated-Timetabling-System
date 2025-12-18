@@ -15,6 +15,7 @@ class Timetable extends Model
         'timetable_description',
         'user_id',
         'visibility',
+        'allow_non_owner_record_edit'
     ];
 
     public function user(){

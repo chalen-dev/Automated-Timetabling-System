@@ -41,6 +41,8 @@ class SessionGroupController extends Controller
 
     public function index(Timetable $timetable, Request $request, SessionGroup $sessionGroup)
     {
+        $this->authorize('editRecords', $timetable);
+
         $query = $timetable->sessionGroups()->with(['academicProgram', 'courseSessions.course']);
 
         if ($search = $request->input('search')) {

@@ -86,4 +86,20 @@ class TimetablePolicy
         // ONLY OWNER can change visibility & access
         return $timetable->user_id === $user->id;
     }
+
+    public function editRecords(User $user, Timetable $timetable): bool
+    {
+        // Admin always allowed
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        // Owner always allowed
+        if ($timetable->user_id === $user->id) {
+            return true;
+        }
+
+        // Non-owner allowed only if timetable permits it
+        return (bool) $timetable->allow_non_owner_record_edit;
+    }
 }

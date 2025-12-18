@@ -20,6 +20,8 @@ class TimetableRoomController extends Controller
      */
     public function index(Timetable $timetable, Request $request)
     {
+        $this->authorize('editRecords', $timetable);
+
         $query = $timetable->rooms();
 
         if ($search = $request->input('search')) {

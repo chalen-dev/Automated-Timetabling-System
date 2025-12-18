@@ -126,6 +126,28 @@
                     </div>
                 </div>
 
+                <hr class="my-6">
+
+                <h3 class="text-lg font-semibold mb-2">
+                    Editing Permissions
+                </h3>
+
+                <div class="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="allow_non_owner_record_edit"
+                        name="allow_non_owner_record_edit"
+                        value="1"
+                        {{ $timetable->allow_non_owner_record_edit ? 'checked' : '' }}
+                        class="rounded border-gray-300"
+                    >
+
+                    <label for="allow_non_owner_record_edit" class="text-sm text-gray-700">
+                        Allow non-owners to edit records (Class Sessions & Rooms)
+                    </label>
+                </div>
+
+
             </div>
 
             <!-- Actions -->

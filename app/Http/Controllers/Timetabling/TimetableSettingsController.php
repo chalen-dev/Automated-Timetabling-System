@@ -24,6 +24,7 @@ class TimetableSettingsController extends Controller
                 ->orderBy('name')
                 ->get(),
             'programs' => AcademicProgram::orderBy('program_name')->get(),
+            'allow_non_owner_record_edit' => 'nullable|boolean',
         ]);
     }
 
@@ -45,6 +46,8 @@ class TimetableSettingsController extends Controller
         // Save visibility
         $timetable->update([
             'visibility' => $data['visibility'],
+            'allow_non_owner_record_edit' =>
+                $request->boolean('allow_non_owner_record_edit'),
         ]);
 
         // Sync access tables (ONLY if restricted)
