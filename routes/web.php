@@ -169,8 +169,13 @@ Route::middleware([Authenticate::class])->group(function () {
             Route::post('generate', [GenerateTimetableController::class, 'generate'])
                 ->name('generate.post');
 
+            //Timetable overview
             Route::get('overview', [TimetableOverviewController::class, 'index'])
                 ->name('timetable-overview.index');
+            Route::get(
+                'overview/export',
+                [TimetableOverviewController::class, 'export']
+            )->name('timetable-overview.export');
 
             // Timetable settings (visibility & access)
             Route::get(

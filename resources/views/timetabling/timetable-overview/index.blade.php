@@ -216,6 +216,13 @@
                 </div>
 
                 <div class="absolute right-3">
+                    <a
+                        href="{{ route('timetables.timetable-overview.export', [$timetable, 'term' => $termIndex]) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border shadow-sm bg-white text-gray-800 hover:bg-gray-50 mr-2"
+                    >
+                        <i class="bi bi-download"></i>
+                        <span class="font-semibold">Download</span>
+                    </a>
                     <button
                         type="button"
                         @click.stop="openUnplaced = !openUnplaced"

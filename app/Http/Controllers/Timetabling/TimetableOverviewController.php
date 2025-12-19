@@ -9,7 +9,9 @@ use App\Models\Timetabling\CourseSession;
 use App\Models\Timetabling\SessionGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class TimetableOverviewController extends Controller
 {
@@ -743,5 +745,185 @@ class TimetableOverviewController extends Controller
             }
         }
     }
+
+    public function export(Timetable $timetable, Request $request)
+    {
+        // Always export BOTH terms
+        $terms = [
+            0 => '1st Term',
+            1 => '2nd Term',
+        ];
+
+        // Load canonical XLSX (same source as overview/editor)
+        $xlsxPath = $this->loadTimetableXlsxPath($timetable);
+        if (!$xlsxPath || !file_exists($xlsxPath)) {
+            abort(404, 'Timetable file not found.');
+        }
+
+        $srcSpreadsheet = IOFactory::load($xlsxPath);
+
+        // Load session data
+        $courseSessions = CourseSession::whereHas('sessionGroup', function ($q) use ($timetable) {
+            $q->where('timetable_id', $timetable->id);
+        })
+            ->with(['course', 'sessionGroup.academicProgram'])
+            ->get()
+            ->keyBy('id');
+
+        $sessionGroups = SessionGroup::where('timetable_id', $timetable->id)
+            ->get()
+            ->keyBy('id');
+
+        // Output workbook
+        $out = new Spreadsheet();
+        $out->removeSheetByIndex(0); // remove default blank sheet
+
+        foreach ($terms as $termIndex => $termLabel) {
+
+            $gridData = $this->buildRoomGridForTerm(
+                $srcSpreadsheet,
+                $termIndex,
+                $courseSessions->all(),
+                $sessionGroups->all()
+            );
+
+            $rooms      = $gridData['rooms'];
+            $timeLabels = $gridData['timeLabels'];
+            $grid       = $gridData['grid'];
+
+            $sheet = $out->createSheet();
+            $sheet->setTitle("Overview – {$termLabel}");
+
+            /* -------------------------------------------------
+             | Title & Term Heading
+             ------------------------------------------------- */
+            $sheet->setCellValue('A1', $timetable->timetable_name);
+            $sheet->mergeCells('A1:Z1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+
+            $sheet->setCellValue('A2', $termLabel);
+            $sheet->mergeCells('A2:Z2');
+            $sheet->getStyle('A2')->getFont()->setBold(true);
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+            /* -------------------------------------------------
+             | Header Rows
+             ------------------------------------------------- */
+            $sheet->setCellValue('A4', 'Time');
+            $sheet->getStyle('A4')->getFont()->setBold(true);
+
+            $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            $colIndex = 2;
+            foreach ($rooms as $roomName) {
+                $startCol = Coordinate::stringFromColumnIndex($colIndex);
+                $endCol   = Coordinate::stringFromColumnIndex($colIndex + 5);
+
+                // Room header
+                $sheet->setCellValue("{$startCol}4", $roomName);
+                $sheet->mergeCells("{$startCol}4:{$endCol}4");
+                $sheet->getStyle("{$startCol}4")->getFont()->setBold(true);
+                $sheet->getStyle("{$startCol}4")->getAlignment()->setHorizontal('center');
+
+                // Day headers
+                foreach ($days as $i => $day) {
+                    $c = Coordinate::stringFromColumnIndex($colIndex + $i);
+                    $sheet->setCellValue("{$c}5", $day);
+                    $sheet->getStyle("{$c}5")->getFont()->setBold(true);
+                    $sheet->getStyle("{$c}5")->getAlignment()->setHorizontal('center');
+                }
+
+                $colIndex += 6;
+            }
+
+            /* -------------------------------------------------
+             | Body Grid
+             ------------------------------------------------- */
+            $rowIndex = 6;
+
+            foreach ($timeLabels as $ti => $timeLabel) {
+
+                $sheet->setCellValue("A{$rowIndex}", $timeLabel);
+                $colIndex = 2;
+
+                foreach ($rooms as $roomName) {
+                    for ($dayIndex = 0; $dayIndex < 6; $dayIndex++) {
+
+                        $cell = $grid[$ti][$roomName][$dayIndex] ?? null;
+
+                        if (is_array($cell) && ($cell['render'] ?? false)) {
+
+                            $colLetter = Coordinate::stringFromColumnIndex($colIndex);
+                            $addr = "{$colLetter}{$rowIndex}";
+
+                            // Normalize text (prevent extra spacing)
+                            $text = preg_replace("/\n{2,}/", "\n", trim((string) $cell['text']));
+                            $sheet->setCellValue($addr, $text);
+
+                            // Text styling
+                            $sheet->getStyle($addr)->getAlignment()
+                                ->setWrapText(true)
+                                ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+                            $sheet->getStyle($addr)->getFont()->setSize(9);
+
+                            // Session color fill
+                            $color = $cell['meta']['session_color'] ?? null;
+                            if ($color) {
+                                $sheet->getStyle($addr)->getFill()
+                                    ->setFillType('solid')
+                                    ->getStartColor()
+                                    ->setARGB(ltrim($color, '#'));
+                            }
+
+                            // Rowspan merge
+                            $rowspan = max(1, (int) ($cell['rowspan'] ?? 1));
+                            if ($rowspan > 1) {
+                                $endRow = $rowIndex + $rowspan - 1;
+                                $sheet->mergeCells("{$addr}:{$colLetter}{$endRow}");
+                            }
+                        }
+
+                        $colIndex++;
+                    }
+                }
+
+                // Lock row height (prevents tall cells)
+                $sheet->getRowDimension($rowIndex)->setRowHeight(38);
+
+                $rowIndex++;
+            }
+
+            /* -------------------------------------------------
+             | Borders & Freeze
+             ------------------------------------------------- */
+            $lastCol = Coordinate::stringFromColumnIndex($colIndex - 1);
+            $lastRow = $rowIndex - 1;
+
+            $sheet->getStyle("A4:{$lastCol}{$lastRow}")
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+            $sheet->freezePane('B6');
+        }
+
+        $filename = $timetable->timetable_name . ' – Overview.xlsx';
+
+        return response()->streamDownload(
+            function () use ($out) {
+                if (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
+                $writer = IOFactory::createWriter($out, 'Xlsx');
+                $writer->save('php://output');
+            },
+            $filename,
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        );
+    }
+
+
 
 }

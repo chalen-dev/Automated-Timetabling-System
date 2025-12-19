@@ -37,34 +37,25 @@
                 </div>
                 @enderror
 
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">
-                        NEW PASSWORD
-                    </label>
-                    <input
-                        type="password"
-                        name="password"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                        placeholder="Enter new password"
-                        required
-                    />
-                    @error('password')
-                    <div class="text-xs text-red-600 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
+                <livewire:input.auth.password-text
+                    label="NEW PASSWORD"
+                    elementId="reset_password"
+                    toggleId="toggleResetPassword"
+                    type="password"
+                    name="password"
+                    placeholder="Enter new password"
+                    isRequired
+                />
 
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">
-                        CONFIRM NEW PASSWORD
-                    </label>
-                    <input
-                        type="password"
-                        name="password_confirmation"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                        placeholder="Confirm new password"
-                        required
-                    />
-                </div>
+                <livewire:input.auth.password-text
+                    label="CONFIRM NEW PASSWORD"
+                    elementId="reset_password_confirmation"
+                    toggleId="toggleResetPasswordConfirmation"
+                    type="password"
+                    name="password_confirmation"
+                    placeholder="Confirm new password"
+                    isRequired
+                />
 
                 <button type="submit"
                         class="bg-[#fbcc15] text-black px-4 py-2 rounded font-bold w-full hover:cursor-pointer">
