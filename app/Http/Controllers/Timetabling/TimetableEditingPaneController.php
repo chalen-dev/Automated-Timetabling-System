@@ -20,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Throwable;
 
 
@@ -541,6 +542,39 @@ class TimetableEditingPaneController extends Controller
         }
     }
 
+    private function humanizeSheetTitle(string $raw): string
+    {
+        // Expected: "1st_Mon"
+        $parts = explode('_', $raw);
+        if (count($parts) !== 2) {
+            return $raw;
+        }
+
+        [$term, $day] = $parts;
+
+        $termMap = [
+            '1st' => '1st Term',
+            '2nd' => '2nd Term',
+            '3rd' => '3rd Term',
+            '4th' => '4th Term',
+        ];
+
+        $dayMap = [
+            'Mon' => 'Monday',
+            'Tue' => 'Tuesday',
+            'Wed' => 'Wednesday',
+            'Thu' => 'Thursday',
+            'Fri' => 'Friday',
+            'Sat' => 'Saturday',
+            'Sun' => 'Sunday',
+        ];
+
+        $termLabel = $termMap[$term] ?? $term;
+        $dayLabel  = $dayMap[$day]  ?? $day;
+
+        return "{$termLabel} {$dayLabel}";
+    }
+
     public function index(Timetable $timetable, Request $request)
     {
         $sheetIndex = (int) $request->query('sheet', 0);
@@ -1000,7 +1034,7 @@ class TimetableEditingPaneController extends Controller
                     if ($old !== null) {
                         try {
                             $spreadsheet->removeSheetByIndex($spreadsheet->getIndex($old));
-                        } catch (\Throwable $e) {
+                        } catch (Throwable $e) {
                             Log::warning('saveFromEditor: could not remove old overview sheet', [
                                 'sheet' => $sheetName,
                                 'error' => $e->getMessage(),
@@ -1036,7 +1070,7 @@ class TimetableEditingPaneController extends Controller
                         $newSheet->setCellValue('A2', 'No sessions available for this overview.');
                     }
                 }
-            } catch (\Throwable $ex) {
+            } catch (Throwable $ex) {
                 Log::error('saveFromEditor: failed to rebuild Overview sheets', [
                     'timetable_id' => $timetable->id,
                     'error' => $ex->getMessage(),
@@ -1087,7 +1121,7 @@ class TimetableEditingPaneController extends Controller
                         'path' => $bucketPath,
                     ]);
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $cloudOk = false;
                 $cloudErr = $e->getMessage();
                 Log::warning('saveFromEditor: bucket upload exception (non-fatal)', [
@@ -1107,7 +1141,7 @@ class TimetableEditingPaneController extends Controller
                 'status'  => 'ok',
                 'message' => $message,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('Error in saveFromEditor', [
                 'timetable_id' => $timetable->id ?? null,
                 'error'        => $e->getMessage(),
@@ -1177,7 +1211,14 @@ class TimetableEditingPaneController extends Controller
 
             for ($s = 0; $s < $sheetCount; $s++) {
                 $srcSheet = $src->getSheet($s);
-                $sheetTitle = $srcSheet->getTitle() ?: ('Sheet' . ($s + 1));
+                $rawSheetTitle = $srcSheet->getTitle() ?: ('Sheet' . ($s + 1));
+
+                // Humanize only standard timetable sheets (1st_Mon, 2nd_Tue, etc.)
+                if (preg_match('/^(1st|2nd|3rd|4th)_[A-Za-z]{3}$/', $rawSheetTitle)) {
+                    $sheetTitle = $this->humanizeSheetTitle($rawSheetTitle);
+                } else {
+                    $sheetTitle = $rawSheetTitle;
+                }
 
                 $dstSheet = new Worksheet($target, $sheetTitle);
                 $target->addSheet($dstSheet, $s);
@@ -1294,7 +1335,7 @@ class TimetableEditingPaneController extends Controller
 
                             if ($sessionIdPart) {
                                 // attempt to load CourseSession and related models
-                                $cs = \App\Models\Timetabling\CourseSession::with(['course', 'sessionGroup.academicProgram'])->find($sessionIdPart);
+                                $cs = CourseSession::with(['course', 'sessionGroup.academicProgram'])->find($sessionIdPart);
                                 if ($cs) {
                                     $sg = $cs->sessionGroup;
                                     $prog = $sg && $sg->academicProgram ? $sg->academicProgram->program_abbreviation : null;
@@ -1306,7 +1347,7 @@ class TimetableEditingPaneController extends Controller
                                     $displayMain = $displayTop . "\n" . $displayBottom;
                                 } elseif ($sessionGroupId) {
                                     // fallback: try to fetch session group only
-                                    $sg = \App\Models\Timetabling\SessionGroup::with('academicProgram')->find($sessionGroupId);
+                                    $sg = SessionGroup::with('academicProgram')->find($sessionGroupId);
                                     if ($sg) {
                                         $prog = $sg->academicProgram ? $sg->academicProgram->program_abbreviation : null;
                                         $displayTop = trim(($prog ?: 'Unknown') . ' ' . ($sg->session_name ?? '') . ' ' . ($sg->year_level !== null ? $sg->year_level . ' Year' : ''));
@@ -1318,7 +1359,7 @@ class TimetableEditingPaneController extends Controller
                             // apply background color for session group if available (try sessionGroupId or cs->sessionGroup)
                             $hex = null;
                             if (!empty($sessionGroupId)) {
-                                $sg2 = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                $sg2 = SessionGroup::find($sessionGroupId);
                                 if ($sg2 && !empty($sg2->session_color)) {
                                     $hex = ltrim($sg2->session_color, '#');
                                 }
@@ -1407,7 +1448,7 @@ class TimetableEditingPaneController extends Controller
                             // color if available
                             $hex = null;
                             if (!empty($sessionGroupId)) {
-                                $sg2 = \App\Models\Timetabling\SessionGroup::find($sessionGroupId);
+                                $sg2 = SessionGroup::find($sessionGroupId);
                                 if ($sg2 && !empty($sg2->session_color)) {
                                     $hex = ltrim($sg2->session_color, '#');
                                 }
@@ -1442,6 +1483,18 @@ class TimetableEditingPaneController extends Controller
                 $dstSheet->getColumnDimension('A')->setWidth(14);
             } // sheets loop
 
+            // Humanize sheet titles for exported file only
+            foreach ($target->getAllSheets() as $sheet) {
+                $oldTitle = $sheet->getTitle();
+
+                // Only rename standard timetable sheets (e.g. 1st_Mon)
+                if (preg_match('/^(1st|2nd|3rd|4th)_[A-Za-z]{3}$/', $oldTitle)) {
+                    $sheet->setTitle(
+                        $this->humanizeSheetTitle($oldTitle)
+                    );
+                }
+            }
+
             // ensure output folder exists
             $outputDir = storage_path('app/exports/formatted-spreadsheets');
             if (!is_dir($outputDir)) {
@@ -1449,7 +1502,7 @@ class TimetableEditingPaneController extends Controller
             }
 
             $outputPath = $outputDir . DIRECTORY_SEPARATOR . $timetable->id . '-formatted.xlsx';
-            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($target);
+            $writer = new Xlsx($target);
 
             // Save to local file (for debugging / local dev)
             $writer->save($outputPath);
